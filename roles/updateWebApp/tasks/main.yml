@@ -1,0 +1,41 @@
+---
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Fetch the latest changes from the Git repository
+  git:
+    repo: "https://oauth2:{{ vault_repository_token }}@{{ git_remote }}{{ git_repository_path }}"
+    dest: "/opt/{{ app_name }}"
+    version: "{{ git_repository_branch }}"  # Specify the branch or tag you want to clone
+    force: yes
+  become: yes
+
+- name: Create a virtual environment if it doesn't exist
+  command: python3 -m venv /opt/{{ app_name }}/venv
+  args:
+    creates: /opt/{{ app_name }}/venv
+  become: yes
+  become_user: django  # Run this task as the django user
+
+- name: Install requirements
+  pip:
+    requirements: /opt/{{ app_name }}/requirements.txt
+    virtualenv: /opt/{{ app_name }}/venv
+  become: yes
+  become_user: django  # Run this task as the django user
+
+- name: Collect static files
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
+  args:
+    chdir: /opt/{{ app_name }}
+  become: yes
+  become_user: django  # Run this task as the django user
+  notify: Restart Gunicorn service  # Notify the handler
+
+- name: Apply database migrations
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
+  args:
+    chdir:

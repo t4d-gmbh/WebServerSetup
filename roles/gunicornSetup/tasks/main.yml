@@ -1,0 +1,60 @@
+---
+- name: Create a Python venv for the WebApp
+  command: python3 -m venv /opt/{{ app_name }}/venv
+  args:
+    creates: /opt/{{ app_name }}/venv/bin/python
+  become: yes
+
+- name: Install Gunicorn
+  pip:
+    name: gunicorn
+    virtualenv: /opt/{{ app_name }}/venv  # Ensure this path matches your app's virtual environment
+  become: yes
+
+- name: Create Gunicorn socket file
+  copy:
+    dest: /etc/systemd/system/gunicorn.socket
+    content: |
+      [Unit]
+      Description=gunicorn socket
+
+      [Socket]
+      ListenStream=/opt/{{ app_name }}/gunicorn.sock
+
+      [Install]
+      WantedBy=sockets.target
+  become: yes
+  notify: Reload systemd
+
+- name: Create Gunicorn systemd service file
+  copy:
+    dest: /etc/systemd/system/gunicorn.service
+    content: |
+      [Unit]
+      Description=gunicorn daemon
+      After=network.target
+
+      [Service]
+      User=django
+      Group=www-data
+      WorkingDirectory=/opt/{{ app_name }}/{{ app_name | lower }}
+      ExecStart=/opt/{{ app_name }}/venv/bin/gunicorn --access-logfile - --workers {{ gunicorn_workers }} --bind unix:/opt/{{ app_name }}/gunicorn.sock {{ app_name | lower }}.wsgi:application
+
+      [Install]
+      WantedBy=multi-user.target
+  become: yes
+  notify: Reload Gunicorn  # Notify the handler if the config changes
+
+- name: Start and enable Gunicorn socket
+  systemd:
+    name: gunicorn.socket
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Enable and start Gunicorn service
+  systemd:
+    name: gunicorn
+    enabled: yes
+    state: started
+  become: yes

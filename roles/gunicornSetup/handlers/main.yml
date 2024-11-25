@@ -1,0 +1,10 @@
+- name: Reload Gunicorn
+  systemd:
+    name: gunicorn  # Replace with your Gunicorn service name
+    state: restarted
+  become: yes
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+  become: yes

@@ -1,0 +1,56 @@
+- name: Update and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+  become: yes
+
+- name: Install necessary packages
+  apt:
+    name:
+      - nginx
+      - ufw
+      - fail2ban
+    state: present
+  become: yes
+
+- name: Configure UFW (Uncomplicated Firewall)
+  ufw:
+    state: enabled
+    rule: allow
+    name: 'OpenSSH'
+  become: yes
+
+- name: Allow HTTPS traffic
+  ufw:
+    rule: allow
+    name: 'Nginx Full'
+  become: yes
+
+- name: Set default incoming policy to deny
+  ufw:
+    state: enabled
+    rule: deny
+  become: yes
+
+- name: Enable UFW logging
+  ufw:
+    logging: on
+  become: yes
+
+    # - name: Configure SSH to use key-based authentication only
+    #   lineinfile:
+    #     path: /etc/ssh/sshd_config
+    #     regexp: '^#?{{ item.key }}'
+    #     line: '{{ item.key }} {{ item.value }}'
+    #   loop:
+    #     - { key: 'PasswordAuthentication', value: 'no' }
+    #     # - { key: 'PermitRootLogin', value: 'no' }
+    #     - { key: 'ChallengeResponseAuthentication', value: 'no' }
+    #     - { key: 'UsePAM', value: 'no' }
+    #   become: yes
+
+- name: Restart SSH service
+  service:
+    name: ssh
+    state: restarted
+  become: yes
