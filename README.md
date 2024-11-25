@@ -1,4 +1,4 @@
-# Ansible Collection: 🌐Webserver 🌐Automation
+# Ansible Collection: 🌐Webserver ⚙️ Automation
 
 This Ansible collection provides a set of roles designed to automate the setup and management of web servers, specifically tailored for deploying Django applications.
 The collection includes roles for user initialization, server hardening, PostgreSQL setup, SSL certificate management, Nginx configuration, web application installation, Gunicorn setup, and application updates.
