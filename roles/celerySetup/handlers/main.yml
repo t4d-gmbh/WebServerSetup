@@ -1,0 +1,10 @@
+---
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Restart Celery Service
+  systemd:
+    name: celery
+    state: restarted
