@@ -69,7 +69,7 @@ Contributions are welcome! Please submit a pull request or open an issue for any
 
 ## License
 
-This collection is licensed under the MIT License. See the file for more details.
+This collection is licensed under the GNU GPLv3 License. See the [LICENSE](LICENSE) file for more details.
 
 ## Copyright
 

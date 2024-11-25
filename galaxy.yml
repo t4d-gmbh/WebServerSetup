@@ -3,7 +3,7 @@ name: WebServerSetup
 version: 1.0.0
 description: Ansible collection for automating the setup and management of web servers, specifically tailored for deploying Django applications.
 readme: README.md
-license: MIT
+license: GNU GPLv3
 author: Jonas I Liechti
 company: t4d.ch
 tags:
