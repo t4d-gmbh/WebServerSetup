@@ -6,7 +6,6 @@ readme: README.md
 license: GNU GPLv3
 authors:
   - "Jonas I Liechti <j-i-l@t4d.ch>"
-company: t4d.ch
 tags:
   - webserver
   - automation
