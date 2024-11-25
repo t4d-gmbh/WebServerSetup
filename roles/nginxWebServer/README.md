@@ -62,7 +62,7 @@ To use this role, add it to your Ansible playbook as follows:
 
 ## License
 
-This role is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This role is licensed under the GNU GPLv3 License.
 
 ## Author Information
 

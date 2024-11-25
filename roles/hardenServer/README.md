@@ -52,7 +52,7 @@ The following tasks are performed by this role:
 
 ## License
 
-This role is licensed under the MIT License.
+This role is licensed under the GNU PGLv3 License.
 
 ## Author Information
 
