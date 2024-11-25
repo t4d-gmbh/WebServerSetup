@@ -1,0 +1,177 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - git
+      - python3-pip
+      - python3-venv
+    state: present
+  become: yes
+
+
+- name: Ensure the application directory exists
+  file:
+    path: /opt/{{ app_name }}
+    state: directory
+    mode: '0755'  # Set permissions for the directory
+  become: yes
+
+# we want to run the webapp ot as root!
+- name: Create a dedicated user for the Django application
+  user:
+    name: django
+    shell: /bin/bash
+    create_home: yes
+    groups: www-data  # Add the user to the www-data group
+    state: present
+  become: yes
+
+- name: Clone the repository
+  git:
+    repo: "https://oauth2:{{ vault_repository_token }}@{{ git_remote }}{{ git_repository_path }}"
+    dest: "/opt/{{ app_name }}"
+    version: main  # Specify the branch or tag you want to clone
+    force: yes
+  become: yes
+
+# set the secret
+- name: Ensure the application directory exists
+  file:
+    path: /etc/{{ app_name }}
+    state: directory
+    mode: '0755'  # Set permissions for the directory
+  become: yes
+
+- name: Check if the secret key file exists
+  stat:
+    path: /etc/{{ app_name }}/secret_key.txt
+  register: secret_file
+  become: yes
+
+- name: Create a secret key for Django if it does not exist
+  command: "openssl rand -base64 32"
+  register: generated_secret
+  when: not secret_file.stat.exists
+  become: yes
+
+- name: Store the secret key in a file
+  copy:
+    dest: /etc/{{ app_name }}/secret_key.txt
+    content: "{{ generated_secret.stdout }}"
+    mode: '0600'  # Set permissions to read/write for owner only
+  when: not secret_file.stat.exists
+  become: yes
+
+- name: Read the existing secret key from the file
+  slurp:
+    src: /etc/{{ app_name }}/secret_key.txt
+  register: existing_secret
+  when: secret_file.stat.exists
+  become: yes
+
+- name: Set the secret key fact
+  set_fact:
+    secret_key: "{{ existing_secret.content | b64decode }}" 
+  when: secret_file.stat.exists
+  become: yes
+
+- name: Set the secret key fact if generated
+  set_fact:
+    secret_key: "{{ generated_secret.stdout }}"
+  when: not secret_file.stat.exists
+  become: yes
+
+- name: Create .env file for Django application
+  copy:
+    dest: /opt/{{ app_name }}/{{ app_name | lower }}/.env
+    content: |
+      DATABASE_NAME={{ db_name }}
+      DATABASE_USER={{ db_user }}
+      DATABASE_PASSWORD={{ vault_db_password }}
+      SECRET_KEY={{ secret_key }}
+      ALLOWED_HOSTS={{ domain_name }}
+      STATIC_ROOT=/opt/{{ app_name }}/static
+      MEDIA_ROOT=/opt/{{ app_name }}/media
+
+  become: yes
+
+- name: Ensure the static and media folders exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'  # Set permissions for the directory
+  become: yes
+  loop:
+    - /opt/{{ app_name }}/static
+    - /opt/{{ app_name }}/media
+      #
+
+- name: Set permissions for the Django project
+  file:
+    path: "/opt/{{ app_name }}"
+    owner: root  # Set the owner to the new user
+    group: www-data  # Set the group to www-data
+    mode: '0775'  # Set permissions for the project directory
+    recurse: yes
+  become: yes
+
+- name: Set permissions for media directory
+  file:
+    path: "/opt/{{ app_name }}/media"
+    owner: django  # Set the owner to the new user
+    group: www-data  # Set the group to www-data
+    mode: '0775'  # Set permissions for the media directory
+  become: yes
+
+- name: Set permissions for static directory
+  file:
+    path: "/opt/{{ app_name }}/static"
+    owner: django  # Set the owner to the new user
+    group: www-data  # Set the group to www-data
+    mode: '0775'  # Set permissions for the static directory
+  become: yes
+
+    # - name: Set permissions for the Django application files
+    #   file:
+    #     path: "/opt/{{ app_name }}/*"
+    #     owner: django  # Set the owner to the new user
+    #     group: www-data  # Set the group to www-data
+    #     mode: '0644'  # Set permissions for application files
+    #   become: yes
+
+
+# Ensure we can act as unpriviledged user
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Create a virtual environment
+  command: python3 -m venv /opt/{{ app_name }}/venv
+  args:
+    creates: /opt/{{ app_name }}/venv
+  become: yes
+  become_user: django  # Run this task as the django user become: yes
+
+- name: Install requirements
+  pip:
+    requirements: /opt/{{ app_name }}/requirements.txt
+    virtualenv: /opt/{{ app_name }}/venv
+  become: yes
+  become_user: django  # Run this task as the django user become: yes
+
+    # - name: Collect static files
+    #   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
+    #   args:
+    #     chdir: /opt/{{ app_name }}
+    #   become: yes
+    #   become_user: django  # Run this task as the django user become: yes
+    # 
+    # - name: Apply database migrations
+    #   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/ {{ app_name | lower}}/manage.py migrate
+    #   args:
+    #     chdir: /opt/{{ app_name }}
+    #   become: yes
+    #   become_user: django  # Run this task as the django user become: yes
+

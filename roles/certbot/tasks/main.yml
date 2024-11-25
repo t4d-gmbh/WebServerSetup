@@ -1,0 +1,94 @@
+---
+- name: Install python deps
+  apt:
+    name:
+      - python3-pip
+      - python3-venv
+      - python3-packaging
+    state: present
+  become: yes
+
+- name: Create a Python virtual environment
+  command: python3 -m venv /opt/certbot/venv
+  args:
+    creates: /opt/certbot/venv/bin/python
+  become: yes
+
+    # - name: Install certbot and certbot-nginx in the virtual environment
+    #   command: /opt/certbot/venv/bin/pip install certbot certbot-nginx
+
+- name: Install certbot and certbot-nginx
+  pip:
+    name:
+      - certbot
+      - certbot-nginx
+      - certbot-dns-infomaniak
+    virtualenv: /opt/certbot/venv
+    state: present
+  become: yes
+
+- name: Create symbolic link for certbot
+  file:
+    src: /opt/certbot/venv/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
+  become: yes
+
+- name: Ensure the application directory exists
+  file:
+    path: /etc/letsencrypt
+    state: directory
+    mode: '0755'  # Set permissions for the directory
+  become: yes
+
+- name: Create Infomaniak credentials file
+  become: yes
+  copy:
+    dest: /etc/letsencrypt/infomaniak.ini
+    content: |
+      dns_infomaniak_token = "{{ vault_infomaniak_DNS_key }}"
+    mode: '0600'
+
+- name: Check if SSL certificate is valid
+  become: yes
+  command: openssl x509 -in {{ cert_path }} -checkend 86400
+  register: cert_check
+  ignore_errors: yes
+
+- name: Obtain SSL certificate
+  become: yes
+  command: >
+    certbot certonly --authenticator dns-infomaniak --dns-infomaniak-credentials /etc/letsencrypt/infomaniak.ini
+    --non-interactive --agree-tos --email {{ certbot_email }}
+    -d {{ domain_name }} --rsa-key-size 4096 --cert-path {{ cert_path }} --key-path {{ key_path }}
+  register: certbot_output
+  when: cert_check.rc != 0  # Only run if the certificate is not valid or does not exist
+
+- debug:
+    var: certbot_output.stdout
+
+# Not sure if this is needed anymore
+- name: Set up a cron job for Certbot renewal
+  become: yes
+  cron:
+    name: "Certbot auto-renewal"
+    minute: "0"
+    hour: "2"  # Runs daily at 2 AM
+    job: "/usr/bin/certbot renew --quiet && /bin/systemctl reload nginx"
+    user: root
+
+      # - name: Obtain SSL certificate
+      #   command: >
+      #     certbot --nginx -d {{ domain_name }} --non-interactive --agree-tos
+      #     --email {{ email }} --cert-path {{ cert_path }} --key-path {{ key_path }}
+      #   become: yes
+      #   register: certbot_result
+      #   changed_when: "'Congratulations' in certbot_result.stdout"
+      # 
+      # - name: Set up auto-renewal for Certbot
+      #   cron:
+      #     name: "Certbot auto-renewal"
+      #     minute: "0"
+      #     hour: "0"
+      #     job: "certbot renew --quiet"
+      #   become: yes

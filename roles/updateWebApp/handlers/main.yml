@@ -1,0 +1,12 @@
+---
+- name: Restart Gunicorn service
+  service:
+    name: gunicorn  # Change this to the name of your Gunicorn service if different
+    state: restarted
+  become: yes
+
+- name: Restart web server
+  service:
+    name: nginx  # Change this to your web server if different
+    state: restarted
+  become: yes

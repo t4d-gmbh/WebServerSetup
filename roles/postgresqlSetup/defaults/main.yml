@@ -1,0 +1,8 @@
+---
+postgresql_version: "latest"
+postgresql_container_name: "postgresql"
+  # postgresql_db: "mydatabase"
+  # postgresql_user: "myuser"
+  # postgresql_password: "mypassword"
+postgresql_port: 5432
+postgresql_data_dir: "/var/lib/postgresql/data"

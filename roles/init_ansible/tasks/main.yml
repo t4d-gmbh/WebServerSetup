@@ -1,0 +1,53 @@
+---
+- name: Create ansible user
+  user:
+    name: "{{ new_ansible_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Add ansible user to the sudo group
+  user:
+    name: "{{ new_ansible_user }}"
+    groups: sudo
+    append: yes  # Append to the group list
+
+- name: Allow ansible user to run sudo without a password
+  lineinfile:
+    path: /etc/sudoers
+    line: '{{ new_ansible_user }} ALL=(ALL) NOPASSWD: ALL'
+    state: present
+    validate: 'visudo -cf %s'  # Validate the sudoers file syntax
+
+- name: Create .ssh directory for ansible user
+  file:
+    path: "/home/{{ new_ansible_user }}/.ssh"
+    state: directory
+    owner: "{{ new_ansible_user }}"
+    group: "{{ new_ansible_user }}"
+    mode: '0700'
+
+- name: Add public key to authorized_keys
+  authorized_key:
+    user: "{{ new_ansible_user }}"
+    state: present
+    key: "{{ public_key }}"
+
+- name: Set permissions for authorized_keys
+  file:
+    path: "/home/{{ new_ansible_user }}/.ssh/authorized_keys"
+    owner: "{{ new_ansible_user }}"
+    group: "{{ new_ansible_user }}"
+    mode: '0600'
+
+- name: Disable password authentication in SSH config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+  notify: Restart SSH service  # Notify the handler
+
+- name: Restart SSH service
+  service:
+    name: ssh
+    state: restarted

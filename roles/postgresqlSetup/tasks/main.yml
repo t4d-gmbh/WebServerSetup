@@ -1,0 +1,52 @@
+---
+- name: Update apt package index
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install required packages for Docker installation
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+  become: true
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+  become: true
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: true
+  become: true
+
+
+- name: Pull PostgreSQL Docker image
+  community.docker.docker_image_pull:
+    name: postgres
+    tag: "{{ postgresql_version }}"
+    # Select platform for pulling. If not specified, will pull whatever docker prefers.
+  become: true
+
+- name: Create PostgreSQL container
+  docker_container:
+    name: "{{ postgresql_container_name }}"
+    image: "postgres:{{ postgresql_version }}"
+    state: started
+    restart_policy: always
+    published_ports:
+      - "{{ postgresql_port }}:5432"
+    env:
+      POSTGRES_DB: "{{ db_name }}"
+      POSTGRES_USER: "{{ db_user }}"
+      POSTGRES_PASSWORD: "{{ vault_db_password}}"
+    volumes:
+      - "{{ postgresql_data_dir }}:/var/lib/postgresql/data"
+  become: true

@@ -1,0 +1,33 @@
+# webserverConfigs/roles/djangoWebServer/templates/django_nginx.conf.j2
+server {
+    listen 80;
+    server_name {{ server_name }};  # e.g., example.com or your server's IP
+
+    # Redirect all HTTP requests to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name {{ server_name }};  # e.g., example.com or your server's IP
+
+    ssl_certificate {{ cert_path }};  # Path to your SSL certificate
+    ssl_certificate_key {{ key_path }};  # Path to your SSL certificate key
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/{
+        autoindex on;
+        alias /opt/{{ app_name }}/static/;
+    }
+    location /media/ {
+        autoindex on;
+        alias /opt/{{ app_name }}/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/opt/{{ app_name }}/gunicorn.sock;
+    }
+
+}
