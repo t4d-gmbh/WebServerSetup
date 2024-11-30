@@ -6,13 +6,13 @@
     state: present
   become: yes
 
-
-- name: Check if Celery service is running
-  systemd:
-    name: celery
-    state: started
-  register: celery_service_status
-  ignore_errors: yes  # Ignore errors if the service is not found
+- name: Create Celery systemd service file
+  template:
+    src: celery.service.j2
+    dest: /etc/systemd/system/celery.service
+  notify: Reload systemd
+  register: template_result  # Register the result of the template task
+  become: yes
 
 - block:
     - name: Pull RabbitMQ Docker image
@@ -48,21 +48,23 @@
         mode: '0755'  # Set permissions for the directory
       become: yes
 
+    - name: Ensure celery specific folders exist
+      file:
+        path: "{{ item }}"
+        owner: "{{ celery_user }}"
+        group: "{{ celery_group }}"
+        state: directory
+        mode: '0755'  # Set permissions for the directory
+      become: yes
+      loop:
+        - /var/log/celery
+        - /var/run/celery
+
     - name: Create celery config file
       template:
         src: celery.j2
         dest: /etc/conf.d/celery
       become: yes
-
-    - name: Create Celery systemd service file
-      template:
-        src: celery.service.j2
-        dest: /etc/systemd/system/celery.service
-      notify: Reload systemd
-      become: yes
-
-    - name: Run handlers immediately
-      meta: flush_handlers
 
     - name: Start and enable Celery service
       systemd:
@@ -71,9 +73,12 @@
         enabled: yes
       become: yes
 
-  when: celery_service_status is failed  # Execute this block if the service is not running
+    - name: Notify the handler to restart Celery service
+      debug:
+        msg: "Notifying handler to restart Celery service."
+      notify: Restart Celery Service
 
-- name: Notify the handler to restart Celery service
-  debug:
-    msg: "Notifying handler to restart Celery service."
-  notify: Restart Celery Service
+    - name: Run handlers immediately
+      meta: flush_handlers
+  when: template_result.changed  # Only start the service if the template changed
+
