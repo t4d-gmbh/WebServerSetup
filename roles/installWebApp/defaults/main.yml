@@ -1,2 +1,7 @@
 ---
 git_repository_branch: main
+db_name: 'my_django_db'
+db_host: 'localhost'
+db_port: '5432'
+db_engine: 'django.db.backends.postgresql'  # 'django.db.backends.sqlite3'
+db_user: 'django'

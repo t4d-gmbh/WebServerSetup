@@ -88,6 +88,9 @@
       DATABASE_NAME={{ db_name }}
       DATABASE_USER={{ db_user }}
       DATABASE_PASSWORD={{ vault_db_password }}
+      DATABASE_HOST={{ db_host }}
+      DATABASE_PORT={{ db_port }}
+      DATABASE_ENGINE={{ db_engine }}
       SECRET_KEY={{ secret_key }}
       ALLOWED_HOSTS={{ domain_name }}
       STATIC_ROOT=/opt/{{ app_name }}/static
