@@ -26,7 +26,10 @@ The collection includes roles for user initialization, server hardening, Postgre
 7. **Gunicorn Setup** 🚀
    - Sets up Gunicorn as a WSGI server for your web application, configuring it to run as a systemd service.
 
-8. **Update Web App** 🔄
+8. **Celery Setup** 🍃
+   - Sets up Celery as a task queue for your web application, configuring RabbitMQ as a message broker and managing Celery as a systemd service.
+
+9. **Update Web App** 🔄
    - Updates and manages a Django web application by fetching the latest changes from the Git repository, installing dependencies, collecting static files, and applying database migrations.
 
 ## Usage
@@ -44,11 +47,11 @@ To use this collection, include the desired roles in your playbook. Below is an 
     - nginxWebServer
     - installWebApp
     - gunicornSetup
+    - celerySetup
     - updateWebApp
 ```
 
 ## Example
-
 
 - **Initial setup**: This assumes a vanilla ubuntu instance on which the
   user `ansible` will be setup and will get access with a ssh key that you
@@ -71,6 +74,7 @@ To use this collection, include the desired roles in your playbook. Below is an 
        ansible.builtin.import_role:
          name: t4d.WebServerSetup.init_ansible
   ```
+  
   To run it:
 
   ```bash
@@ -99,88 +103,3 @@ To use this collection, include the desired roles in your playbook. Below is an 
   The setup playbook can then looks as follows:
 
   ```yaml
-  # setup.yml
-  ---
-  - name: Configure Django Web App
-    hosts: all  # or target a specific host
-    vars_files:
-      - vault.yml  # Include the vault file
-    vars:
-      app_name: myDjangoApp           # Name of your Django application
-      db_name: my_django_db           # Name of the PostgreSQL database
-      db_user: my_django_user         # PostgreSQL user for the database
-      # certbot & nginx specific setup
-      server_name: myAwesomeSite.com  # Your server's domain name or IP
-      domain_name: myAwesomeSite.com  # Domain name for the SSL certificate
-      certbot_email: some@e.mail      # Email for Certbot notifications
-      # you likely don't want to change this
-      cert_path: /etc/letsencrypt/live/{{ domain_name | lower }}/fullchain.pem
-      key_path: /etc/letsencrypt/live/{{ domain_name | lower }}/privkey.pem
-      # to get the web app
-      git_remote: gitlab.com # or github.com or whatever
-      git_repository_path: "<user>/<myapp>.git"  # Git repository URL
-      git_repository_branch: main     # branch or tag
-      # gunicorn setup
-      gunicorn_workers: 3             # Number of Gunicorn workers
-    roles:
-      - t4d.WebServerSetup.hardenServer
-      - t4d.WebServerSetup.postgresqlSetup
-      - t4d.WebServerSetup.certbot
-      - t4d.WebServerSetup.nginxWebServer
-      - t4d.WebServerSetup.installWebApp
-      - t4d.WebServerSetup.gunicornSetup
-  ```
-  To run it:
-  ```bash
-  ansible-playbook setup.yml --ask-vault-pass -i your_inventory_file
-  ```
-- **Update Webapp**: This playbook assumes a fully configured web server on which it updates the django application.
-
-  ```yaml
-  ---
-  - name: Update Django Web Application
-    hosts: all  # or target the specific host
-    vars_files:
-      - vault.yml  # Include the vault file
-    vars:
-      app_name: myDjangoApp           # Name of your Django application
-      # to get the web app
-      git_remote: gitlab.com          # or github.com or whatever
-      git_repository_path: "<user>/<myapp>.git"  # Git repository URL
-      git_repository_branch: main     # branch or tag
-    roles:
-      - t4d.WebServerSetup.updateWebApp
-  ```
-  To run it:
-  ```bash
-  ansible-playbook update.yml --ask-vault-pass -i your_inventory_file
-  ```
-
-## Role Variables
-
-Each role has its own set of variables that can be defined in your playbook or inventory.
-Refer to the individual role documentation for details on the required and optional variables.
-**More details are available in the README files of each role.**
-
-## Dependencies
-
-Some roles may have dependencies on other roles or collections.
-Ensure that you have the necessary collections installed, such as `community.docker` for the PostgreSQL setup role.
-
-## Security Considerations
-
-- Always review and customize the roles according to your specific environment and security requirements.
-- Test the roles in a safe environment before deploying them to production.
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
-
-## License
-
-This collection is licensed under the GNU GPLv3 License. See the [LICENSE](LICENSE) file for more details.
-
-## Copyright
-
-© 2024 Jonas I Liechti, t4d.ch. All rights reserved. 
-
