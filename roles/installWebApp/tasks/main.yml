@@ -30,7 +30,7 @@
   git:
     repo: "https://oauth2:{{ vault_repository_token }}@{{ git_remote }}{{ git_repository_path }}"
     dest: "/opt/{{ app_name }}"
-    version: main  # Specify the branch or tag you want to clone
+    version: "{{ git_repository_branch }}"  # Specify the branch or tag you want to clone
     force: yes
   become: yes
 
@@ -88,6 +88,9 @@
       DATABASE_NAME={{ db_name }}
       DATABASE_USER={{ db_user }}
       DATABASE_PASSWORD={{ vault_db_password }}
+      DATABASE_HOST={{ db_host }}
+      DATABASE_PORT={{ db_port }}
+      DATABASE_ENGINE={{ db_engine }}
       SECRET_KEY={{ secret_key }}
       ALLOWED_HOSTS={{ domain_name }}
       STATIC_ROOT=/opt/{{ app_name }}/static
@@ -161,17 +164,16 @@
   become: yes
   become_user: django  # Run this task as the django user become: yes
 
-    # - name: Collect static files
-    #   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
-    #   args:
-    #     chdir: /opt/{{ app_name }}
-    #   become: yes
-    #   become_user: django  # Run this task as the django user become: yes
-    # 
-    # - name: Apply database migrations
-    #   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/ {{ app_name | lower}}/manage.py migrate
-    #   args:
-    #     chdir: /opt/{{ app_name }}
-    #   become: yes
-    #   become_user: django  # Run this task as the django user become: yes
+- name: Collect static files
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
+  args:
+    chdir: /opt/{{ app_name }}
+  become: yes
+  become_user: django  # Run this task as the django user become: yes
 
+- name: Apply database migrations
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower}}/manage.py migrate
+  args:
+    chdir: /opt/{{ app_name }}
+  become: yes
+  become_user: django  # Run this task as the django user become: yes
