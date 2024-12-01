@@ -30,7 +30,7 @@
   git:
     repo: "https://oauth2:{{ vault_repository_token }}@{{ git_remote }}{{ git_repository_path }}"
     dest: "/opt/{{ app_name }}"
-    version: main  # Specify the branch or tag you want to clone
+    version: "{{ git_repository_branch }}"  # Specify the branch or tag you want to clone
     force: yes
   become: yes
 
