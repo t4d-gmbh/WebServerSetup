@@ -103,3 +103,100 @@ To use this collection, include the desired roles in your playbook. Below is an 
   The setup playbook can then looks as follows:
 
   ```yaml
+  # prepare.yml
+  ---
+  - name: Initialize Ansible user
+    hosts: all
+    become: yes
+    vars:
+      public_key: "{{ lookup('file', public_key_path) }}"
+      new_ansible_user: ansible # Set your desired username here
+    tasks:
+     - name: Include the example role
+       become: yes
+       ansible.builtin.import_role:
+         name: t4d.WebServerSetup.init_ansible
+  ```
+
+  To run it:
+
+  ```bash
+  ansible-playbook prepare.yml -e "public_key_path=/path/to/your/public_key.pub" -e "ansible_user=ubuntu" -e "ansible_ssh_private_key_file=/path/to/your/ssh/file" -e "public_key_path=/path/to/the/used/sshkey" -i your_inventory_file
+  ```
+
+- **Server configuration**: This playbook will completely setup the Web application.
+  For this to work you must:
+
+  - set the Ansible user and ssh key in _your_inventory_file_;
+  - have the following variables set in a local `valut.yml` file:
+
+    - `vault_db_password`: The password for the postres database to use
+    - `vault_infomaniak_DNS_key`: A infomaniak token to preform DNS challenge 
+    - `vault_repository_token`: A http token that allows read access to your django web app;
+  - have your Django application set up to use `python-decouple` and take the following variables from the `.env` file:
+
+    - `DATABASE_NAME`
+    - `DATABASE_USER`
+    - `DATABASE_PASSWORD`
+    - `SECRET_KEY`
+    - `ALLOWED_HOSTS`
+    - `STATIC_ROOT`
+    - `MEDIA_ROOT`
+  
+  The setup playbook can then looks as follows:
+
+  ```yaml
+  # setup.yml
+  ---
+  - name: Configure Django Web App
+    hosts: all  # or target a specific host
+    vars_files:
+      - vault.yml  # Include the vault file
+    vars:
+      app_name: myDjangoApp           # Name of your Django application
+      db_name: my_django_db           # Name of the PostgreSQL database
+      db_user: my_django_user         # PostgreSQL user for the database
+      # certbot & nginx specific setup
+      server_name: myAwesomeSite.com  # Your server's domain name or IP
+      domain_name: myAwesomeSite.com  # Domain name for the SSL certificate
+      certbot_email: some@e.mail      # Email for Certbot notifications
+      # you likely don't want to change this
+      cert_path: /etc/letsencrypt/live/{{ domain_name | lower }}/fullchain.pem
+      key_path: /etc/letsencrypt/live/{{ domain_name | lower }}/privkey.pem
+      # to get the web app
+      git_remote: gitlab.com # or github.com or whatever
+      git_repository_path: "<user>/<myapp>.git"  # Git repository URL
+      git_repository_branch: main     # branch or tag
+      # gunicorn setup
+      gunicorn_workers: 3             # Number of Gunicorn workers
+    roles:
+      - t4d.WebServerSetup.hardenServer
+      - t4d.WebServerSetup.postgresqlSetup
+      - t4d.WebServerSetup.certbot
+      - t4d.WebServerSetup.nginxWebServer
+      - t4d.WebServerSetup.installWebApp
+      - t4d.WebServerSetup.gunicornSetup
+  ```
+
+  To run it:
+  ```bash
+  ansible-playbook setup.yml --ask-vault-pass -i your_inventory_file
+  ```
+
+- **Update Webapp**: This playbook assumes a fully configured web server on which it updates the django application.
+
+  ```yaml
+  ---
+  - name: Update Django Web Application
+    hosts: all  # or target the specific host
+    vars_files:
+      - vault.yml  # Include the vault file
+    vars:
+      app_name: myDjangoApp           # Name of your Django application
+      # to get the web app
+      git_remote: gitlab.com          # or github.com or whatever
+      git_repository_path: "<user>/<myapp>.git"  # Git repository URL
+      git_repository_branch: main     # branch or tag
+    roles:
+      - t4d.WebServerSetup.updateWebApp
+  ```
