@@ -169,7 +169,7 @@
   become_user: django  # Run this task as the django user become: yes
 
 - name: Apply database migrations
-  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/ {{ app_name | lower}}/manage.py migrate
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower}}/manage.py migrate
   args:
     chdir: /opt/{{ app_name }}
   become: yes
