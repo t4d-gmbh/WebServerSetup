@@ -1,0 +1,84 @@
+---
+# Ensure we can act as unpriviledged user
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Create Celery systemd service file
+  template:
+    src: celery.service.j2
+    dest: /etc/systemd/system/celery.service
+  notify: Reload systemd
+  register: template_result  # Register the result of the template task
+  become: yes
+
+- block:
+    - name: Pull RabbitMQ Docker image
+      community.docker.docker_image_pull:
+        name: rabbitmq
+        tag: "{{ rabbitmq_version }}"
+      become: yes
+
+    - name: Run RabbitMQ container
+      docker_container:
+        name: rabbitmq
+        image: "rabbitmq:{{ rabbitmq_version }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "5672:5672"  # RabbitMQ default port
+          - "15672:15672"  # RabbitMQ management UI
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+      become: yes
+
+    - name: Deploy the temp files
+      template:
+        src: celery.conf.j2
+        dest: /etc/tmpfiles.d/celery.conf
+      become: yes
+
+    - name: Ensure conf.d exists
+      file:
+        path: /etc/conf.d
+        state: directory
+        mode: '0755'  # Set permissions for the directory
+      become: yes
+
+    - name: Ensure celery specific folders exist
+      file:
+        path: "{{ item }}"
+        owner: "{{ celery_user }}"
+        group: "{{ celery_group }}"
+        state: directory
+        mode: '0755'  # Set permissions for the directory
+      become: yes
+      loop:
+        - /var/log/celery
+        - /var/run/celery
+
+    - name: Create celery config file
+      template:
+        src: celery.j2
+        dest: /etc/conf.d/celery
+      become: yes
+
+    - name: Start and enable Celery service
+      systemd:
+        name: celery
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Notify the handler to restart Celery service
+      debug:
+        msg: "Notifying handler to restart Celery service."
+      notify: Restart Celery Service
+
+    - name: Run handlers immediately
+      meta: flush_handlers
+  when: template_result.changed  # Only start the service if the template changed
+
