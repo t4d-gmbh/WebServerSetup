@@ -28,6 +28,7 @@ The Django application to install must be configured to use `python-decouple` an
 - `vault_repository_token`: The token for accessing the Git repository (should be stored securely, e.g., in Ansible Vault).
 - `git_remote`: The remote Git server URL.
 - `git_repository_path`: The path to the Git repository.
+- `git_repository_branch`: 28-allow-to-run-detached-tasks
 - `db_name`: The name of the database for the application.
 - `db_user`: The database user for the application.
 - `vault_db_password`: The password for the database user (should be stored securely).
@@ -76,6 +77,7 @@ To use this role, add it to your Ansible playbook as follows:
     vault_repository_token: "your_repository_token"
     git_remote: "https://github.com/your_user/"
     git_repository_path: "your_repo.git"
+    git_repository_branch: main
     db_name: "mydatabase"
     db_user: "dbuser"
     vault_db_password: "your_db_password"
