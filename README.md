@@ -174,8 +174,8 @@ To use this collection, include the desired roles in your playbook. Below is an 
       - t4d.WebServerSetup.postgresqlSetup
       - t4d.WebServerSetup.certbot
       - t4d.WebServerSetup.nginxWebServer
-      - t4d.WebServerSetup.celerySetup
       - t4d.WebServerSetup.installWebApp
+      - t4d.WebServerSetup.celerySetup
       - t4d.WebServerSetup.gunicornSetup
   ```
 
