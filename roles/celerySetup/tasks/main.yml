@@ -6,6 +6,17 @@
     state: present
   become: yes
 
+- name: Make sure the specific celery user exists
+  user:
+    name: "{{ celery_user }}"
+    shell: /bin/bash
+    create_home: yes
+    groups:
+      - www-data  # Add the user to the www-data group
+      - "{{ celery_group }}"
+    state: present
+  become: yes
+
 - name: Create Celery systemd service file
   template:
     src: celery.service.j2
