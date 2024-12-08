@@ -1,12 +1,18 @@
 ---
 - name: Restart Gunicorn service
   service:
-    name: gunicorn  # Change this to the name of your Gunicorn service if different
+    name: gunicorn
     state: restarted
   become: yes
 
 - name: Restart web server
   service:
-    name: nginx  # Change this to your web server if different
+    name: nginx
+    state: restarted
+  become: yes
+
+- name: Restart Celery Service
+  systemd:
+    name: celery
     state: restarted
   become: yes

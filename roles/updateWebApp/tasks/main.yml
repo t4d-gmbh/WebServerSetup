@@ -33,7 +33,9 @@
     chdir: /opt/{{ app_name }}
   become: yes
   become_user: django  # Run this task as the django user
-  notify: Restart Gunicorn service  # Notify the handler
+  notify:
+    - Restart Gunicorn service  # Notify the handler
+    - Restart Celery Service
 
 - name: Apply database migrations
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
