@@ -36,6 +36,7 @@
   notify:
     - Restart Gunicorn service  # Notify the handler
     - Restart Celery Service
+    - Restart web server
 
 - name: Apply database migrations
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
