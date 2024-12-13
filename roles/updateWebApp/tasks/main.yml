@@ -42,3 +42,16 @@
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
   args:
     chdir:
+  register: migrate_result
+
+- name: Handle migration result
+  block:
+    - name: Show debug message if no migrations to apply
+      debug:
+        msg: "No migrations were applied."
+      when: migrate_result.rc != 0 and "No migrations to apply" in migrate_result.stderr
+
+    - name: Fail if migration failed for other reasons
+      fail:
+        msg: "Migration failed with an unexpected error: {{ migrate_result.stderr }}"
+      when: migrate_result.rc != 0 and "No migrations to apply" not in migrate_result.stderr
