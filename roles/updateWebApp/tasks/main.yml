@@ -43,6 +43,7 @@
   args:
     chdir:
   register: migrate_result
+  ignore_errors: yes
 
 - name: Handle migration result
   block:
