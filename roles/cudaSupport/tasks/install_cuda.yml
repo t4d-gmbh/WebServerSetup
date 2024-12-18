@@ -1,0 +1,42 @@
+---
+- name: Add NVIDIA PPA
+  apt_repository:
+    repo: ppa:graphics-drivers/ppa
+    state: present
+  become: yes
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install ubuntu-drivers tool
+  apt:
+    name: "ubuntu-drivers-common"
+    state: present
+  become: yes
+
+- name: Detect recommended NVIDIA driver version
+  command: ubuntu-drivers devices
+  register: nvidia_driver_info
+  become: yes
+
+- name: Set NVIDIA driver version variable
+  set_fact:
+    # nvidia_driver_version: "{{ item | regex_search('nvidia-driver-(\\d+)') }}"
+    nvidia_driver_version: "{{ item | regex_search('nvidia-driver-(\\d+)') | regex_replace('nvidia-driver-', '') }}"
+  loop: "{{ nvidia_driver_info.stdout_lines }}"
+  when: "'recommended' in item"
+
+- name: Install NVIDIA driver
+  apt:
+    name: "{{ 'nvidia-driver-' + nvidia_driver_version if nvidia_driver_version else 'nvidia-driver-{{ nvidia_driver_version }}' }}"
+    state: present
+  when: nvidia_driver_version is defined or nvidia_driver_version == ""
+  become: yes
+
+- name: Reboot the server if required
+  reboot:
+    msg: "Rebooting after NVIDIA driver installation."
+  when: nvidia_driver_version is defined or nvidia_driver_version == ""
+  become: yes

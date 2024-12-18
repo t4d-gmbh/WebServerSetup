@@ -1,0 +1,8 @@
+---
+python_version: "3.11"
+cuda_version: "11.8"
+nvidia_driver_version: ""  # Leave empty to use the recommended version
+pytorch_version: "2.1.5"  # Specify the default PyTorch version
+conda_env_name: "ml_env"  # Specify the name of the Conda environment
+additional_packages: []  # List of additional Python packages to install
+new_username: "ml_user"  # Specify the new username

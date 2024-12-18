@@ -1,0 +1,75 @@
+---
+- name: Install ACL package
+  apt:
+    name: acl
+    state: present
+  become: yes
+
+- name: Create a new user
+  user:
+    name: "{{ new_username }}"
+    shell: /bin/bash
+    create_home: yes
+    state: present
+  become: yes
+
+- name: Check if Miniconda is already installed
+  command: /home/{{ new_username }}/miniconda/bin/conda --version
+  register: miniconda_installed
+  ignore_errors: yes
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Install Miniconda for the new user
+  shell: |
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/{{ new_username }}/miniconda.sh
+    bash /home/{{ new_username }}/miniconda.sh -b -p /home/{{ new_username }}/miniconda
+    echo 'export PATH="/home/{{ new_username }}/miniconda/bin:$PATH"' >> /home/{{ new_username }}/.bashrc
+    source /home/{{ new_username }}/.bashrc
+  args:
+    executable: /bin/bash
+  when: miniconda_installed.rc != 0
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Create Conda environment for the new user
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda create -n {{ conda_env_name }} python={{ python_version }} -y
+  args:
+    creates: "/home/{{ new_username }}/miniconda/envs/{{ conda_env_name }}"
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Install PyTorch in the Conda environment for the new user
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} pytorch=={{ pytorch_version }} torchvision torchaudio pytorch-cuda={{ cuda_version }} -c pytorch -c nvidia -y
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+    
+- name: Check for PyTorch installation with Conda
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda list torch
+  register: conda_check
+  become: yes
+  become_user: "{{ new_username }}"
+  ignore_errors: yes  # Ignore errors if PyTorch is not installed
+
+- name: Display PyTorch version
+  debug:
+    msg: "PyTorch is installed. Version: {{ conda_check.stdout }}"
+  when: conda_check.rc == 0  # Only run if the command was successful
+
+- name: Raise an error if PyTorch is not installed
+  fail:
+    msg: "PyTorch is not installed in the Conda environment."
+  when: conda_check.rc != 0  # Only run if the command failed
+
+- name: Install additional packages in the Conda environment for the new user
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} {{ item }} -y
+  loop: "{{ additional_packages }}"
+  when: additional_packages | length > 0
+  become: yes
+  become_user: "{{ new_username }}"
