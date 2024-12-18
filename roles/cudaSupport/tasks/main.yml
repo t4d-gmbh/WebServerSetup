@@ -1,0 +1,15 @@
+---
+- name: Update and Reboot if Kernel is Updated
+  include_tasks: update_and_reboot.yml
+
+- name: Install NVIDIA Driver and CUDA Toolkit
+  include_tasks: install_cuda.yml
+
+- name: Install Python
+  include_tasks: install_python.yml
+
+- name: Install PyTorch
+  include_tasks: install_pytorch.yml
+
+- name: Install DeepLabCut
+  include_tasks: install_DeepLabCut.yml
