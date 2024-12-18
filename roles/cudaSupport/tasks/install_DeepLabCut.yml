@@ -1,0 +1,24 @@
+---
+- name: Install dependencies DeepLabCut
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} -c conda-forge pytables==3.8.0 -y
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Activate Conda environment and install pip
+  command: |
+    /home/{{ new_username }}/miniconda/bin/conda install -y pip
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Install DeepLabCut3
+  command: |
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install git+https://github.com/DeepLabCut/DeepLabCut.git@pytorch_dlc#egg=deeplabcut[gui,modelzoo,wandb]
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
