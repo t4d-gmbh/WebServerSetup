@@ -10,7 +10,7 @@
     update_cache: yes
   become: yes
 
-- name: Install the specified version of Python and the venv package
+- name: "Install Python {{ python_version }} and the venv package"
   apt:
     name: 
       - "python{{ python_version }}"
