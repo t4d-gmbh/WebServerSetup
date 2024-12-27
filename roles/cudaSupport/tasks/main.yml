@@ -8,8 +8,21 @@
 - name: Install Python
   include_tasks: install_python.yml
 
-- name: Install PyTorch
+- name: Prepare Environment
+  include_tasks: prepare_environment.yml
+
+# - name: Install PyTorch
+#   include_tasks: install_pytorch.yml
+#
+# - name: Install TensorFlow
+#   include_tasks: install_tensorflow.yml
+- name: Install TensorFlow if specified
+  include_tasks: install_tensorflow.yml
+  when: "'tensorflow' in ml_backend"
+
+- name: Install PyTorch if specified
   include_tasks: install_pytorch.yml
+  when: "'pytorch' in ml_backend"
 
 - name: Install DeepLabCut
   include_tasks: install_DeepLabCut.yml
