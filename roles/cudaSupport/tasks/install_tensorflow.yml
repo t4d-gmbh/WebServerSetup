@@ -6,9 +6,9 @@
 
 - name: Set TensorFlow package based on GPU presence
   set_fact:
-    tensorflow_package: "{{ 'tensorflow-gpu' if nvidia_smi_check.rc == 0 else 'tensorflow' }}"
+    tensorflow_package: "{{ 'tensorflow' if nvidia_smi_check.rc == 0 else 'tensorflow_cpu' }}"
 
-- name: Install TensorFlow in the Conda environment for the new user
+- name: "Install TensorFlow {{ tensorflow_version }} in the Conda environment for the new user"
   command: >
     /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} {{ tensorflow_package }}=={{ tensorflow_version }} -y
   args:

@@ -15,18 +15,18 @@
   become: yes
   become_user: "{{ new_username }}"
 
-- name: Install DeepLabCut
+- name: "Install DeepLabCut {{ dlc_branch }}"
   command: |
-    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install git+https://github.com/DeepLabCut/DeepLabCut.git@pytorch_dlc#egg=deeplabcut[gui,modelzoo,wandb]
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install "deeplabcut[gui,modelzool,wandb] @ git+https://github.com/DeepLabCut/DeepLabCut.git@{{ dlc_branch }}"
   args:
     chdir: /home/{{ new_username }}/miniconda
   become: yes
   become_user: "{{ new_username }}"
   when: "'tensorflow' not in ml_backend"
 
-- name: Install DeepLabCut with TensorFlow support
+- name: "Install DeepLabCut {{ dlc_branch }} with TensorFlow support"
   command: |
-    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install git+https://github.com/DeepLabCut/DeepLabCut.git@pytorch_dlc#egg=deeplabcut[gui,modelzoo,wandb,tf]
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install "deeplabcut[gui,modelzoo,tf] @ git+https://github.com/DeepLabCut/DeepLabCut.git@{{ dlc_branch }}"
   args:
     chdir: /home/{{ new_username }}/miniconda
   become: yes
