@@ -6,3 +6,4 @@ pytorch_version: "2.1.5"  # Specify the default PyTorch version
 conda_env_name: "ml_env"  # Specify the name of the Conda environment
 additional_packages: []  # List of additional Python packages to install
 new_username: "ml_user"  # Specify the new username
+ml_backend: ['tensorflow', 'pytorch']  # determines what backend to use
