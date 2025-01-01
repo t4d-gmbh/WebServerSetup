@@ -32,7 +32,7 @@
   become: yes
   become_user: "{{ new_username }}"
 
-- name: Create Conda environment for the new user
+- name: "Create Conda environment for user {{ new_username }}"
   command: >
     /home/{{ new_username }}/miniconda/bin/conda create -n {{ conda_env_name }} python={{ python_version }} -y
   args:
