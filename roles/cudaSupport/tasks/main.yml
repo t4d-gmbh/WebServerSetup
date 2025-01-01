@@ -26,3 +26,6 @@
 
 - name: Install DeepLabCut
   include_tasks: install_DeepLabCut.yml
+
+- name: Fetching Scripts
+  include_tasks: checkout_scripts.yml
