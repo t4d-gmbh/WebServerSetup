@@ -1,0 +1,17 @@
+---
+- name: Checkout the Git repository
+  git:
+    repo: "{{ scripts_repo_url }}"  # URL of the Git repository
+    dest: "{{ scripts_repo_dest }}"  # Destination path for the repository
+    version: "{{ scripts_repo_branch }}"  # Branch to check out
+    force: yes
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Install additional dependencies from requirements.txt
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install -r requirements.txt
+  args:
+    chdir: "{{ scripts_repo_dest }}"
+  become: yes
+  become_user: "{{ new_username }}"
