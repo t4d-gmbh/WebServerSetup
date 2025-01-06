@@ -29,3 +29,6 @@
 
 - name: Fetching Scripts
   include_tasks: checkout_scripts.yml
+
+- name: Installing TigerVNC for remote access
+  include_tasks: install_tigervnc.yml

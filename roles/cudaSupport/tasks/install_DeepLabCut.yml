@@ -1,4 +1,15 @@
 ---
+- name: Install Qt Creator and development packages
+  apt:
+    name:
+      - qtcreator
+      - qtbase5-dev
+      - qt5-qmake
+      - cmake
+    state: present
+    update_cache: yes
+  become: yes
+
 - name: Install dependencies DeepLabCut
   command: >
     /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} -c conda-forge pytables==3.8.0 -y
