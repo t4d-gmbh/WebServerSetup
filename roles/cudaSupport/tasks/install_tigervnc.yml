@@ -1,0 +1,111 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install required packages
+  apt:
+    name:
+      - xfce4
+      - xfce4-goodies
+      - tigervnc-standalone-server
+      - tigervnc-xorg-extension 
+    state: present
+  become: yes
+
+- name: Ensure the .vnc directory exists
+  file:
+    path: /home/{{ new_username }}/.vnc
+    state: directory
+    mode: '0755'  # Set permissions for the directory
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Create VNC password file
+  shell: echo "{{ vault_vnc_password }}" | vncpasswd -f > /home/{{ new_username }}/.vnc/passwd
+  args:
+    creates: /home/{{ new_username }}/.vnc/passwd
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Set permissions for VNC password file
+  file:
+    path: /home/{{ new_username }}/.vnc/passwd
+    owner: "{{ new_username }}"
+    group: "{{ new_username }}"
+    mode: '0600'
+  become: yes
+
+- name: Create VNC startup script
+  copy:
+    dest: /home/{{ new_username }}/.vnc/xstartup
+    content: |
+      #!/bin/sh
+      unset SESSION_MANAGER
+      unset DBUS_SESSION_BUS_ADDRESS
+      startxfce4
+    mode: '0755'
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Create VNC service file
+  copy:
+    dest: /etc/systemd/system/vncserver@.service
+    content: |
+      [Unit]
+      Description=Start TigerVNC server at startup
+      After=syslog.target network.target
+
+      [Service]
+      Type=simple
+      User={{ new_username }}
+      Group={{ new_username }}
+      WorkingDirectory=/home/{{ new_username }}
+
+      PIDFile=/home/{{ new_username }}/.vnc/%H:590%i.pid
+      ExecStartPre=-/bin/sh -c "/usr/bin/vncserver -kill :%i > /dev/null 2>&1"
+      ExecStart=/usr/bin/vncserver -fg -depth 24 -geometry 1920x1080 -localhost no :%i
+      ExecStop=/usr/bin/vncserver -kill :%i
+
+      [Install]
+      WantedBy=multi-user.target
+  become: yes
+
+- name: Reload systemd daemons
+  command: systemctl daemon-reload
+  become: yes
+
+- name: Enable VNC server service
+  systemd:
+    name: vncserver@1.service
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Kill any existing VNC servers
+  command: vncserver -kill :*
+  become: yes
+  ignore_errors: yes
+
+- name: Start VNC server service
+  systemd:
+    name: vncserver@1.service
+    state: started
+  become: yes
+
+- name: Check the status of the VNC server service
+  command: systemctl status vncserver@1
+  register: vnc_status
+  become: yes
+
+- name: Display VNC server status
+  debug:
+    var: vnc_status.stdout_lines
+
+- name: Open VNC port in UFW
+  ufw:
+    rule: allow
+    port: '5901'  # Adjust this if using a different display number
+    proto: 'tcp'
+  become: yes

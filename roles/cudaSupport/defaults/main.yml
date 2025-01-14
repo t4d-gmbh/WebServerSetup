@@ -1,0 +1,11 @@
+---
+python_version: "3.10"  # Is required for DeepLabCut 2.x
+cuda_version: "12.4"
+nvidia_driver_version: ""  # Leave empty to use the recommended version
+pytorch_version: "2.1.5"  # Specify the default PyTorch version
+tensorflow_version: "2.10"  # Last version supported for DLC 2.x
+new_username: "ml_user"  # Specify the new username
+conda_env_name: "ml_env"  # Specify the name of the Conda environment
+additional_packages: []  # List of additional Python packages to install
+ml_backend: ['tensorflow', 'pytorch']  # determines what backend to use
+dlc_branch: "v2.3.10"  # "pytorch_dlc"  # What verion of DeepLabCut to install 

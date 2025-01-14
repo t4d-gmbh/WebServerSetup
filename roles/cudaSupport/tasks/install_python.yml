@@ -1,0 +1,20 @@
+---
+- name: Add Snakeoil PPA for recent Python versions
+  apt_repository:
+    repo: ppa:deadsnakes/ppa
+    state: present
+  become: yes
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: "Install Python {{ python_version }} and the venv package"
+  apt:
+    name: 
+      - "python{{ python_version }}"
+      - "python{{ python_version }}-dev"
+      - "python{{ python_version }}-venv"
+    state: present
+  become: yes

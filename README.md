@@ -32,6 +32,9 @@ The collection includes roles for user initialization, server hardening, Postgre
 9. **Update Web App** 🔄
    - Updates and manages a Django web application by fetching the latest changes from the Git repository, installing dependencies, collecting static files, and applying database migrations.
 
+10. **Cuda Support** 🔄
+   - Sets up Cuda on a GPU-enabled Ubuntu instance and (optionally) install pytroch and/or tensorflow, as well as, DeepLabCut.
+
 ## Usage
 
 To use this collection, include the desired roles in your playbook. Below is an example of how to use multiple roles from this collection:

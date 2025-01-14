@@ -1,0 +1,34 @@
+---
+- name: Update and Reboot if Kernel is Updated
+  include_tasks: update_and_reboot.yml
+
+- name: Install NVIDIA Driver and CUDA Toolkit
+  include_tasks: install_cuda.yml
+
+- name: Install Python
+  include_tasks: install_python.yml
+
+- name: Prepare Environment
+  include_tasks: prepare_environment.yml
+
+# - name: Install PyTorch
+#   include_tasks: install_pytorch.yml
+#
+# - name: Install TensorFlow
+#   include_tasks: install_tensorflow.yml
+- name: Install TensorFlow if specified
+  include_tasks: install_tensorflow.yml
+  when: "'tensorflow' in ml_backend"
+
+- name: Install PyTorch if specified
+  include_tasks: install_pytorch.yml
+  when: "'pytorch' in ml_backend"
+
+- name: Install DeepLabCut
+  include_tasks: install_DeepLabCut.yml
+
+- name: Fetching Scripts
+  include_tasks: checkout_scripts.yml
+
+- name: Installing TigerVNC for remote access
+  include_tasks: install_tigervnc.yml

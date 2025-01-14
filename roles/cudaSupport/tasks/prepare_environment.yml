@@ -1,0 +1,41 @@
+---
+- name: Install ACL package
+  apt:
+    name: acl
+    state: present
+  become: yes
+
+- name: Create a new user
+  user:
+    name: "{{ new_username }}"
+    shell: /bin/bash
+    create_home: yes
+    state: present
+  become: yes
+
+- name: Check if Miniconda is already installed
+  command: /home/{{ new_username }}/miniconda/bin/conda --version
+  register: miniconda_installed
+  ignore_errors: yes
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Install Miniconda for the new user
+  shell: |
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/{{ new_username }}/miniconda.sh
+    bash /home/{{ new_username }}/miniconda.sh -b -p /home/{{ new_username }}/miniconda
+    echo 'export PATH="/home/{{ new_username }}/miniconda/bin:$PATH"' >> /home/{{ new_username }}/.bashrc
+    source /home/{{ new_username }}/.bashrc
+  args:
+    executable: /bin/bash
+  when: miniconda_installed.rc != 0
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: "Create Conda environment for user {{ new_username }}"
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda create -n {{ conda_env_name }} python={{ python_version }} -y
+  args:
+    creates: "/home/{{ new_username }}/miniconda/envs/{{ conda_env_name }}"
+  become: yes
+  become_user: "{{ new_username }}"

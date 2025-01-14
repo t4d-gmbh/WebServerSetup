@@ -1,0 +1,45 @@
+---
+- name: Install Qt Creator and development packages
+  apt:
+    name:
+      - qtcreator
+      - qtbase5-dev
+      - qt5-qmake
+      - cmake
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Install dependencies DeepLabCut
+  command: >
+    /home/{{ new_username }}/miniconda/bin/conda install -n {{ conda_env_name }} -c conda-forge pytables==3.8.0 -y
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: Activate Conda environment and install pip
+  command: |
+    /home/{{ new_username }}/miniconda/bin/conda install -y pip
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+
+- name: "Install DeepLabCut {{ dlc_branch }}"
+  command: |
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install "deeplabcut[gui,modelzool,wandb] @ git+https://github.com/DeepLabCut/DeepLabCut.git@{{ dlc_branch }}"
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+  when: "'tensorflow' not in ml_backend"
+
+- name: "Install DeepLabCut {{ dlc_branch }} with TensorFlow support"
+  command: |
+    /home/{{ new_username }}/miniconda/bin/conda run -n {{ conda_env_name }} pip install "deeplabcut[gui,modelzoo,tf] @ git+https://github.com/DeepLabCut/DeepLabCut.git@{{ dlc_branch }}"
+  args:
+    chdir: /home/{{ new_username }}/miniconda
+  become: yes
+  become_user: "{{ new_username }}"
+  when: "'tensorflow' in ml_backend"
