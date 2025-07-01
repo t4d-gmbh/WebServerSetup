@@ -36,6 +36,13 @@
     group: "{{ dancer_user }}"
     mode: '0644'
 
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+
 - name: Start Headscale container
   command: docker compose up -d
   args:
