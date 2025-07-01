@@ -49,6 +49,7 @@
     password: "{{ item.password }}"
     state: present
   loop: "{{ HTPASSWD_USERS }}"
+  no_log: true  # Suppress output for this task
 
 - name: Start Traefik container
   community.docker.docker_compose_v2:
