@@ -42,3 +42,4 @@
     chdir: /data/docker/headscale
   become: yes
   become_user: "{{ dancer_user }}"
+  become_method: su  # or 'sudo' if you prefer
