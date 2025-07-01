@@ -14,8 +14,10 @@ services:
       - /data/docker/traefik/users/:/etc/traefik/users/
       - /data/docker/traefik/logs/:/var/logs/
     environment:
-      {% for key, value in certresolver_env.items() %}
-      - {{ key | regex_replace('^CERTRESOLVER_', '') }}
+      {% for key, value in vars.items() %}
+      {% if key.startswith('DEPLOY_') %}
+      - {{ key | replace('DEPLOY_', '') }}
+      {% endif %}
       {% endfor %}
     restart: unless-stopped
     networks:
