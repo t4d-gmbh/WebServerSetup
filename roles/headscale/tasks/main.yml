@@ -1,4 +1,22 @@
 ---
+- name: Ensure required packages are installed
+    apt:
+      name:
+        - podman
+        - podman-compose
+      state: present
+      update_cache: yes
+- name: Ensure dancer_user exists
+  user:
+    name: "{{ dancer_user }}"
+    state: present
+
+- name: Add dancer_user to podman group
+  user:
+    name: "{{ dancer_user }}"
+    groups: podman
+    append: yes
+
 - name: Create Headscale configuration directory
   file:
     path: /data/docker/headscale
