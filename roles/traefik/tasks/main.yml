@@ -37,6 +37,14 @@
     state: present
   become: yes
 
+- name: Create htpasswd file and add users
+  htpasswd:
+    path: /data/docker/traefik/users/users.txt
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    state: present
+  loop: "{{ HTPASSWD_USERS }}"
+
 - name: Start Traefik container
   community.docker.docker_compose_v2:
     project_src: /data/docker/traefik
