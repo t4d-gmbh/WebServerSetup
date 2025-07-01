@@ -201,3 +201,42 @@ To use this collection, include the desired roles in your playbook. Below is an 
     roles:
       - t4d.WebServerSetup.updateWebApp
   ```
+
+- **Setting up a Headscale control plane**
+
+```yaml
+---
+- name: Deploy Headscale behind Traefik
+  hosts: all
+  become: true
+  vars_files:
+    - vault.yml  # Load variables from the vault
+  vars:
+    dancer_user: "dancer"  # VARIABLE: User for podman
+    server_url: "https://example.com"  # VARIABLE: Server URL
+    email: "example@email.com"  # VARIABLE: Email for ACME
+    dns_provider: "infomaniak"  # VARIABLE: DNS provider
+    prefixes_v4: "100.64.0.0/10"  # VARIABLE: Default IPv4 prefix
+    prefixes_v6: "fd7a:115c:a1e0::/48"  # VARIABLE: Default IPv6 prefix
+    nameservers:
+      - "1.1.1.1"  # VARIABLE: Default nameserver
+      - "9.9.9.9"  # VARIABLE: Default nameserver
+    additional_nameservers: []  # VARIABLE: Allow to set further nameservers
+
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        name:
+          - podman
+          - podman-compose
+        state: present
+        update_cache: yes
+
+    - name: Create podman network
+      command: podman network create proxy
+      ignore_errors: yes  # Ignore if the network already exists
+
+  roles:
+    - t4d.WebServerSetup.headscale
+    - t4d.WebServerSetup.traefik
+```

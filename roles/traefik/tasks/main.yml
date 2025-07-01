@@ -1,0 +1,37 @@
+---
+- name: Create Traefik configuration directory
+  file:
+    path: /data/docker/traefik
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create Traefik configuration file
+  template:
+    src: traefik.yaml.j2
+    dest: /data/docker/traefik/traefik.yaml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Create Traefik docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /data/docker/traefik/docker-compose.yml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Create .env file for Traefik
+  template:
+    src: .env.j2
+    dest: /data/docker/traefik/.env
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Start Traefik container
+  command: podman-compose up -d
+  args:
+    chdir: /data/docker/traefik

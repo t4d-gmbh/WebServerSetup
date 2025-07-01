@@ -1,0 +1,37 @@
+---
+- name: Create Headscale configuration directory
+  file:
+    path: /data/docker/headscale
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create Headscale data directory
+  file:
+    path: /data/docker/headscale/lib
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create Headscale configuration file
+  template:
+    src: config.yaml.j2
+    dest: /data/docker/headscale/config.yaml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Create Headscale docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /data/docker/headscale/docker-compose.yml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Start Headscale container
+  command: podman-compose up -d
+  args:
+    chdir: /data/docker/headscale

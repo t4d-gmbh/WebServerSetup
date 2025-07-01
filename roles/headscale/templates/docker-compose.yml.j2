@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  headscale:
+    image: headscale/headscale:0.26.1
+    restart: unless-stopped
+    container_name: headscale
+    volumes:
+      - /data/docker/headscale:/etc/headscale
+      - /data/docker/headscale/lib:/var/lib/headscale
+    command: serve
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.headscale-http.entrypoints=web
+      - traefik.http.routers.headscale-http.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`)
+      - traefik.http.routers.headscale-https.entrypoints=websecure
+      - traefik.http.routers.headscale-https.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`)
+      - traefik.http.routers.headscale-https.tls.certresolver=infomaniak
+      - traefik.http.routers.headscale-https.service=headscale
+      - traefik.http.services.headscale.loadbalancer.server.port=8080
+      - traefik.http.services.headscale.loadbalancer.server.scheme=http
+      - traefik.udp.services.headscale-udp-41641.loadbalancer.server.port=41641
+      - traefik.udp.services.headscale-udp-3478.loadbalancer.server.port=3478
+      - traefik.http.middlewares.headscale-cors.headers.accesscontrolallowmethods=GET,POST,PUT,PATCH,DELETE,OPTIONS
+      - traefik.http.middlewares.headscale-cors.headers.accesscontrolallowheaders=*
+      - traefik.http.middlewares.headscale-cors.headers.accesscontrolallowcredentials=true
+      - traefik.http.middlewares.headscale-cors.headers.accesscontrolalloworiginlist=*  # Add other origins if needed
+      - traefik.http.middlewares.headscale-cors.headers.accesscontrolmaxage=100
+      - traefik.http.middlewares.headscale-cors.headers.addvaryheader=true
+      - traefik.http.routers.headscale-https.middlewares=headscale-cors
+    networks:
+      - proxy
+
+  headscale-admin:
+    image: goodieshq/headscale-admin:latest
+    container_name: headscale-admin
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.headscale-admin-http.entrypoints=web
+      - traefik.http.routers.headscale-admin-http.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`) && PathPrefix(`/admin`)
+      - traefik.http.routers.headscale-admin-https.entrypoints=websecure
+      - traefik.http.routers.headscale-admin-https.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`) && PathPrefix(`/admin`)
+      - traefik.http.routers.headscale-admin-https.tls.certresolver=infomaniak
+      - traefik.http.middlewares.headscale-admin-auth.basicauth.usersfile=/etc/traefik/users/users.txt
+      - traefik.http.middlewares.headscale-admin-auth.basicauth.realm=Headscale
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
