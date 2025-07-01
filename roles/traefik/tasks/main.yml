@@ -32,6 +32,6 @@
     mode: '0644'
 
 - name: Start Traefik container
-  command: podman-compose up -d
+  command: docker compose up -d
   args:
     chdir: /data/docker/traefik

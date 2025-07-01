@@ -212,7 +212,7 @@ To use this collection, include the desired roles in your playbook. Below is an 
   vars_files:
     - vault.yml  # Load variables from the vault
   vars:
-    dancer_user: "dancer"  # VARIABLE: User for podman
+    dancer_user: "dancer"  # VARIABLE: User for docker
     server_url: "https://example.com"  # VARIABLE: Server URL
     email: "example@email.com"  # VARIABLE: Email for ACME
     dns_provider: "infomaniak"  # VARIABLE: DNS provider
@@ -224,17 +224,6 @@ To use this collection, include the desired roles in your playbook. Below is an 
     additional_nameservers: []  # VARIABLE: Allow to set further nameservers
 
   tasks:
-    - name: Ensure required packages are installed
-      apt:
-        name:
-          - podman
-          - podman-compose
-        state: present
-        update_cache: yes
-
-    - name: Create podman network
-      command: podman network create proxy
-      ignore_errors: yes  # Ignore if the network already exists
 
   roles:
     - t4d.WebServerSetup.headscale
