@@ -16,7 +16,7 @@ services:
     environment:
       {% for key in vars.keys() if key.startswith('CERTRESOLVER_') -%}
       - {{ key | replace('CERTRESOLVER_', '') }}
-      {% endfor %}
+      {% endfor -%}
     restart: unless-stopped
     networks:
       - proxy
