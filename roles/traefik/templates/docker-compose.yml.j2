@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   traefik:
     container_name: traefik
@@ -16,9 +14,9 @@ services:
       - /data/docker/traefik/users/:/etc/traefik/users/
       - /data/docker/traefik/logs/:/var/logs/
     environment:
-        {% for key, value in certresolver_env.items() %}
-        - {{ key | regex_replace('^CERTRESOLVER_', '') }}
-        {% endfor %}
+      {% for key, value in certresolver_env.items() %}
+      - {{ key | regex_replace('^CERTRESOLVER_', '') }}
+      {% endfor %}
     restart: unless-stopped
     networks:
       - proxy

@@ -34,4 +34,6 @@
 - name: Start Traefik container
   command: docker compose up -d
   args:
-    chdir: /data/docker/traefik
+    chdir: /data/docker/headscale
+  become: yes
+  become_user: "{{ dancer_user }}"
