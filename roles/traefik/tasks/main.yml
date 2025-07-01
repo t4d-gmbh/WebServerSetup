@@ -37,6 +37,13 @@
     state: present
   become: yes
 
+- name: Install passlib
+  # this is needed for htpasswd to work
+  ansible.builtin.pip:
+    name: passlib
+    state: present
+  become: yes
+
 - name: Create htpasswd file and add users
   htpasswd:
     path: /data/docker/traefik/users/users.txt
