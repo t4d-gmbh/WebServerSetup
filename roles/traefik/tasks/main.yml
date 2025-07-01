@@ -39,7 +39,7 @@
 
 - name: Start Traefik container
   community.docker.docker_compose_v2:
-    project_src: /data/docker/headscale
+    project_src: /data/docker/traefik
     state: present
   become: yes
   become_user: "{{ dancer_user }}"
