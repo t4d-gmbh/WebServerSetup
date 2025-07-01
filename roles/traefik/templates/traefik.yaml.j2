@@ -24,7 +24,7 @@ certificatesResolvers:
   {{ dns_provider }}:
     acme:
       email: "{{ email }}"
-      storage: /etc/traefik/certs/acme.json
+      storage: /etc/traefik/certs/{{ dns_provider }}-acme.json
       dnsChallenge:
         provider: "{{ dns_provider }}"
         resolvers:
