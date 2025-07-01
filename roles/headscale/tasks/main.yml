@@ -1,11 +1,11 @@
 ---
 - name: Ensure required packages are installed
-    apt:
-      name:
-        - podman
-        - podman-compose
-      state: present
-      update_cache: yes
+  apt:
+    name:
+      - podman
+      - podman-compose
+    state: present
+    update_cache: yes
 - name: Ensure dancer_user exists
   user:
     name: "{{ dancer_user }}"
