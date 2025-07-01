@@ -31,10 +31,15 @@
     group: "{{ dancer_user }}"
     mode: '0644'
 
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
 - name: Start Traefik container
-  command: docker compose up -d
-  args:
-    chdir: /data/docker/headscale
+  community.docker.docker_compose_v2:
+    project_src: /data/docker/headscale
+    state: present
   become: yes
   become_user: "{{ dancer_user }}"
-  become_method: su  # or 'sudo' if you prefer
