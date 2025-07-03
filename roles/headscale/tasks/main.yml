@@ -44,8 +44,8 @@
 
 
 - name: Start Headscale container
-  command: docker compose up -d
-  args:
-    chdir: /data/docker/headscale
+  community.docker.docker_compose_v2:
+    project_src: /data/docker/headscale
+    state: present
   become: yes
   become_user: "{{ dancer_user }}"
