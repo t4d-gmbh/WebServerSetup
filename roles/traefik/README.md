@@ -56,9 +56,10 @@ To use this role, add it to your Ansible playbook as follows:
     dancer_user: "your_username"
     dns_provider: "your_dns_provider"
     email: "your_email@example.com"
+    # This should be defined in a vault:
     HTPASSWD_USERS:
       - name: "admin"
-        password: "your_password"
+        pw_hash: "your_password_hash"
   roles:
     - traefik
 ```
