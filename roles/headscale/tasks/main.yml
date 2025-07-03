@@ -1,0 +1,66 @@
+---
+- name: Ensure dancer_user exists
+  user:
+    name: "{{ dancer_user }}"
+    state: present
+
+- name: Create Headscale configuration directory
+  file:
+    path: /data/docker/headscale
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create Headscale data directory
+  file:
+    path: /data/docker/headscale/lib
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create Headscale configuration file
+  template:
+    src: config-{{ headscale.version }}.yaml.j2
+    dest: /data/docker/headscale/config.yaml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Create Headscale docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /data/docker/headscale/docker-compose.yml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Start Headscale container
+  community.docker.docker_compose_v2:
+    project_src: /data/docker/headscale
+    state: present
+  become: yes
+  become_user: "{{ dancer_user }}"
+
+- block:
+    - name: Create the API key for the admin interface
+      community.docker.docker_container_exec:
+        container: headscale
+        command:  headscale apikeys create --expiration {{ api_key_expiration }}
+      register: generate_api_key
+
+    - name: Fetch the api key
+      copy:
+        content: "{{ generate_api_key.stdout }}"
+        dest: "./api_key.txt"
+      delegate_to: localhost
+      when: generate_api_key is succeeded
+      become: false  # We do not want to sudo on our own machine
+  when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True

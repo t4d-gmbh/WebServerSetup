@@ -1,0 +1,11 @@
+---
+headscale:
+  version: "0.26.1"
+# nameservers for dns handling
+nameservers:
+  - "1.1.1.1"
+  - "9.9.9.9"
+  - "2606:4700:4700::1111"
+  - "2606:4700:4700::1001"
+api_key_expiration: "365d"
+generate_new_api_key: False
