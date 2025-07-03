@@ -42,6 +42,7 @@ services:
       - traefik.http.routers.headscale-admin-https.tls.certresolver={{ dns_provider }}
       - traefik.http.middlewares.headscale-admin-auth.basicauth.usersfile=/etc/traefik/users/users.txt
       - traefik.http.middlewares.headscale-admin-auth.basicauth.realm=Headscale
+      - traefik.http.routers.headscale-admin-https.middlewares=headscale-admin-auth
     networks:
       - proxy
 
