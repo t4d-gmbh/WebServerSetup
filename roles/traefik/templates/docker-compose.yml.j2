@@ -1,0 +1,26 @@
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:{{ traefik.version }}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /data/docker/traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - /data/docker/traefik/conf/:/etc/traefik/conf/
+      - /data/docker/traefik/certs/:/etc/traefik/certs/
+      - /data/docker/traefik/users/:/etc/traefik/users/
+      - /data/docker/traefik/logs/:/var/logs/
+    environment:
+    {% for key in CERTRESOLVER.keys() +%}
+      - {{ key }}
+    {% endfor +%}
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
