@@ -61,6 +61,6 @@
         content: "{{ generate_api_key.stdout }}"
         dest: "./api_key.txt"
       delegate_to: localhost
-      when: generate_api_key is succeeded  # Only fetch if the command succeeded
-      become: false
+      when: generate_api_key is succeeded
+      become: false  # We do not want to sudo on our own machine
   when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
