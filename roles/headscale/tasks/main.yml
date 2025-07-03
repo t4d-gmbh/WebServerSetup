@@ -49,27 +49,25 @@
   become: yes
   become_user: "{{ dancer_user }}"
 
-- name: Create the API key for the admin interface
-  tasks:
-    - block:
-        - name: Create the API key for the admin interface
-          community.docker.docker_container_exec:
-            container: headscale
-            argv:
-              - "headscale apikeys create --expiration {{ api_key_expiration }} > /tmp/api_key.txt"
-            chdir: /root
-          register: generate_api_key
+- block:
+    - name: Create the API key for the admin interface
+      community.docker.docker_container_exec:
+        container: headscale
+        argv:
+          - "headscale apikeys create --expiration {{ api_key_expiration }} > /tmp/api_key.txt"
+        chdir: /root
+      register: generate_api_key
 
-        - name: Fetch the output file from the container
-          community.docker.docker_cp:
-            container: headscale
-            src: /tmp/api_key.txt
-            dest: ./api_key.txt  # Local path to store the output
-          when: generate_api_key is succeeded  # Only fetch if the command succeeded
+    - name: Fetch the output file from the container
+      community.docker.docker_cp:
+        container: headscale
+        src: /tmp/api_key.txt
+        dest: ./api_key.txt  # Local path to store the output
+      when: generate_api_key is succeeded  # Only fetch if the command succeeded
 
-        - name: Clean up the temporary file in the container
-          community.docker.docker_container_exec:
-            container: headscale
-            argv:
-              - "rm -f /tmp/api_key.txt"  # Remove the temporary file
-      when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
+    - name: Clean up the temporary file in the container
+      community.docker.docker_container_exec:
+        container: headscale
+        argv:
+          - "rm -f /tmp/api_key.txt"  # Remove the temporary file
+  when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
