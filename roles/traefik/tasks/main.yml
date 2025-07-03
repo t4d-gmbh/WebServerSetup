@@ -31,6 +31,17 @@
     group: "{{ dancer_user }}"
     mode: '0644'
 
+- name: Create Traefik users directory
+  file:
+    path: /data/docker/traefik/users
+    state: directory
+    # this should be owned by root
+
+- name: Create the users file
+  template:
+    src: users.txt.j2
+    dest: /data/docker/traefik/users/users.txt
+
 - name: Ensure ACL package is installed
   package:
     name: acl
@@ -42,14 +53,14 @@
     name: python3-passlib
     state: present
 
-- name: Create htpasswd file and add users
-  htpasswd:
-    path: /data/docker/traefik/users/users.txt
-    name: "{{ item.name }}"
-    password: "{{ item.password }}"
-    state: present
-  loop: "{{ HTPASSWD_USERS }}"
-  no_log: true  # Suppress output for this task
+    # - name: Create htpasswd file and add users
+    #   htpasswd:
+    #     path: /data/docker/traefik/users/users.txt
+    #     name: "{{ item.name }}"
+    #     password: "{{ item.password }}"
+    #     state: present
+    #   loop: "{{ HTPASSWD_USERS }}"
+    #   no_log: true  # Suppress output for this task
 
 - name: Start Traefik container
   community.docker.docker_compose_v2:
