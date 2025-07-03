@@ -1,7 +1,6 @@
-# Ansible Collection: 🌐Webserver ⚙️ Automation
+# Ansible Collection: Webserver🌐 Automation
 
-This Ansible collection provides a set of roles designed to automate the setup and management of web servers, specifically tailored for deploying Django applications.
-The collection includes roles for user initialization, server hardening, PostgreSQL setup, SSL certificate management, Nginx configuration, web application installation, Gunicorn setup, and application updates.
+This Ansible collection provides a set of roles designed to automate the setup and management of web servers, specifically tailored for deploying Django applications. The collection includes roles for user initialization, server hardening, PostgreSQL setup, SSL certificate management, Nginx configuration, web application installation, Gunicorn setup, and application updates, as well as container management with Docker, Headscale, and Traefik.
 
 ## Roles Included
 
@@ -32,26 +31,18 @@ The collection includes roles for user initialization, server hardening, Postgre
 9. **Update Web App** 🔄
    - Updates and manages a Django web application by fetching the latest changes from the Git repository, installing dependencies, collecting static files, and applying database migrations.
 
-## Usage
+10. **Docker Setup** 🐳
+    - Installs Docker and Docker Compose, configures the Docker service, and adds the specified user to the Docker group for container management.
 
-To use this collection, include the desired roles in your playbook. Below is an example of how to use multiple roles from this collection:
+11. **Headscale** 🛠️
+    - Installs and configures Headscale, a self-hosted implementation of Tailscale, including setting up necessary directories, configuration files, and starting the Headscale container.
 
-```yaml
-- hosts: webservers
-  become: yes
-  roles:
-    - init_ansible
-    - hardenServer
-    - postgresqlSetup
-    - certbot
-    - nginxWebServer
-    - installWebApp
-    - gunicornSetup
-    - celerySetup
-    - updateWebApp
-```
+12. **Traefik** 🚦
+    - Installs and configures Traefik as a reverse proxy and load balancer, managing routing for services and providing SSL termination with Let's Encrypt.
 
-## Example
+## Usage Examples
+
+You find more complete usage examples under [examples/](./examples/).
 
 - **Initial setup**: This assumes a vanilla ubuntu instance on which the
   user `ansible` will be setup and will get access with a ssh key that you
@@ -201,31 +192,3 @@ To use this collection, include the desired roles in your playbook. Below is an 
     roles:
       - t4d.WebServerSetup.updateWebApp
   ```
-
-- **Setting up a Headscale control plane**
-
-```yaml
----
-- name: Deploy Headscale behind Traefik
-  hosts: all
-  become: true
-  vars_files:
-    - vault.yml  # Load variables from the vault
-  vars:
-    dancer_user: "dancer"  # VARIABLE: User for docker
-    server_url: "https://example.com"  # VARIABLE: Server URL
-    email: "example@email.com"  # VARIABLE: Email for ACME
-    dns_provider: "infomaniak"  # VARIABLE: DNS provider
-    prefixes_v4: "100.64.0.0/10"  # VARIABLE: Default IPv4 prefix
-    prefixes_v6: "fd7a:115c:a1e0::/48"  # VARIABLE: Default IPv6 prefix
-    nameservers:
-      - "1.1.1.1"  # VARIABLE: Default nameserver
-      - "9.9.9.9"  # VARIABLE: Default nameserver
-    additional_nameservers: []  # VARIABLE: Allow to set further nameservers
-
-  tasks:
-
-  roles:
-    - t4d.WebServerSetup.headscale
-    - t4d.WebServerSetup.traefik
-```
