@@ -56,20 +56,10 @@
         command:  headscale apikeys create --expiration {{ api_key_expiration }}
       register: generate_api_key
 
-    - name: Display the output
-      debug:
-        var: generate_api_key.stdout
-
-    - name: Fetch the file from the remote machine
-      fetch:
-        src: /data/docker/headscale/tmp/api_key.txt  # see docker_compose.yml for the mapping
-        dest: ./api_key.txt  # Local path to store the output
-        flat: yes
+    - name: Fetch the api key
+      copy:
+        content: "{{ generate_api_key.stdout }}"
+        dest: "./api_key.txt"
+      delegate_to: localhost
       when: generate_api_key is succeeded  # Only fetch if the command succeeded
-
-    - name: Clean up the temporary file in the container
-      community.docker.docker_container_exec:
-        container: headscale
-        argv:
-          - "rm -f /tmp/api_key.txt"  # Remove the temporary file
   when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
