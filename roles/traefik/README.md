@@ -40,7 +40,6 @@ To use this role, add it to your Ansible playbook as follows:
 5. **Create Traefik Users Directory**: Creates a directory for storing user credentials.
 6. **Create the Users File**: Generates a file containing user credentials for basic authentication.
 7. **Ensure ACL Package is Installed**: Installs the ACL package for managing access control lists.
-8. **Install Python3 Passlib**: Installs the Passlib library for password hashing.
 9. **Start Traefik Container**: Uses Docker Compose to start the Traefik container.
 
 ## Usage
