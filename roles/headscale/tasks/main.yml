@@ -53,9 +53,7 @@
     - name: Create the API key for the admin interface
       community.docker.docker_container_exec:
         container: headscale
-        argv:
-          - "headscale apikeys create --expiration {{ api_key_expiration }} > /tmp/api_key.txt"
-        chdir: /root
+        command:  headscale apikeys create --expiration {{ api_key_expiration }} > /tmp/api_key.txt
       register: generate_api_key
 
     - name: Fetch the file from the remote machine
