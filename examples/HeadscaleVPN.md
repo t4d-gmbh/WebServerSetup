@@ -1,9 +1,11 @@
-# Ansible Roles README
+# Headscale VPN setup
 
 This README provides instructions on how to use three Ansible roles: **Docker**, **Traefik**, and **Headscale**.
+
 These roles are designed to set up a Docker environment with Traefik as a reverse proxy and Headscale for managing Tailscale nodes.
 
-The exemplary setup deployed in this example is heavily inspired from the very nice [Headscale VPN video tutorial](https://www.youtube.com/watch?v=DQ1W5JFGBpY) (in German) from [Navigio](https://www.youtube.com/@Navigio1).
+The setup deployed in this example is heavily inspired from the very nice [Headscale VPN video tutorial](https://www.youtube.com/watch?v=DQ1W5JFGBpY) (in German) from [Navigio](https://www.youtube.com/@Navigio1).
+If you are very new to Headscale, Tailscale and overlay networks (and understand German) above video tutorial is a good starting pont and will also help you to better understand what the **Docker**, **Traefik** and **Headscale** roles are doing in this automated setup.
 
 ## Prerequisites
 
