@@ -9,7 +9,7 @@
 
 - name: Create Traefik configuration file
   template:
-    src: traefik.yaml.j2
+    src: traefik-{{ traefik.version }}.yaml.j2
     dest: /data/docker/traefik/traefik.yaml
     owner: "{{ dancer_user }}"
     group: "{{ dancer_user }}"

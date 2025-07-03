@@ -22,7 +22,7 @@
 
 - name: Create Headscale configuration file
   template:
-    src: config.yaml.j2
+    src: config-{{ headscale.version }}.yaml.j2
     dest: /data/docker/headscale/config.yaml
     owner: "{{ dancer_user }}"
     group: "{{ dancer_user }}"

@@ -1,4 +1,6 @@
 ---
+headscale:
+  version: "0.26.1"
 # nameservers for dns handling
 nameservers:
   - "1.1.1.1"
