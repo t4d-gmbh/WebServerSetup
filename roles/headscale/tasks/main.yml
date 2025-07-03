@@ -56,10 +56,14 @@
         command:  headscale apikeys create --expiration {{ api_key_expiration }}
       register: generate_api_key
 
-    - name: Write variable to a file on the local machine
-      local_action:
-        module: copy
+    - name: whare are we
+      command: ls; pwd; whoami
+      delegate_to: localhost
+
+    - name: Fetch the api key
+      copy:
         content: "{{ generate_api_key.stdout }}"
         dest: "./api_key.txt"
+      delegate_to: localhost
       when: generate_api_key is succeeded  # Only fetch if the command succeeded
   when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
