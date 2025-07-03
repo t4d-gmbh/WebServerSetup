@@ -159,3 +159,12 @@ alice:$2y$05$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 Use the generated hash (i.e., everything after the `:`) in your `vault.yml` file. 🔑
+
+
+## Used Roles
+
+Here can find detailed information about the roles used in this examples:
+
+- [Docker](roles/docker/README.md)
+- [Traefik](roles/traefik/README.md)
+- [Headscale](roles/headscale/README.md)
