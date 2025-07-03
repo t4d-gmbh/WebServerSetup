@@ -58,11 +58,11 @@
         chdir: /root
       register: generate_api_key
 
-    - name: Fetch the output file from the container
-      community.docker.docker_cp:
-        container: headscale
-        src: /tmp/api_key.txt
+    - name: Fetch the file from the remote machine
+      fetch:
+        src: /data/docker/headscale/tmp/api_key.txt  # see docker_compose.yml for the mapping
         dest: ./api_key.txt  # Local path to store the output
+        flat: yes
       when: generate_api_key is succeeded  # Only fetch if the command succeeded
 
     - name: Clean up the temporary file in the container

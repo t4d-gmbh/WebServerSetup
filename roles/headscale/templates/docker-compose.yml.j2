@@ -6,6 +6,7 @@ services:
     volumes:
       - /data/docker/headscale:/etc/headscale
       - /data/docker/headscale/lib:/var/lib/headscale
+      - /data/docker/headscale/tmp:/tmp
     command: serve
     labels:
       - traefik.enable=true
