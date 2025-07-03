@@ -13,7 +13,7 @@ services:
       - traefik.http.routers.headscale-http.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`)
       - traefik.http.routers.headscale-https.entrypoints=websecure
       - traefik.http.routers.headscale-https.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`)
-      - traefik.http.routers.headscale-https.tls.certresolver=infomaniak
+      - traefik.http.routers.headscale-https.tls.certresolver={{ dns_provider }}
       - traefik.http.routers.headscale-https.service=headscale
       - traefik.http.services.headscale.loadbalancer.server.port=8080
       - traefik.http.services.headscale.loadbalancer.server.scheme=http
@@ -39,7 +39,7 @@ services:
       - traefik.http.routers.headscale-admin-http.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`) && PathPrefix(`/admin`)
       - traefik.http.routers.headscale-admin-https.entrypoints=websecure
       - traefik.http.routers.headscale-admin-https.rule=Host(`{{ server_url | regex_replace('https://|http://', '') }}`) && PathPrefix(`/admin`)
-      - traefik.http.routers.headscale-admin-https.tls.certresolver=infomaniak
+      - traefik.http.routers.headscale-admin-https.tls.certresolver={{ dns_provider }}
       - traefik.http.middlewares.headscale-admin-auth.basicauth.usersfile=/etc/traefik/users/users.txt
       - traefik.http.middlewares.headscale-admin-auth.basicauth.realm=Headscale
     networks:
