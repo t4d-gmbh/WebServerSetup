@@ -78,7 +78,7 @@ Here’s an example of the playbook file (`playbook.yml`):
     prefixes_v6: "fd7a:115c:a1e0::/48"  # Default IPv6 prefix
     api_key_expiration: "3000d"  # 3000 days, that's a long time!
     generate_new_api_key: true  # If set to false, no new API key will be generated
-    headscale_database_file: "/path/to/my/db.sqlite"  # if not provided a new database is initiated
+    headscale_data_lib: "/path/to/my/headscale/lib"  # if not provided a new headscale instance is set up
 
   tasks:
     - name: Ensure Docker is set up and running
