@@ -20,21 +20,6 @@
     group: "{{ dancer_user }}"
     mode: '0755'
 
-- block:
-  - name: Copy Headscale Data
-    ansible.posix.synchronize:
-      mode: push
-      src: "{{ headscale_data_lib if headscale_data_lib.endswith('/') else headscale_data_lib + '/' }}"
-      dest: "/data/docker/headscale/lib/"
-
-  - name: Restrict access to noise private key
-    file:
-      path: /data/docker/headscale/lib/noise_private.key
-      owner: root
-      group: root
-      mode: '0600'
-  when: headscale_data_lib is defined
-
 - name: Create Headscale configuration file
   template:
     src: config-{{ headscale.version }}.yaml.j2
@@ -50,6 +35,13 @@
     owner: "{{ dancer_user }}"
     group: "{{ dancer_user }}"
     mode: '0644'
+
+- name: Copy Headscale database
+  copy:
+    src: "{{ headscale_database_file }}"
+    dest: "/data/docker/headscale/lib/db.sqlite"
+    force: true
+  when: headscale_database_file is defined
 
 - name: Ensure ACL package is installed
   package:
@@ -78,4 +70,4 @@
       delegate_to: localhost
       when: generate_api_key is succeeded
       become: false  # We do not want to sudo on our own machine
-  when: generate_new_api_key | default(false)  # Only run the block if generate_new_api_key is True
+  when: (generate_new_api_key | default(false)) or headscale_database_file is defined

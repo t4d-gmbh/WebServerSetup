@@ -20,7 +20,7 @@ This Ansible role installs and configures Headscale, a self-hosted implementatio
 - `prefixes_v4`: The IPv4 prefixes for Headscale.
 - `prefixes_v6`: The IPv6 prefixes for Headscale.
 - `email`: The email address for Let's Encrypt notifications.
-- `headscale_database_file`: Opitonal path to a sqlite database file that will be used as the sqlite db of the headscale instance. If not provided a new database will be initiated.
+- `headscale_database_file`: Optional path to a sqlite database file that will be used as the sqlite db of the headscale instance. If not provided a new database will be initiated.
 
 ## Dependencies
 
