@@ -22,7 +22,8 @@
 
 - block:
   - name: Copy Headscale Data
-    copy:
+    ansible.posix.synchronize:
+      mode: push
       src: "{{ headscale_data_lib if headscale_data_lib.endswith('/') else headscale_data_lib + '/' }}"
       dest: "/data/docker/headscale/lib/"
 
