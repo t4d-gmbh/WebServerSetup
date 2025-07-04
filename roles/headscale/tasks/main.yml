@@ -20,11 +20,11 @@
     group: "{{ dancer_user }}"
     mode: '0755'
 
-- name: Copy file to remote machine
+- name: Copy Headscale Data
   copy:
-    src: "{{ headscale_database_file }}"
-    dest: "/data/docker/headscale/lib/db.sqlite"
-  when: headscale_database_file is defined
+    src: "{{ headscale_data_lib if headscale_data_lib.endswith('/') else headscale_data_lib + '/' }}"
+    dest: "/data/docker/headscale/lib/"
+  when: headscale_data_lib is defined
 
 - name: Create Headscale configuration file
   template:
