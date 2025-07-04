@@ -20,10 +20,18 @@
     group: "{{ dancer_user }}"
     mode: '0755'
 
-- name: Copy Headscale Data
-  copy:
-    src: "{{ headscale_data_lib if headscale_data_lib.endswith('/') else headscale_data_lib + '/' }}"
-    dest: "/data/docker/headscale/lib/"
+- block:
+  - name: Copy Headscale Data
+    copy:
+      src: "{{ headscale_data_lib if headscale_data_lib.endswith('/') else headscale_data_lib + '/' }}"
+      dest: "/data/docker/headscale/lib/"
+
+  - name: Restrict access to noise private key
+    file:
+      path: /data/docker/headscale/lib/noise_private.key
+      owner: root
+      group: root
+      mode: '0600'
   when: headscale_data_lib is defined
 
 - name: Create Headscale configuration file
