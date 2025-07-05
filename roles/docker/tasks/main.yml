@@ -44,6 +44,6 @@
 
 - name: Log into DockerHub
   community.docker.docker_login:
-    username: {{ DOCKER_LOGIN.username }}
-    password: {{ DOCKER_LOGIN.password }}
+    username: "{{ DOCKER_LOGIN.username }}"
+    password: "{{ DOCKER_LOGIN.password }}"
   when: DOCKER_LOGIN is defined
