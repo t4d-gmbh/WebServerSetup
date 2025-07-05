@@ -42,8 +42,16 @@
     state: started
     enabled: yes
 
-- name: Log into DockerHub
-  community.docker.docker_login:
-    username: "{{ DOCKER_LOGIN.username }}"
-    password: "{{ DOCKER_LOGIN.password }}"
+- block:
+  - name: Ensure ACL package is installed
+    package:
+      name: acl
+      state: present
+    become: yes
+  - name: Log into DockerHub
+    community.docker.docker_login:
+      username: "{{ DOCKER_LOGIN.username }}"
+      password: "{{ DOCKER_LOGIN.password }}"
+    become: yes
+    become_user: "{{ dancer_user }}"
   when: DOCKER_LOGIN is defined
