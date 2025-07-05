@@ -11,6 +11,7 @@ This Ansible role installs and configures Docker and Docker Compose on an Ubuntu
 ## Role Variables
 
 - `dancer_user`: The username of the user to be added to the Docker group.
+- `DOCKER_LOGIN`: Optional variable that needs to provide `user` and `password`. If defined, then it is used to login to Docker Hub
 
 ## Dependencies
 
@@ -34,6 +35,7 @@ To use this role, add it to your Ansible playbook as follows:
 4. **Update APT and Install Docker Packages**: Installs Docker Engine, Docker CLI, containerd, and Docker Compose.
 5. **Add User to Docker Group**: Adds the specified user to the Docker group to allow non-sudo access to Docker commands.
 6. **Start and Enable Docker Service**: Ensures that the Docker service is started and enabled to run on boot.
+7. **Loggin in to Docker Hub**: If credentails are provided they are used to login to Docker Hub.
 
 ## Usage
 
@@ -47,6 +49,9 @@ To use this role, add it to your Ansible playbook as follows:
   become: yes
   vars:
     dancer_user: "your_username"
+    DOCKER_LOGIN:  # NOTE: This should be defined in a vault!
+      username: timmy
+      password: "timmy's-password"
   roles:
     - docker
 ```
