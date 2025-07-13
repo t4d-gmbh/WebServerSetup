@@ -7,50 +7,113 @@
 - name: Install necessary packages
   apt:
     name:
-      - nginx
       - ufw
       - fail2ban
     state: present
-  become: yes
+  become: true
 
-- name: Configure UFW (Uncomplicated Firewall)
-  ufw:
-    state: enabled
-    rule: allow
-    name: 'OpenSSH'
-  become: yes
-
-- name: Allow HTTPS traffic
-  ufw:
-    rule: allow
-    name: 'Nginx Full'
-  become: yes
-
-- name: Set default incoming policy to deny
-  ufw:
-    state: enabled
-    rule: deny
-  become: yes
+- name: Start and enable UFW
+  become: true
+  service:
+    name: ufw
+    state: started
+    enabled: true
 
 - name: Enable UFW logging
   ufw:
     logging: on
-  become: yes
+  become: true
+    
+- name: Configure SSH
+  become: true
+  block:
+    - name: Install OpenSSH
+      apt:
+        name: openssh-server
+        state: present
+    - name: Allow SSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+      notify: Restart UFW
+  when: "'ssh' in enable_services"
 
-    # - name: Configure SSH to use key-based authentication only
-    #   lineinfile:
-    #     path: /etc/ssh/sshd_config
-    #     regexp: '^#?{{ item.key }}'
-    #     line: '{{ item.key }} {{ item.value }}'
-    #   loop:
-    #     - { key: 'PasswordAuthentication', value: 'no' }
-    #     # - { key: 'PermitRootLogin', value: 'no' }
-    #     - { key: 'ChallengeResponseAuthentication', value: 'no' }
-    #     - { key: 'UsePAM', value: 'no' }
-    #   become: yes
+- name: Configure Nginx
+  become: true
+  block:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+    - name: Allow HTTPS traffic
+      ufw:
+        rule: allow
+        name: 'Nginx Full'
+      notify: Restart UFW
+  when: "'nginx' in enable_services"
 
-- name: Restart SSH service
-  service:
-    name: ssh
-    state: restarted
-  become: yes
+- name: Configure Samba
+  become: true
+  block:
+    - name: Install Samba
+      apt:
+        name: samba
+        state: present
+    - name: Allow Samba
+      ufw:
+        rule: allow
+        name: 'Samba'
+      notify: Restart UFW
+  when: "'samba' in enable_services"
+
+- name: Configure NFS
+  become: true
+  block:
+    - name: Install NFS
+      apt:
+        name: nfs-common
+        state: present
+    - name: Allow NFS
+      ufw:
+        rule: allow
+        name: 'nfs'
+      notify: Restart UFW
+  when: "'nfs' in enable_services"
+
+- name: Configure Tailscale
+  become: true
+  block:
+    - name: Add Tailscale repository
+      apt_repository:
+        repo: "deb https://pkgs.tailscale.com/stable/debian/ $(lsb_release -cs) main"
+        state: present
+    - name: Install Tailscale
+      apt:
+        name: tailscale
+        state: present
+    - name: Allow Tailscale UDP
+      ufw:
+        rule: allow
+        port: 41641
+        proto: udp
+      notify: Restart UFW
+    - name: Allow Tailscale TCP
+      ufw:
+        rule: allow
+        port: 443
+        proto: tcp
+      notify: Restart UFW
+  when: "'tailscale' in enable_services"
+
+# - name: Configure SSH to use key-based authentication only
+#   lineinfile:
+#     path: /etc/ssh/sshd_config
+#     regexp: '^#?{{ item.key }}'
+#     line: '{{ item.key }} {{ item.value }}'
+#   loop:
+#     - { key: 'PasswordAuthentication', value: 'no' }
+#     # - { key: 'PermitRootLogin', value: 'no' }
+#     - { key: 'ChallengeResponseAuthentication', value: 'no' }
+#     - { key: 'UsePAM', value: 'no' }
+#   become: true
+#   notify: Restart SSH
