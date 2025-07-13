@@ -10,7 +10,13 @@ This Ansible role is designed to harden an Ubuntu server by implementing securit
 
 ## Role Variables
 
-This role does not require any specific variables to be set. However, you may want to customize the list of packages installed or modify the SSH configuration settings as needed.
+- `enable_services`: A list of services to set up (including firewall config).
+  The following services can be configured:
+  - nginx
+  - tailscale
+  - ssh
+  - samba
+  - nfs
 
 ## Dependencies
 
@@ -20,12 +26,12 @@ This role does not have any dependencies on other roles.
 
 To use this role, include it in your playbook as follows:
 
-:::yaml
+```yaml
 - hosts: your_target_hosts
   become: yes
   roles:
     - hardenServer
-:::
+```
 
 Replace `your_target_hosts` with the appropriate inventory group or host.
 

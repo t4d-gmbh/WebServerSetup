@@ -1,0 +1,14 @@
+---
+
+- name: Restart UFW
+  become: true
+  service:
+    name: ufw
+    state: restarted
+
+- name: Restart SSH
+  become: true
+  service:
+    name: ssh
+    state: restarted
+  become: yes
