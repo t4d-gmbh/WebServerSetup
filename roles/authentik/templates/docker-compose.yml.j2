@@ -67,8 +67,8 @@ services:
       - traefik.http.routers.authentik-https.rule=Host(`{{ AUTHENTIK.server_url | regex_replace('https://|http://', '') }}`)
       - traefik.http.routers.authentik-https.tls=true
       - traefik.http.routers.authentik-https.tls.certresolver={{ dns_provider }}
-      - traefik.http.routers.authentik-https.service=authentik-svc
-      - traefik.http.services.authentik-svc.loadbalancer.server.port=9000
+      - "traefik.http.routers.authentik-https.service=authentik-svc"
+      - "traefik.http.services.authentik-svc.loadBalancer.server.port=9000"
     # NOTE: ports are not used with traefik
     # ports:
     #   - "${COMPOSE_PORT_HTTP:-9000}:9000"
