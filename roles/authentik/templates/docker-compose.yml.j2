@@ -45,15 +45,14 @@ services:
     restart: unless-stopped
     command: server
     environment:
+      - AUTHENTIK_REDIS__HOST=redis
+      - AUTHENTIK_POSTGRESQL__HOST=postgresql
+      - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
+      - AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
+      - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD}
+      - AUTHENTIK_ERROR_REPORTING__ENABLED=${AUTHENTIK_ERROR_REPORTING__ENABLED:-true}
       # NOTE: they need to be set in .env
       # AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?secret key required}
-      
-      AUTHENTIK_REDIS__HOST=redis
-      AUTHENTIK_POSTGRESQL__HOST=postgresql
-      AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
-      AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
-      AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD}
-      AUTHENTIK_ERROR_REPORTING__ENABLED=${AUTHENTIK_ERROR_REPORTING__ENABLED:-true}
     volumes:
       - /data/docker/authentik/media:/media
       - /data/docker/authentik/custom-templates:/templates
