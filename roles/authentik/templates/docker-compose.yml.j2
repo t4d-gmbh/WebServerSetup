@@ -34,9 +34,7 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: postgresql
       PGPASSWORD: ${POSTGRES_PASSWORD}
-    entrypoint: ["sh", "-c", "echo '0 2 * * * pg_dump -h ${DB_HOST} -U ${POSTGRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar' | crontab - && cron -f"]
     networks:
       - backup
 
