@@ -3,6 +3,14 @@
   user:
     name: "{{ docker_user }}"
     state: present
+
+- name: Create Docker networks
+  community.docker.docker_network:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - backup
     
 - name: Create authentik configuration directory
   file:

@@ -12,7 +12,7 @@ services:
       retries: 5
       timeout: 5s
     volumes:
-      - /data/docker/authentik/database:/var/lib/postgresql/data
+      - database:/var/lib/postgresql/data
     # NOTE: they need to be set in .env
     # environment:
     #   POSTGRES_PASSWORD: ${PG_PASS:?database password required}
@@ -22,6 +22,21 @@ services:
       - .env
     networks:
       - proxy
+      - backup
+
+  backup:
+    container_name: authentik-postgresql-backup
+    image: docker.io/library/postgres:16-alpine
+    volumes:
+      - data/docker/authentik/backups:/backups
+    env_file:
+      - .env
+    environment:
+      DB_HOST: postgresql
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    entrypoint: ["sh", "-c", "echo '0 2 * * * pg_dump -h ${DB_HOST} -U ${POSTGRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar' | crontab - && cron -f"]
+    networks:
+      - backup
 
   redis:
     container_name: authentik-redis
@@ -110,6 +125,12 @@ services:
     networks:
       - proxy
 
+volumes:
+  database:
+    driver: local
+
 networks:
   proxy:
+    external: true
+  backup:
     external: true
