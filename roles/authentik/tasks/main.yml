@@ -28,11 +28,12 @@
     group: "{{ docker_user }}"
     mode: '0755'
   loop:
-    - database
-    - redis
-    - media
-    - custom-templates
     - certs  # TODO: check if permissions are ok
+    - custom-templates
+    - backups
+    - database
+    - media
+    - redis
 
 - name: Create authentik docker-compose file
   template:
