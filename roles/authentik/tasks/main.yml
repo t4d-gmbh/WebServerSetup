@@ -35,6 +35,30 @@
     - media
     - redis
 
+- name: Create Dockerfile for backup service
+  ansible.builtin.copy:
+    dest: /data/docker/authentik/Dockerfile.backup
+    content: |
+      FROM postgres:16.9
+      RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
+      COPY entrypoint.sh /entrypoint.sh
+      RUN chmod +x /entrypoint.sh
+      ENTRYPOINT ["/entrypoint.sh"]
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+- name: Create entrypoint script for backup service
+  ansible.builtin.copy:
+    dest: /data/docker/authentik/entrypoint.sh
+    content: |
+      #!/bin/bash
+      echo "0 2 * * * pg_dump -h postgresql -U ${POSGTRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar" | crontab -
+      cron -f
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
 - name: Create authentik docker-compose file
   template:
     src: docker-compose.yml.j2
