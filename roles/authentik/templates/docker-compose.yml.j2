@@ -26,7 +26,7 @@ services:
 
   backup:
     container_name: authentik-postgresql-backup
-    image: docker.io/library/postgres:16-alpine
+    image: postgres:16.9
     volumes:
       - /data/docker/authentik/backups:/backups
     env_file:
