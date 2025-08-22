@@ -79,6 +79,9 @@ Here’s an example of the playbook file (`playbook.yml`):
     api_key_expiration: "3000d"  # 3000 days, that's a long time!
     generate_new_api_key: true  # If set to false, no new API key will be generated
     headscale_data_lib: "/path/to/my/headscale/lib"  # if not provided a new headscale instance is set up
+    AUTHENTIK_TAG: "2025.6.3"
+    AUTHENTIK:
+      server_url: "https://auth.myserver.com"
 
   tasks:
     - name: Ensure Docker is set up and running
@@ -89,6 +92,10 @@ Here’s an example of the playbook file (`playbook.yml`):
       community.docker.docker_network:
         name: proxy
         state: present
+
+    - name: Ensure authentik is configured
+      include_role:
+        name: t4d.WebServerSetup.authentik
 
     - name: Ensure Headscale is configured
       include_role:
