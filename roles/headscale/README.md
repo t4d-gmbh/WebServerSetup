@@ -16,6 +16,7 @@ This Ansible role installs and configures Headscale, a self-hosted implementatio
 - `api_key_expiration`: The expiration time for the API key (default: "365d").
 - `generate_new_api_key`: Boolean to determine if a new API key should be generated (default: false).
 - `nameservers`: List of DNS nameservers to be used by Headscale.
+- `headscale_dns_split`: Optional dictionary defining split DNS configurations for specific domains.
 - `server_url`: The URL of the Headscale server.
 - `prefixes_v4`: The IPv4 prefixes for Headscale.
 - `prefixes_v6`: The IPv6 prefixes for Headscale.
@@ -64,6 +65,9 @@ To use this role, add it to your Ansible playbook as follows:
     prefixes_v6: "fc00::/7"
     email: "your_email@example.com"
     generate_new_api_key: true
+    headscale_dns_split:
+      mylan: 
+        - 10.10.0.1
   roles:
     - headscale
 ```

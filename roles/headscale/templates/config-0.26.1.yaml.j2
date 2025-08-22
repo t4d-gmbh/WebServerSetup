@@ -74,6 +74,15 @@ dns:
     {% for ns in nameservers +%}
       - {{ ns }}
     {% endfor +%}
+    {% if headscale_dns_split is defined and headscale_dns_split +%}
+    split:
+      {% for domain, ips in headscale_dns_split.items() +%}
+      {{ domain }}:
+        {% for ip in ips +%}
+        - {{ ip }}
+        {% endfor +%}
+      {% endfor +%}
+    {% endif +%}
   search_domains: []
 
 unix_socket: /var/run/headscale/headscale.sock
