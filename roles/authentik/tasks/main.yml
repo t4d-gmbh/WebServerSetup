@@ -1,0 +1,91 @@
+---
+- name: Ensure docker exists
+  user:
+    name: "{{ docker_user }}"
+    state: present
+
+- name: Create Docker networks
+  community.docker.docker_network:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - backup
+    
+- name: Create authentik configuration directory
+  file:
+    path: /data/docker/authentik
+    state: directory
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0755'
+
+- name: Create subdirectories in authentik data directory
+  file:
+    path: "/data/docker/authentik/{{ item }}"
+    state: directory
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0755'
+  loop:
+    - certs  # TODO: check if permissions are ok
+    - custom-templates
+    - backups
+    - database
+    - media
+    - redis
+
+- name: Create Dockerfile for backup service
+  ansible.builtin.copy:
+    dest: /data/docker/authentik/Dockerfile.backup
+    content: |
+      FROM postgres:16.9
+      RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
+      COPY entrypoint.sh /entrypoint.sh
+      RUN chmod +x /entrypoint.sh
+      ENTRYPOINT ["/entrypoint.sh"]
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+- name: Create entrypoint script for backup service
+  ansible.builtin.copy:
+    dest: /data/docker/authentik/entrypoint.sh
+    content: |
+      #!/bin/bash
+      echo "0 2 * * * pg_dump -h postgresql -U ${POSGTRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar" | crontab -
+      cron -f
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+- name: Create authentik docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /data/docker/authentik/docker-compose.yml
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+- name: Create .env file for authentik
+  template:
+    src: .env.j2
+    dest: /data/docker/authentik/.env
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+# TODO: Send postgres (and redis) db
+
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Start authentik container
+  community.docker.docker_compose_v2:
+    project_src: /data/docker/authentik
+    state: present
+  become: yes
+  become_user: "{{ docker_user }}"

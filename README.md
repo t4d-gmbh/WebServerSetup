@@ -40,6 +40,9 @@ This Ansible collection provides a set of roles designed to automate the setup a
 12. **Traefik** 🚦
     - Installs and configures Traefik as a reverse proxy and load balancer, managing routing for services and providing SSL termination with Let's Encrypt.
 
+13. **Authentik** 🛂
+    - Installs and cofnigures Authentik in a docker container and provides the necessary configuration for traefik to include the service into the reverse proxy.
+
 ## Usage Examples
 
 You find more complete usage examples under [examples/](./examples/).

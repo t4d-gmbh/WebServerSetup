@@ -1,0 +1,7 @@
+---
+
+docker_user: 'dancer'
+AUTHENTIK_TAG: "2025.6.3"
+AUTHENTIK_ERROR_REPORTING__ENABLED: true
+AUTHENTIK:
+  server_url: "https://auth.myserver.net"
