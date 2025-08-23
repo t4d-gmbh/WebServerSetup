@@ -72,6 +72,16 @@ To use this role, add it to your Ansible playbook as follows:
     - headscale
 ```
 
+## Notes
+
+#### Split DNS
+
+In case you configure a split DNS setup allowing to access an internal LAN that uses a local name resolution, like `<hostname>.lan` or similar, make sure to provide the IP of the local DNS server (most likely your router) from the IP range you decided to route.
+Further, it might be needed to enable the router to resolve DNS requests for the local LAN from outside the local LAN. This is a security setting that might be disabled by default (e.g. on OpenWrt under _DHCP and DNS > Filter > Local service only_).
+Once enabled, hosts from the tailnet will be able to access the machines from the routed LAN directly by their hostname and the local domain (usually `.local` or `.lan`). If you intent to include a local LAN in that manner we recommend using a custom local domain (i.e. do not use `lan` or `local`).
+
+
+
 ## License
 
 This role is licensed under the GNU GPLv3 License.
