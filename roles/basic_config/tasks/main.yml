@@ -1,0 +1,53 @@
+# tasks file for base-config
+
+- name: Configure swap partition if swapfile_size is provided
+  block:
+    - name: Gather swap file statistics
+      ansible.builtin.stat:
+        path: "{{ swapfile_path }}"
+      register: swap_file_stat
+
+    - name: Create swap file using dd if it does not exist
+      ansible.builtin.command: >
+        dd if=/dev/zero of={{ swapfile_path }} bs=1M
+        count={{ swapfile_size | regex_replace('G', '') | int * 1024 if 'G' in swapfile_size else (swapfile_size | regex_replace('M', '') | int) }}
+      when: not swap_file_stat.stat.exists
+
+    - name: Set correct permissions for the swap file (root read/write only)
+      ansible.builtin.file:
+        path: "{{ swapfile_path }}"
+        mode: '0600' # Permissions are set to prevent normal users from accessing the file.
+
+    - name: Mark the file as swap space
+      ansible.builtin.command: "mkswap {{ swapfile_path }}"
+      register: mkswap_result
+      changed_when: "'Setting up swapspace version' in mkswap_result.stdout" # Indication that mkswap actively performed a change
+      failed_when: mkswap_result.rc not in [0, 2] # mkswap returns 0 for success, 2 if already marked as swap
+
+    - name: Enable the swap file
+      ansible.builtin.command: "swapon {{ swapfile_path }}"
+      register: swapon_result
+      changed_when: swapon_result.rc == 0 # swapon returns 0 if successfully enabled, non-zero if already active or error
+
+    - name: Make the swap file permanent by adding it to /etc/fstab
+      ansible.builtin.mount:
+        name: "none" # The mount point for a swap file is specified as 'none'
+        src: "{{ swapfile_path }}"
+        fstype: "swap"
+        opts: "sw"
+        state: "present" # Ensures the entry exists in /etc/fstab
+
+    - name: Adjust the swappiness property for server optimization
+      ansible.posix.sysctl:
+        name: vm.swappiness
+        value: "{{ swappiness_value }}"
+        state: "present"
+        reload: yes # Ensures the change is applied immediately and made permanent in /etc/sysctl.conf
+
+    - name: Adjust the vfs_cache_pressure setting for server optimization
+      ansible.posix.sysctl:
+        name: vm.vfs_cache_pressure
+        value: "{{ vfs_cache_pressure_value }}"
+        state: "present"
+        reload: yes # Ensures the change is applied immediately and made permanent in /etc/sysctl.conf
+  when: swapfile_size is not none and swapfile_size | length > 0
