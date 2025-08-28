@@ -22,7 +22,7 @@
       ansible.builtin.command: "mkswap {{ swapfile_path }}"
       register: mkswap_result
       changed_when: "'Setting up swapspace version' in mkswap_result.stdout" # Indication that mkswap actively performed a change
-      failed_when: mkswap_result.rc not in [4] # mkswap returns 0 for success, 2 if already marked as swap
+      failed_when: mkswap_result.rc not in [0, 2] # mkswap returns 0 for success, 2 if already marked as swap
 
     - name: Enable the swap file
       ansible.builtin.command: "swapon {{ swapfile_path }}"
