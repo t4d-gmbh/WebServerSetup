@@ -1,0 +1,14 @@
+# swapfile_size: Set to a valid size (e.g., "1G", "2G") to create a swap file.
+# If set to "None" (or commented out), no swap file will be created.
+swapfile_size: "None"
+
+# Path where the swap file will be created.
+swapfile_path: "/swapfile"
+
+# The 'swappiness' parameter configures how often the system swaps data out of RAM to disk.
+# A value closer to 0 is generally recommended for servers to prioritize RAM usage [3-5].
+swappiness_value: "10"
+
+# The 'vfs_cache_pressure' setting configures how much the system caches inode and dentry information.
+# A lower value (like 50) is recommended to prevent the system from removing inode information from cache too quickly [5-7].
+vfs_cache_pressure_value: "50"
