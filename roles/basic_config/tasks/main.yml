@@ -22,12 +22,13 @@
       ansible.builtin.command: "mkswap {{ swapfile_path }}"
       register: mkswap_result
       changed_when: "'Setting up swapspace version' in mkswap_result.stdout" # Indication that mkswap actively performed a change
-      failed_when: mkswap_result.rc not in [0, 1, 2] # mkswap returns 0 for success, 1 if already mounted and 2 if already marked as swap
+      failed_when: mkswap_result.rc not in [0, 1, 2] # mkswap returns 0 for success, 2 if already marked as swap
 
     - name: Enable the swap file
       ansible.builtin.command: "swapon {{ swapfile_path }}"
       register: swapon_result
       changed_when: swapon_result.rc == 0 # swapon returns 0 if successfully enabled, non-zero if already active or error
+      when: mkswap_result.rc in [0, 2] # Only run if mkswap returned 0 or 2
 
     - name: Make the swap file permanent by adding it to /etc/fstab
       ansible.builtin.mount:
