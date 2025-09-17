@@ -32,6 +32,9 @@ The Django application to install must be configured to use `python-decouple` an
 - `db_name`: The name of the database for the application.
 - `db_user`: The database user for the application.
 - `vault_db_password`: The password for the database user (should be stored securely).
+- `vault_email_config`: A dictionary with the django email configuration.
+  It should be stored securely in a vault file (hence the `vault_` prefix).
+  For an example with the django default values, see `/defautls/main.yml`.
 
 ## Dependencies
 
