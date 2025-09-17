@@ -1,0 +1,6 @@
+# List of services to enable
+# NOTE: as long as you want to keep using ansible, ssh should
+#       alwasy be part of this list!
+enable_services:
+  - "ssh"
+  # - "nginx"
