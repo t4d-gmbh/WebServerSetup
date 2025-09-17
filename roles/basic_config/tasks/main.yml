@@ -1,6 +1,7 @@
 # tasks file for base-config
 
 - name: Configure swap partition if swapfile_size is provided
+  become: yes
   block:
     - name: Gather swap file statistics
       ansible.builtin.stat:
