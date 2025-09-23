@@ -1,0 +1,8 @@
+[Unit]
+Description=OpenStack VM snapshot backup
+
+[Service]
+Type=oneshot
+User={{ osbackupper.user }}
+EnvironmentFile=/etc/openstack/openstack-backup.env
+ExecStart={{ osbackupper.venv }}/bin/python -m openstackbackupper.cli --backup-dir {{ osbackupper.backup_dir }}

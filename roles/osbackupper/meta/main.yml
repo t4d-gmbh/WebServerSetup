@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Your Name
+  description: Install OpenStack VM backup package, service and timer.
+  company: Your Org
+  license: MIT
+dependencies: []

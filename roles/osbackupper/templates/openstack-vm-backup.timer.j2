@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily OpenStack VM backup timer
+
+[Timer]
+OnCalendar=*-*-* {{ osbackupper.run_at }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

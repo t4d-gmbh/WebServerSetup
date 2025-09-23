@@ -1,0 +1,98 @@
+---
+- name: Ensure backup user exists
+  user:
+    name: "{{ osbackupper.user }}"
+    system: yes
+    create_home: no
+
+- name: Ensure backup directory exists
+  file:
+    path: "{{ osbackupper.backup_dir }}"
+    state: directory
+    owner: "{{ osbackupper.user }}"
+    group: "{{ osbackupper.user }}"
+    mode: "0750"
+
+- name: Ensure venv parent dir exists
+  file:
+    path: "{{ osbackupper.venv | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Install system packages for Python build (Debian/Ubuntu)
+  apt:
+    name:
+      - python3-venv
+      - python3-dev
+      - build-essential
+      - libssl-dev
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install system packages for Python build (RHEL)
+  yum:
+    name:
+      - python3-venv
+      - python3-devel
+      - gcc
+      - openssl-devel
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Create virtualenv
+  command: python3 -m venv "{{ osbackupper.venv }}"
+  args:
+    creates: "{{ osbackupper.venv }}/bin/activate"
+
+- name: Upgrade pip in venv
+  command: "{{ osbackupper.venv }}/bin/python -m pip install --upgrade pip"
+  register: pip_upgrade
+
+- name: Install Python package into venv (editable if developing)
+  pip:
+    virtualenv: "{{ osbackupper.venv }}"
+    editable: "{{ osbackupper.package_src }}"
+    name: "{{ osbackupper.package_src }}"
+    state: present
+
+- name: Create /etc/openstack directory
+  file:
+    path: /etc/openstack
+    state: directory
+    owner: "{{ osbackupper.user }}"
+    mode: "0700"
+
+- name: Deploy env file (from vault vars)
+  template:
+    src: openstack-backup.env.j2
+    dest: /etc/openstack/openstack-backup.env
+    owner: "{{ osbackupper.user }}"
+    mode: "0600"
+  vars:
+    openstack_auth: "{{ openstack_auth }}"
+
+- name: Deploy systemd service unit
+  template:
+    src: openstack-vm-backup.service.j2
+    dest: "/etc/systemd/system/{{ osbackupper.service_name }}.service"
+    mode: "0644"
+  notify: daemon-reload
+
+- name: Deploy systemd timer unit
+  template:
+    src: openstack-vm-backup.timer.j2
+    dest: "/etc/systemd/system/{{ osbackupper.service_name }}.timer"
+    mode: "0644"
+  notify: daemon-reload
+
+- name: Ensure systemd timer enabled and started
+  systemd:
+    name: "{{ osbackupper.service_name }}.timer"
+    enabled: yes
+    state: started
+
+- name: Ensure service exists (for manual runs)
+  systemd:
+    name: "{{ osbackupper.service_name }}.service"
+    enabled: no
+    state: stopped
