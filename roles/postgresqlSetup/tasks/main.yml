@@ -64,7 +64,7 @@
       POSTGRES_DB: "{{ db_name }}"
       POSTGRES_USER: "{{ db_user }}"
       POSTGRES_PASSWORD: "{{ vault_db_password }}"
-      PGDATA: "{{ postgresql_pgdata }}/pgdata"
+      PGDATA: "{{ postgresql_pgdata_parent }}/pgdata"
     volumes:
       - "{{ postgresql_data_dir }}:{{ postgresql_pgdata_parent }}"
   become: true
