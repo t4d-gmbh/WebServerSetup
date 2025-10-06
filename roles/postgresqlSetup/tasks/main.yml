@@ -20,6 +20,7 @@
     state: present
   become: true
 
+
 - name: Ensure Docker service is running
   service:
     name: docker
@@ -27,17 +28,33 @@
     enabled: true
   become: true
 
-
 - name: Pull PostgreSQL Docker image
   community.docker.docker_image_pull:
     name: postgres
     tag: "{{ postgresql_version }}"
-    # Select platform for pulling. If not specified, will pull whatever docker prefers.
+  register: pulled_image
   become: true
 
-- name: Create PostgreSQL container
-  docker_container:
+- name: Remove existing PostgreSQL container if image tag changed
+  community.docker.docker_container:
     name: "{{ postgresql_container_name }}"
+    state: absent
+    force_kill: true
+  when: pulled_image.changed
+  become: true
+
+- name: Ensure host postgres data dir exists
+  file:
+    path: "{{ postgresql_data_dir }}/pgdata"
+    state: directory
+    owner: 999
+    group: 999
+    mode: "0700"
+  become: true
+
+- name: Create PostgreSQL container from specific tag
+  community.docker.docker_container:
+    name: "{{ postgresql_container_name  }}"
     image: "postgres:{{ postgresql_version }}"
     state: started
     restart_policy: always
@@ -46,7 +63,8 @@
     env:
       POSTGRES_DB: "{{ db_name }}"
       POSTGRES_USER: "{{ db_user }}"
-      POSTGRES_PASSWORD: "{{ vault_db_password}}"
+      POSTGRES_PASSWORD: "{{ vault_db_password }}"
+      PGDATA: "{{ postgresql_pgdata_parent }}/pgdata"
     volumes:
-      - "{{ postgresql_data_dir }}:/var/lib/postgresql/data"
+      - "{{ postgresql_data_dir }}:{{ postgresql_pgdata_parent }}"
   become: true

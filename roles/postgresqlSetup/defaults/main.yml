@@ -6,3 +6,4 @@ postgresql_container_name: "postgresql"
   # postgresql_password: "mypassword"
 postgresql_port: 5432
 postgresql_data_dir: "/var/lib/postgresql/data"
+postgresql_pgdata_parent: "/var/lib/postgresql/data"
