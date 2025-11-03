@@ -1,5 +1,7 @@
 ---
-
+{% set AUTHENTIK_TAG = (lookup('env', 'AUTHENTIK_TAG') | default('2025.6.3')) %}
+{% set version_parts = AUTHENTIK_TAG.split('.') %}
+{% set skip_redis = (version_parts[0]|int < 2025) or (version_parts[0]|int == 2025 and version_parts[1]|int < 10) %}
 services:
   postgresql:
     container_name: authentik-postgresql
@@ -38,6 +40,7 @@ services:
     networks:
       - backup
 
+  {% if not skip_redis %}
   redis:
     container_name: authentik-redis
     image: docker.io/library/redis:alpine
@@ -53,6 +56,7 @@ services:
       - /data/docker/authentik/redis:/data
     networks:
       - proxy
+  {% endif %}
 
   server:
     container_name: authentik-server
@@ -60,7 +64,7 @@ services:
     restart: unless-stopped
     command: server
     environment:
-      - AUTHENTIK_REDIS__HOST=redis
+      {% if not skip_redis %}- AUTHENTIK_REDIS__HOST=redis{% endif %}
       - AUTHENTIK_POSTGRESQL__HOST=postgresql
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
@@ -90,8 +94,10 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+      {% if not skip_redis %}
       redis:
         condition: service_healthy
+      {% endif %}
     networks:
       - proxy
 
@@ -101,7 +107,7 @@ services:
     restart: unless-stopped
     command: worker
     environment:
-      - AUTHENTIK_REDIS__HOST=redis
+      {% if not skip_redis %}- AUTHENTIK_REDIS__HOST=redis{% endif %}
       - AUTHENTIK_POSTGRESQL__HOST=postgresql
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
@@ -120,8 +126,10 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+      {% if not skip_redis %}
       redis:
         condition: service_healthy
+      {% endif %}
     networks:
       - proxy
 

@@ -33,7 +33,7 @@
     - backups
     - database
     - media
-    - redis
+    - redis  # might not be needed for 2025.10.0 and after
 
 - name: Create Dockerfile for backup service
   ansible.builtin.copy:
