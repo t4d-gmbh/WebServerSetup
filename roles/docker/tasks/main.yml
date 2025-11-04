@@ -12,11 +12,13 @@
     update_cache: true
 
 - name: Add Docker GPG apt Key
+  become: yes
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
 
 - name: Add Docker Repository
+  become: yes
   apt_repository:
     repo: deb https://download.docker.com/linux/ubuntu focal stable
     state: present
@@ -33,12 +35,14 @@
     update_cache: true
 
 - name: Add user to the docker group
+  become: yes
   user:
     name: "{{ dancer_user }}"
     groups: docker
     append: yes
 
 - name: Start and enable Docker service
+  become: yes
   service:
     name: docker
     state: started
