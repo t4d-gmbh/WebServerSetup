@@ -40,7 +40,7 @@ services:
     networks:
       - backup
 
-  {% if not skip_redis %}
+{%- if not skip_redis %}
   redis:
     container_name: authentik-redis
     image: docker.io/library/redis:alpine
@@ -56,7 +56,7 @@ services:
       - /data/docker/authentik/redis:/data
     networks:
       - proxy
-  {% endif %}
+{%- endif %}
 
   server:
     container_name: authentik-server
@@ -64,7 +64,9 @@ services:
     restart: unless-stopped
     command: server
     environment:
-      {% if not skip_redis %}- AUTHENTIK_REDIS__HOST=redis{% endif %}
+{%- if not skip_redis %}
+      - AUTHENTIK_REDIS__HOST=redis
+{%- endif %}
       - AUTHENTIK_POSTGRESQL__HOST=postgresql
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
@@ -94,10 +96,10 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
-      {% if not skip_redis %}
+{%- if not skip_redis %}
       redis:
         condition: service_healthy
-      {% endif %}
+{%- endif %}
     networks:
       - proxy
 
@@ -107,7 +109,9 @@ services:
     restart: unless-stopped
     command: worker
     environment:
-      {% if not skip_redis %}- AUTHENTIK_REDIS__HOST=redis{% endif %}
+{%- if not skip_redis %}
+      - AUTHENTIK_REDIS__HOST=redis
+{%- endif %}
       - AUTHENTIK_POSTGRESQL__HOST=postgresql
       - AUTHENTIK_POSTGRESQL__USER=${POSTGRES_USER}
       - AUTHENTIK_POSTGRESQL__NAME=${POSTGRES_DB}
@@ -126,10 +130,10 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
-      {% if not skip_redis %}
+{%- if not skip_redis %}
       redis:
         condition: service_healthy
-      {% endif %}
+{%- endif %}
     networks:
       - proxy
 
