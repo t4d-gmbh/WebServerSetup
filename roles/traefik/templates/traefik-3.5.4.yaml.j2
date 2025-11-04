@@ -19,15 +19,7 @@ entryPoints:
           scheme: https
   websecure:
     address: :443
-{% if tls_domains %}
-    http:
-      tls:
-        domains:
-          -  main: "{{ tls_domains.main }}"
-{% if tls_domains.sans %}
-             sans: "{{ tls_domains.sans | join(',') }}"
-{% endif %}
-{% endif %}
+
 
 certificatesResolvers:
   {{ dns_provider }}:
@@ -39,6 +31,19 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "9.9.9.9:53"
+
+{% if tls_default_domains %}
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: "{{ dns_provider }}" 
+        domain:
+          main: "{{ tls_default_domains.main }}"
+{% if tls_default_domains.sans %}
+          sans: "{{ tls_domains.sans | join(',') }}"
+{% endif %}
+{% endif %}
 
 accessLog:
   addInternals: true
