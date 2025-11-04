@@ -32,7 +32,7 @@ certificatesResolvers:
           - "1.1.1.1:53"
           - "9.9.9.9:53"
 
-{% if tls_default_domains %}
+{% if tls_default_domains is defined %}
 tls:
   stores:
     default:

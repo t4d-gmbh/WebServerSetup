@@ -31,7 +31,7 @@ certificatesResolvers:
           - "1.1.1.1:53"
           - "9.9.9.9:53"
 
-{% if tls_default_domains %}
+{% if tls_default_domains is defined %}
 tls:
   stores:
     default:
@@ -39,7 +39,7 @@ tls:
         resolver: "{{ dns_provider }}" 
         domain:
           main: "{{ tls_default_domains.main }}"
-{% if tls_default_domains.sans %}
+{% if tls_default_domains.sans is defined and tls_default_domains.sans %}
           sans: "{{ tls_default_domains.sans | join(',') }}"
 {% endif %}
 {% endif %}
