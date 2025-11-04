@@ -1,5 +1,3 @@
-{% if HTPASSWD_USERS %}
-{% for user in HTPASSWD_USERS -%}
+{% for user in HTPASSWD_USERS | default([]) -%}
 {{ user.name }}:{{ user.pw_hash }}
 {% endfor -%}
-{% endif %}
