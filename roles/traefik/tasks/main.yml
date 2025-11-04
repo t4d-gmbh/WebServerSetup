@@ -1,5 +1,6 @@
 ---
 - name: Create Traefik configuration directory
+  become: yes
   file:
     path: /data/docker/traefik
     state: directory
@@ -8,6 +9,7 @@
     mode: '0755'
 
 - name: Create Traefik configuration file
+  become: yes
   template:
     src: traefik-{{ traefik.version }}.yaml.j2
     dest: /data/docker/traefik/traefik.yaml
@@ -16,6 +18,7 @@
     mode: '0644'
 
 - name: Create Traefik docker-compose file
+  become: yes
   template:
     src: docker-compose.yml.j2
     dest: /data/docker/traefik/docker-compose.yml
@@ -24,6 +27,7 @@
     mode: '0644'
 
 - name: Create .env file for Traefik
+  become: yes
   template:
     src: .env.j2
     dest: /data/docker/traefik/.env
@@ -32,12 +36,14 @@
     mode: '0644'
 
 - name: Create Traefik users directory
+  become: yes
   file:
     path: /data/docker/traefik/users
     state: directory
     # this should be owned by root
 
 - name: Create the users file
+  become: yes
   template:
     src: users.txt.j2
     dest: /data/docker/traefik/users/users.txt
