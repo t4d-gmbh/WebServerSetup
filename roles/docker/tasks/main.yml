@@ -1,6 +1,6 @@
 ---
 - name: Install required system packages
-  apt:
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
@@ -9,6 +9,7 @@
       - virtualenv
     state: latest
     update_cache: true
+    become: yes
 
 - name: Add Docker GPG apt Key
   apt_key:
@@ -21,7 +22,7 @@
     state: present
 
 - name: Update apt and install Docker packages
-  apt:
+  ansible.builtin.apt:
     name:
       - docker-ce
       - docker-ce-cli
@@ -29,6 +30,7 @@
       - docker-compose
     state: latest
     update_cache: true
+    become: yes
 
 - name: Add user to the docker group
   user:
