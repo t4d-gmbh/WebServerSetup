@@ -16,6 +16,9 @@ This Ansible role installs and configures Traefik, a modern reverse proxy and lo
 - `dns_provider`: The DNS provider for Let's Encrypt certificate resolution.
 - `email`: The email address for Let's Encrypt notifications.
 - `HTPASSWD_USERS`: A list of users for basic authentication, each containing `name` and `password`.
+- `tls_domains`: An optional dict with the keys `main` and `sans`.
+  - `main` the main domain to fetch a certificate for
+  - `sans` are a list of sub-domains.
 
 ## Dependencies
 
@@ -60,6 +63,10 @@ To use this role, add it to your Ansible playbook as follows:
     HTPASSWD_USERS:
       - name: "admin"
         pw_hash: "your_password_hash"
+    tls_domains:
+      main: "my.server.me"
+      sans:
+        - "*.my.server.me"  # a wildcard cert
   roles:
     - traefik
 ```
