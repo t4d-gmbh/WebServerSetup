@@ -19,11 +19,15 @@ entryPoints:
           scheme: https
   websecure:
     address: :443
-    {% if tls_domains %}
+{% if tls_domains %}
     http:
-      {% if tls_domains.main %}tls.domains[0].main: "{{ tls_domains.main }}{% endif %}
-      {% if tls_domains.sans %}tls.domains[0].sans: "{{ tls_domains.sans | join(',') }}{% endif %}
-    {% endif %}
+{% if tls_domains.main %}
+      tls.domains[0].main: "{{ tls_domains.main }}
+{% endif %}
+{% if tls_domains.sans %}
+      tls.domains[0].sans: "{{ tls_domains.sans | join(',') }}
+{% endif %}
+{% endif %}
 
 certificatesResolvers:
   {{ dns_provider }}:
