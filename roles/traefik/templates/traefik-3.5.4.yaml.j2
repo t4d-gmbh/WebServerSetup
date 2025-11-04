@@ -41,7 +41,7 @@ tls:
         domain:
           main: "{{ tls_default_domains.main }}"
 {% if tls_default_domains.sans %}
-          sans: "{{ tls_domains.sans | join(',') }}"
+          sans: "{{ tls_default_domains.sans | join(',') }}"
 {% endif %}
 {% endif %}
 
