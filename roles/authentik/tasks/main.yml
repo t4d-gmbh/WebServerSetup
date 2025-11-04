@@ -5,6 +5,7 @@
     state: present
 
 - name: Create Docker networks
+  become: yes
   community.docker.docker_network:
     name: "{{ item }}"
     state: present
@@ -13,6 +14,7 @@
     - backup
     
 - name: Create authentik configuration directory
+  become: yes
   file:
     path: /data/docker/authentik
     state: directory
@@ -21,6 +23,7 @@
     mode: '0755'
 
 - name: Create subdirectories in authentik data directory
+  become: yes
   file:
     path: "/data/docker/authentik/{{ item }}"
     state: directory
@@ -36,6 +39,7 @@
     - redis  # might not be needed for 2025.10.0 and after
 
 - name: Create Dockerfile for backup service
+  become: yes
   ansible.builtin.copy:
     dest: /data/docker/authentik/Dockerfile.backup
     content: |
@@ -49,6 +53,7 @@
     mode: '0644'
 
 - name: Create entrypoint script for backup service
+  become: yes
   ansible.builtin.copy:
     dest: /data/docker/authentik/entrypoint.sh
     content: |
@@ -60,6 +65,7 @@
     mode: '0644'
 
 - name: Create authentik docker-compose file
+  become: yes
   template:
     src: docker-compose.yml.j2
     dest: /data/docker/authentik/docker-compose.yml
@@ -68,6 +74,7 @@
     mode: '0644'
 
 - name: Create .env file for authentik
+  become: yes
   template:
     src: .env.j2
     dest: /data/docker/authentik/.env
@@ -78,14 +85,14 @@
 # TODO: Send postgres (and redis) db
 
 - name: Ensure ACL package is installed
+  become: yes
   package:
     name: acl
     state: present
-  become: yes
 
 - name: Start authentik container
+  become: yes
+  become_user: "{{ docker_user }}"
   community.docker.docker_compose_v2:
     project_src: /data/docker/authentik
     state: present
-  become: yes
-  become_user: "{{ docker_user }}"
