@@ -42,7 +42,7 @@
     password: "{{ DOCKER_LOGIN.password }}"
   become: yes
   become_user: "{{ dancer_user }}"
-when: DOCKER_LOGIN is defined
+  when: DOCKER_LOGIN is defined
 
 - name: Pull the container image
   become: True
