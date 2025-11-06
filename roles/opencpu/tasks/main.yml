@@ -12,7 +12,7 @@
   become: yes
 
 - name: Create OpenCPU configuration directory
-  become: yes
+  become: true
   file:
     path: /data/docker/opencpu
     state: directory
@@ -21,6 +21,7 @@
     mode: '0755'
 
 - name: Create OpenCPU container directory
+  become: true
   file:
     path: /data/docker/opencpu/opencpu
     state: directory
@@ -29,6 +30,7 @@
     mode: '0755'
 
 - name: Present Opencpu container build file
+  become: true
   template:
     src: Dockerfile.j2
     dest: /data/docker/opencpu/opencpu/Dockerfile
