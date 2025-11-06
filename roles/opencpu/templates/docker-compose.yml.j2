@@ -9,15 +9,15 @@ services:
         - proxy
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.opencpu.rule=Host(`{{ opencpu.DOMAIN regex_replace('https://|http//', '') }}`)"
+        - "traefik.http.routers.opencpu.rule=Host(`{{ opencpu.DOMAIN | regex_replace('https://|http//', '') }}`)"
         - "traefik.http.routers.opencpu.entrypoints=websecure"
         - traefik.http.routers.opencpu.tls=true
         - traefik.http.routers.opencpu.tls.certresolver={{ dns_provider }}
         - "traefik.http.services.opencpu.loadbalancer.server.port=80"
 {% if opencpu.AUTHENTIK_PROXY_CONTAINER is defined %}
-        - "traefik.http.middlewares.opencpu-authentik.forwardauth.address: http://{{ opencpu.AUTHENTIK_PROXY_CONTAINER }}:9000/outpost.goauthentik.io/auth/traefik
-        - "traefik.http.middlewares.opencpu-authentik.forwardauth.trustForwardHeader:true"
-        - "traefik.http.middlewares.opencpu-authentik.forwardauth.authResponseHeaders: X-authentik-username,X-authentik-groups,X-authentik-entitlements,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version"
+        - "traefik.http.middlewares.opencpu-authentik.forwardauth.address=http://{{ opencpu.AUTHENTIK_PROXY_CONTAINER }}:9000/outpost.goauthentik.io/auth/traefik"
+        - "traefik.http.middlewares.opencpu-authentik.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.opencpu-authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-groups,X-authentik-entitlements,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version"
         - "traefik.http.routers.headscale-https.middlewares=opencpu-authentik"
 {% endif %} 
 
