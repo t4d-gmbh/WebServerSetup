@@ -43,7 +43,7 @@
     username: "{{ DOCKER_LOGIN.username }}"
     password: "{{ DOCKER_LOGIN.password }}"
   become: yes
-  become_user: "{{ dancer_user }}"
+  become_user: "{{ docker_user }}"
   when: DOCKER_LOGIN is defined
 
 - name: Pull the container image
