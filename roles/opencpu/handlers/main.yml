@@ -1,6 +1,7 @@
 ---
 
 - name: Run OpenCPU docker compose
+  become: true
   community.docker.docker_compose_v2:
     project_src: /data/docker/opencpu
     # state: present is the default, which runs 'docker compose up -d'
