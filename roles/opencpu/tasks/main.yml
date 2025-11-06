@@ -49,7 +49,7 @@
 - name: Pull the container image
   become: True
   community.docker.docker_image:
-    name: ${opencpu.DOCKER_IMAGE:-docker.io.opencpu/ubuntu-24.04}:${opencpu.DOCKER_TAG:-v2.2.14-2}
+    name: "{{opencpu.DOCKER_IMAGE | default('docker.io.opencpu/ubuntu-24.04') }}:{{ opencpu.DOCKER_TAG | default ('v2.2.14-2') }}"
     source: pull
   notify:
     - Run OpenCPU docker compose
