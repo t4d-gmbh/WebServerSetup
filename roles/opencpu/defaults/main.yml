@@ -1,0 +1,14 @@
+---
+docker_user: "dancer"
+dns_provider: "infomaniak"
+opencpu:
+  DOMAIN: "r.myserver.com"
+  AUTHENTIK_PROXY_CONTAINER: "authentik-server"
+  CONTAINER_NAME: "opencpu"
+  DOCKER_IMAGE: "docker.io/opencpu/ubuntu-24.04"
+  DOCKER_TAG: "v2.2.14-2"
+
+  RUN_R:
+    - "install.packages('pak', repos=c(CRAN='https://cran.r-project.org'))"
+    - "pak::repo_add(INLA = 'https://inla.r-inla-download.org/R/stable/')"
+    # - "pak::pkg_install('furrer-lab/abn@3.1.2', dependencies=TRUE)"

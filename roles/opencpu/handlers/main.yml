@@ -1,0 +1,11 @@
+---
+
+- name: Run OpenCPU docker compose
+  community.docker.docker_compose_v2:
+    project_src: /data/docker/opencpu
+    # state: present is the default, which runs 'docker compose up -d'
+    state: present
+    # 'auto' is the default and is usually what you want for idempotency.
+    # Containers are recreated when their configuration differs from the
+    # service definition.
+    recreate: auto

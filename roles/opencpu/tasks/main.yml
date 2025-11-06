@@ -1,0 +1,64 @@
+---
+- name: Ensure docker_user exists
+  become: yes
+  user:
+    name: "{{ docker_user }}"
+    state: present
+
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Create OpenCPU configuration directory
+  become: yes
+  file:
+    path: /data/docker/opencpu
+    state: directory
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0755'
+
+- name: Create OpenCPU container directory
+  file:
+    path: /data/docker/opencpu/opencpu
+    state: directory
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0755'
+
+- name: Present Opencpu container build file
+  template:
+    src: Dockerfile.j2
+    dest: /data/docker/opencpu/opencpu/Dockerfile
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+
+- name: Log into DockerHub
+  community.docker.docker_login:
+    username: "{{ DOCKER_LOGIN.username }}"
+    password: "{{ DOCKER_LOGIN.password }}"
+  become: yes
+  become_user: "{{ dancer_user }}"
+when: DOCKER_LOGIN is defined
+
+- name: Pull the container image
+  become: True
+  community.docker.docker_image:
+    name: ${opencpu.DOCKER_IMAGE:-docker.io.opencpu/ubuntu-24.04}:${opencpu.DOCKER_TAG:-v2.2.14-2}
+    source: pull
+  notify:
+    - Run OpenCPU docker compose
+    
+- name: Present OpenCPU docker-compose file
+  become: true
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /data/docker/opencpu/docker-compose.yml
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+  notify:
+    - Run OpenCPU docker compose

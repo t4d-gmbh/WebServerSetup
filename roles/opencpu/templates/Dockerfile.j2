@@ -1,0 +1,12 @@
+# start from the base OpenCPU image
+FROM ${ opencpu.DOCKER_IMAGE:-docker.io/opencpu/ubuntu-24.04}:${opencpu.DOCKER_TAG:-v2.2.14-2}
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends libcurl4-openssl-dev
+RUN rm -rf /var/lib/apt/lists/* 
+
+# Install custom packages
+{% for command in opencpu.RUN_R %}
+{{ key }}={{ value }}
+RUN R -e "${command}"
+{% endfor %}
