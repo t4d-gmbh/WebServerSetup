@@ -34,7 +34,7 @@ By means of container labels the instance is configured to use authentik as auth
   - `AUTHENTIK_PROXY_CONTAINER`: _Optional_ name of the docker container running the authentik outpost used to authenticate for the opencpu service.
     If omitted the OpenCPU service is not secured and can be reached without any authentication.
 
-    In case you are unsure what to put here, simply use the container name of the authentik service (see authentik role) and configure configure authentik's forwardAuth procedure with an "embedded Outpost".
+    In case you are unsure what to put here, simply use the container name of the authentik service (match the value of `AUTHENTIK_CONTAINER_NAME` in the authentik role) and configure configure authentik's forwardAuth procedure with an "embedded Outpost".
 
 ## Dependencies
 

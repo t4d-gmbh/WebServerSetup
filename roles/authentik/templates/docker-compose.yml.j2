@@ -59,7 +59,7 @@ services:
 {% endif %}
 
   server:
-    container_name: authentik-server
+    container_name: {{ AUTHENTIK_CONTAINER_NAME }}
     image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.6.3}
     restart: unless-stopped
     command: server
