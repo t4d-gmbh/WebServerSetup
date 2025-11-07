@@ -3,7 +3,7 @@ services:
       build:
         context: ./opencpu
         dockerfile: Dockerfile
-      container_name: "${opencpu.CONTAINER_NAME:-opencpu}"
+      container_name: "{{ opencpu.CONTAINER_NAME | default('opencpu') }}"
       restart: unless-stopped
       networks:
         - proxy
