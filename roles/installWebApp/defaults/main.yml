@@ -7,8 +7,8 @@ db_engine: 'django.db.backends.postgresql'  # 'django.db.backends.sqlite3'
 db_user: 'django'
 vault_email_config:
   email_host: 'localhost'
-  email_port: '25'
-  email_use_ssl: 'True'
+  email_port: '587' # 25 without tls 465 for ssl
+  email_use_tls: 'True'
   email_host_user: ''
   email_host_password: ''
   email_default_from: ''
