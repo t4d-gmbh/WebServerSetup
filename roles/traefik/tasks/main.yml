@@ -60,3 +60,7 @@
     state: present
   become: yes
   become_user: "{{ dancer_user }}"
+  register: traefik_compose_result
+  retries: 3
+  delay: 10
+  until: traefik_compose_result is not failed

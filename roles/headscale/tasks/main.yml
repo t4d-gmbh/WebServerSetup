@@ -55,6 +55,10 @@
     state: present
   become: yes
   become_user: "{{ dancer_user }}"
+  register: headscale_compose_result
+  retries: 3
+  delay: 10
+  until: headscale_compose_result is not failed
 
 - block:
     - name: Create the API key for the admin interface

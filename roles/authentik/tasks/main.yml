@@ -96,3 +96,7 @@
   community.docker.docker_compose_v2:
     project_src: /data/docker/authentik
     state: present
+  register: authentik_compose_result
+  retries: 3
+  delay: 10
+  until: authentik_compose_result is not failed

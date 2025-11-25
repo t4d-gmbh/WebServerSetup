@@ -10,3 +10,7 @@
     # Containers are recreated when their configuration differs from the
     # service definition.
     recreate: auto
+  register: opencpu_compose_result
+  retries: 3
+  delay: 10
+  until: opencpu_compose_result is not failed
