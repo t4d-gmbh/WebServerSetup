@@ -8,10 +8,11 @@
         name: testuser
         state: present
 
-    - name: Install Docker (needed for community.docker modules)
+    - name: Install Docker and Python dependencies
       ansible.builtin.apt:
         name:
           - docker.io
+          - python3-docker
         state: present
         update_cache: true
 

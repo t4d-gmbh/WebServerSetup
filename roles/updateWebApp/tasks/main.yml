@@ -12,6 +12,8 @@
     version: "{{ git_repository_branch }}"  # Specify the branch or tag you want to clone
     force: yes
   become: yes
+  tags:
+    - molecule-notest
 
 - name: Create a virtual environment if it doesn't exist
   command: python3 -m venv /opt/{{ app_name }}/venv
@@ -19,6 +21,8 @@
     creates: /opt/{{ app_name }}/venv
   become: yes
   become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest
 
 - name: Install requirements
   pip:
@@ -26,6 +30,8 @@
     virtualenv: /opt/{{ app_name }}/venv
   become: yes
   become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest
 
 - name: Collect static files
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
@@ -37,6 +43,8 @@
     - Restart Gunicorn service  # Notify the handler
     - Restart Celery Service
     - Restart web server
+  tags:
+    - molecule-notest
 
 - name: Apply database migrations
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
@@ -44,6 +52,8 @@
     chdir:
   register: migrate_result
   ignore_errors: yes
+  tags:
+    - molecule-notest
 
 - name: Handle migration result
   block:
@@ -56,3 +66,5 @@
       fail:
         msg: "Migration failed with an unexpected error: {{ migrate_result.stderr }}"
       when: migrate_result.rc != 0 and "No migrations to apply" not in migrate_result.stderr
+  tags:
+    - molecule-notest

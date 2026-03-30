@@ -7,3 +7,11 @@
       ansible.builtin.user:
         name: testuser
         state: present
+
+    - name: Install GPG (needed for apt_key module)
+      ansible.builtin.apt:
+        name:
+          - gpg
+          - gpg-agent
+        state: present
+        update_cache: true

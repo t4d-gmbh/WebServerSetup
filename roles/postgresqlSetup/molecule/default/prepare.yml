@@ -1,0 +1,11 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Python Docker dependencies
+      ansible.builtin.apt:
+        name:
+          - python3-docker
+        state: present
+        update_cache: true
