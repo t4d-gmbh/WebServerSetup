@@ -6,35 +6,35 @@ This Ansible collection provides a set of roles designed to automate the setup a
 
 ## Roles Included
 
-*   **[Basic Configuration](roles/basic_config/README.md)** ⚙️ ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-basic_config.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-basic_config.yml?label=molecule) **[Basic Configuration](roles/basic_config/README.md)** ⚙️
     Manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance.
-*   **[Init Ansible](roles/init_ansible/README.md)** 👤 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-init_ansible.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-init_ansible.yml?label=molecule) **[Init Ansible](roles/init_ansible/README.md)** 👤
     Sets up a new user for Ansible automation, configures sudo access, sets up SSH keys, and disables password authentication for enhanced security.
-*   **[Harden Server](roles/hardenServer/README.md)** 🔒 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-hardenServer.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-hardenServer.yml?label=molecule) **[Harden Server](roles/hardenServer/README.md)** 🔒
     Hardens an Ubuntu server by implementing security best practices, including configuring the Uncomplicated Firewall (UFW) and securing SSH access.
-*   **[PostgreSQL Setup](roles/postgresqlSetup/README.md)** 🐘 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-postgresqlSetup.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-postgresqlSetup.yml?label=molecule) **[PostgreSQL Setup](roles/postgresqlSetup/README.md)** 🐘
     Installs and configures PostgreSQL using Docker, ensuring that the necessary packages are installed and a PostgreSQL container is created and running.
-*   **[Certbot](roles/certbot/README.md)** 🔑 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-certbot.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-certbot.yml?label=molecule) **[Certbot](roles/certbot/README.md)** 🔑
     Installs and configures Certbot for obtaining and managing SSL certificates using the Infomaniak DNS plugin, ensuring automatic renewal of certificates.
-*   **[Nginx Web Server](roles/nginxWebServer/README.md)** 🌍 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-nginxWebServer.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-nginxWebServer.yml?label=molecule) **[Nginx Web Server](roles/nginxWebServer/README.md)** 🌍
     Installs and configures Nginx as a web server for a Django application, managing SSL certificates and serving static files.
-*   **[Install Web App](roles/installWebApp/README.md)** 📦 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-installWebApp.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-installWebApp.yml?label=molecule) **[Install Web App](roles/installWebApp/README.md)** 📦
     Installs and configures a Django web application, setting up the necessary environment, creating a dedicated user, and managing application secrets.
-*   **[Gunicorn Setup](roles/gunicornSetup/README.md)** 🚀 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gunicornSetup.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gunicornSetup.yml?label=molecule) **[Gunicorn Setup](roles/gunicornSetup/README.md)** 🚀
     Sets up Gunicorn as a WSGI server for your web application, configuring it to run as a systemd service.
-*   **[Celery Setup](roles/celerySetup/README.md)** 🍃 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-celerySetup.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-celerySetup.yml?label=molecule) **[Celery Setup](roles/celerySetup/README.md)** 🍃
     Sets up Celery as a task queue for your web application, configuring RabbitMQ as a message broker and managing Celery as a systemd service.
-*   **[Update Web App](roles/updateWebApp/README.md)** 🔄 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-updateWebApp.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-updateWebApp.yml?label=molecule) **[Update Web App](roles/updateWebApp/README.md)** 🔄
     Updates and manages a Django web application by fetching the latest changes from the Git repository, installing dependencies, collecting static files, and applying database migrations.
-*   **[Docker Setup](roles/docker/README.md)** 🐳 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-docker.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-docker.yml?label=molecule) **[Docker Setup](roles/docker/README.md)** 🐳
     Installs Docker and Docker Compose, configures the Docker service, and adds the specified user to the Docker group for container management.
-*   **[Headscale](roles/headscale/README.md)** 🛠️ ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-headscale.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-headscale.yml?label=molecule) **[Headscale](roles/headscale/README.md)** 🛠️
     Installs and configures Headscale, a self-hosted implementation of Tailscale, including setting up necessary directories, configuration files, and starting the Headscale container.
-*   **[Traefik](roles/traefik/README.md)** 🚦 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-traefik.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-traefik.yml?label=molecule) **[Traefik](roles/traefik/README.md)** 🚦
     Installs and configures Traefik as a reverse proxy and load balancer, managing routing for services and providing SSL termination with Let's Encrypt.
-*   **[Authentik](roles/authentik/README.md)** 🛂 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-authentik.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-authentik.yml?label=molecule) **[Authentik](roles/authentik/README.md)** 🛂
     Installs and configures Authentik in a docker container and provides the necessary configuration for Traefik to include the service into the reverse proxy.
-*   **[OpenCPU](roles/opencpu/README.md)** 📊 ![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-opencpu.yml/badge.svg)
+*   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-opencpu.yml?label=molecule) **[OpenCPU](roles/opencpu/README.md)** 📊
     Installs and configures OpenCPU as a Docker container with Traefik integration and optional Authentik authentication.
 
 ## Usage Examples
