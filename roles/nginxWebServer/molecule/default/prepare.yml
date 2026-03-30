@@ -3,6 +3,10 @@
   hosts: all
   become: true
   tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
     - name: Create dummy SSL certificate for testing
       ansible.builtin.command: >
         openssl req -x509 -nodes -days 1

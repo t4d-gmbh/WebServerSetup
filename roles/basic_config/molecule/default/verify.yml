@@ -8,7 +8,7 @@
         path: /testswap
       register: swap_file
 
-    - name: Assert swap file exists
+    - name: Assert swap file exists with correct permissions
       ansible.builtin.assert:
         that:
           - swap_file.stat.exists
@@ -26,24 +26,6 @@
           - fstab_check.rc == 0
         fail_msg: "Swap file entry not found in /etc/fstab"
 
-    - name: Read swappiness value
-      ansible.builtin.command: cat /proc/sys/vm/swappiness
-      register: swappiness
-      changed_when: false
-
-    - name: Assert swappiness is set correctly
-      ansible.builtin.assert:
-        that:
-          - swappiness.stdout == "10"
-        fail_msg: "vm.swappiness is {{ swappiness.stdout }}, expected 10"
-
-    - name: Read vfs_cache_pressure value
-      ansible.builtin.command: cat /proc/sys/vm/vfs_cache_pressure
-      register: vfs_cache
-      changed_when: false
-
-    - name: Assert vfs_cache_pressure is set correctly
-      ansible.builtin.assert:
-        that:
-          - vfs_cache.stdout == "50"
-        fail_msg: "vm.vfs_cache_pressure is {{ vfs_cache.stdout }}, expected 50"
+    # NOTE: swapon and sysctl cannot be tested in Docker containers.
+    # The swapon, vm.swappiness, and vm.vfs_cache_pressure tasks are
+    # tagged with molecule-notest and skipped during converge.

@@ -28,6 +28,7 @@ provisioner:
         nameservers:
           - "1.1.1.1"
           - "9.9.9.9"
+        dns_provider: infomaniak
         generate_new_api_key: false
 scenario:
   test_sequence:

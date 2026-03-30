@@ -26,6 +26,9 @@ provisioner:
         HTPASSWD_USERS:
           - name: admin
             pw_hash: "$apr1$test$testhash"
+        CERTRESOLVER:
+          infomaniak:
+            INFOMANIAK_ACCESS_TOKEN: "test-token"
         TRAEFIK_ENV:
           INFOMANIAK_ACCESS_TOKEN: "test-token"
 scenario:

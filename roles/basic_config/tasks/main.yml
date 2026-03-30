@@ -30,6 +30,8 @@
       register: swapon_result
       changed_when: swapon_result.rc == 0
       failed_when: swapon_result.rc != 0 and 'already in use' not in (swapon_result.stderr | default(''))
+      tags:
+        - molecule-notest
 
     - name: Make the swap file permanent by adding it to /etc/fstab
       ansible.builtin.mount:
@@ -45,6 +47,8 @@
         value: "{{ swappiness_value }}"
         state: "present"
         reload: yes
+      tags:
+        - molecule-notest
 
     - name: Adjust the vfs_cache_pressure setting for server optimization
       ansible.posix.sysctl:
@@ -52,4 +56,6 @@
         value: "{{ vfs_cache_pressure_value }}"
         state: "present"
         reload: yes
+      tags:
+        - molecule-notest
   when: swapfile_size is not none and swapfile_size | length > 0
