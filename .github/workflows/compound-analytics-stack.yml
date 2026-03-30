@@ -1,0 +1,46 @@
+---
+name: "Compound - R Analytics Stack"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "roles/docker/**"
+      - "roles/authentik/**"
+      - "roles/opencpu/**"
+      - "tests/compound-docker-auth-opencpu/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "roles/docker/**"
+      - "roles/authentik/**"
+      - "roles/opencpu/**"
+      - "tests/compound-docker-auth-opencpu/**"
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+jobs:
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-core molecule molecule-plugins[docker] docker
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run Molecule tests
+        run: molecule test
+        working-directory: tests/compound-docker-auth-opencpu
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"

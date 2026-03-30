@@ -37,6 +37,19 @@ This Ansible collection provides a set of roles designed to automate the setup a
 *   ![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-opencpu.yml?label=molecule) **[OpenCPU](roles/opencpu/README.md)** 📊
     Installs and configures OpenCPU as a Docker container with Traefik integration and optional Authentik authentication.
 
+## Integration Tests
+
+These compound tests verify that roles work together correctly as full deployment stacks:
+
+*   ![Django Stack](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=Django%20Stack) **Django Application Stack**
+    End-to-end deployment of a Django web application: server hardening, PostgreSQL database, SSL certificates via Certbot, Nginx reverse proxy, application installation with Celery task queue and Gunicorn WSGI server.
+*   ![Full Stack](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=Full%20Stack) **Full Infrastructure Stack**
+    Complete container infrastructure: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.
+*   ![VPN Stack](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=VPN%20Stack) **VPN Stack**
+    Docker-based VPN infrastructure: Authentik for user authentication paired with Headscale (self-hosted Tailscale) for secure mesh networking, fronted by Traefik.
+*   ![R Analytics](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=R%20Analytics) **R Analytics Stack**
+    Authenticated R computing environment: OpenCPU server for running R scripts via a REST API, secured behind Authentik and accessible through Traefik.
+
 ## Usage Examples
 You find more complete usage examples under `examples/`.
 
