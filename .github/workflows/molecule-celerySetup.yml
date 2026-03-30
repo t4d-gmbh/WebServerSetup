@@ -1,0 +1,38 @@
+---
+name: "Molecule - celerySetup"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "roles/celerySetup/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "roles/celerySetup/**"
+  workflow_dispatch:
+
+jobs:
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-core molecule molecule-plugins[docker] docker
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run Molecule tests
+        run: molecule test
+        working-directory: roles/celerySetup
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
