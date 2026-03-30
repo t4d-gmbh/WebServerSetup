@@ -1,5 +1,7 @@
 # Ansible Role: Celery Setup
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-celerySetup.yml/badge.svg)
+
 This Ansible role sets up Celery as a task queue for your web application.
 It installs necessary packages, configures RabbitMQ as a message broker, and sets up Celery to run as a systemd service.
 

@@ -1,5 +1,7 @@
 # Ansible Role: Install Web App
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-installWebApp.yml/badge.svg)
+
 This Ansible role installs and configures a web application, specifically designed for Django applications. It sets up the necessary environment, creates a dedicated user, clones the application repository, and manages application secrets.
 
 ## Requirements

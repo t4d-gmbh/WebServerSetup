@@ -1,5 +1,7 @@
 # Ansible Role: Init Ansible
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-init_ansible.yml/badge.svg)
+
 This Ansible role sets up a new user for Ansible automation. It creates a user, configures sudo access, sets up SSH keys, and disables password authentication for enhanced security.
 
 ## Requirements

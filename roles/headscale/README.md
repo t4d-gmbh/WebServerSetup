@@ -1,5 +1,7 @@
 # Ansible Role: Headscale
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-headscale.yml/badge.svg)
+
 This Ansible role installs and configures Headscale, a self-hosted implementation of Tailscale. It sets up the necessary directories, configuration files, and starts the Headscale container using Docker. The role also manages the creation of an API key for the admin interface if required.
 
 ## Requirements

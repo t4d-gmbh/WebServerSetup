@@ -1,5 +1,7 @@
 # Ansible Role: Harden Server
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-hardenServer.yml/badge.svg)
+
 This Ansible role hardens an Ubuntu server by implementing security best practices. It configures the Uncomplicated Firewall (UFW) with a default-deny incoming policy, hardens SSH configuration, installs fail2ban for intrusion prevention, and conditionally sets up firewall rules for selected services.
 
 ## Requirements

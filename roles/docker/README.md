@@ -1,5 +1,7 @@
 # Ansible Role: Docker
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-docker.yml/badge.svg)
+
 This Ansible role installs and configures Docker and Docker Compose on an Ubuntu server. It ensures that the necessary system packages are installed, the Docker GPG key and repository are added, and the Docker service is started and enabled. Additionally, it adds a specified user to the Docker group for managing containers without sudo.
 
 ## Requirements

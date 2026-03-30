@@ -1,5 +1,7 @@
 # Ansible Role: Basic Configuration
 
+![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-basic_config.yml/badge.svg)
+
 This role manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal server performance. When `swapfile_size` is set, it creates and activates a swap file and tunes memory management kernel parameters. When `swapfile_size` is left as `null` (the default), the entire role is skipped.
 
 ## Requirements
