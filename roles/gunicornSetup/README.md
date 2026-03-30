@@ -1,6 +1,6 @@
 # Ansible Role: Gunicorn Setup
 
-![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gunicornSetup.yml?label=molecule)
+[![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gunicornSetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gunicornSetup.yml)
 
 This Ansible role sets up Gunicorn as a WSGI server for your web application. It creates a Python virtual environment, installs Gunicorn, and configures it to run as a systemd service.
 

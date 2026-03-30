@@ -1,6 +1,6 @@
 # Ansible Role: Authentik
 
-![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-authentik.yml?label=molecule)
+[![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-authentik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-authentik.yml)
 
 This Ansible role installs and configures [Authentik](https://goauthentik.io/), an open-source Identity Provider, as a Docker Compose stack. It deploys the Authentik server, worker, PostgreSQL database, an automated database backup service, and optionally Redis (for versions prior to 2025.10.0). The role integrates with Traefik for reverse proxying and TLS termination.
 
