@@ -10,6 +10,8 @@ on:
     branches: [main]
     paths:
       - "roles/installWebApp/**"
+  schedule:
+    - cron: "0 6 1 * *"
   workflow_dispatch:
 
 jobs:
