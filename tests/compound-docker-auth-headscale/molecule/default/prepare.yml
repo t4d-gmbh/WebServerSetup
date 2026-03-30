@@ -13,5 +13,7 @@
         name:
           - gpg
           - gpg-agent
+          - python3-docker
+          - docker-compose-v2
         state: present
         update_cache: true

@@ -8,13 +8,13 @@ This Ansible collection provides a set of roles designed to automate the setup a
 
 These compound tests verify that roles work together correctly as full deployment stacks:
 
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml) **Django Application Stack**  
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml) **Django Application Stack** ([example playbook](examples/DjangoWebApp.md))
     End-to-end deployment of a Django web application: server hardening, PostgreSQL database, SSL certificates via Certbot, Nginx reverse proxy, application installation with Celery task queue and Gunicorn WSGI server.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-full-stack.yml) **Full Infrastructure Stack**  
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-full-stack.yml) **Full Infrastructure Stack** ([example playbook](examples/FullInfrastructure.md))
     Complete container infrastructure: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml) **VPN Stack**  
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml) **VPN Stack** ([example playbook](examples/HeadscaleVPN.md))
     Docker-based VPN infrastructure: Authentik for user authentication paired with Headscale (self-hosted Tailscale) for secure mesh networking, fronted by Traefik.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml) **R Analytics Stack**  
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml) **R Analytics Stack** ([example playbook](examples/RAnalytics.md))
     Authenticated R computing environment: OpenCPU server for running R scripts via a REST API, secured behind Authentik and accessible through Traefik.
 
 ## Roles Included
