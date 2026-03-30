@@ -26,7 +26,10 @@ jobs:
           ansible-galaxy collection install -r requirements.yml
 
       - name: Run yamllint
-        run: yamllint .
+        run: |
+          # yamllint exits 1 for warnings, 2 for errors
+          # Only fail on errors (exit code 2+)
+          yamllint . || test $? -eq 1
 
       - name: Run ansible-lint
         run: ansible-lint

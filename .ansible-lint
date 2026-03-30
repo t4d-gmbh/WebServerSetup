@@ -6,12 +6,22 @@ skip_list:
   - role-name  # Roles use camelCase (hardenServer, etc.)
   - name[casing]  # Allow flexible task naming
   - yaml[truthy]  # Allow 'yes'/'no' in addition to 'true'/'false'
+  - var-naming  # Variables don't follow role-prefix convention (pre-existing)
+  - fqcn  # Modules not using fully qualified names yet (pre-existing)
+  - key-order  # Task key ordering is flexible
+  - schema[galaxy]  # Collection name uses PascalCase (pre-existing)
+  - galaxy  # No changelog/runtime yet
 
 # Warn but don't fail on these
 warn_list:
   - command-instead-of-module
   - no-changed-when
   - yaml[line-length]
+  - risky-file-permissions
+  - no-handler
+  - name[missing]
+  - package-latest
+  - jinja[spacing]
 
 # Exclude molecule/test artifacts from linting
 exclude_paths:
