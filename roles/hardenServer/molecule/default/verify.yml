@@ -1,0 +1,87 @@
+---
+- name: Verify hardenServer
+  hosts: all
+  become: true
+  tasks:
+    - name: Check UFW is installed
+      ansible.builtin.command: which ufw
+      register: ufw_installed
+      changed_when: false
+
+    - name: Assert UFW is installed
+      ansible.builtin.assert:
+        that:
+          - ufw_installed.rc == 0
+        fail_msg: "UFW is not installed"
+
+    - name: Check fail2ban is installed
+      ansible.builtin.command: which fail2ban-client
+      register: fail2ban_installed
+      changed_when: false
+
+    - name: Assert fail2ban is installed
+      ansible.builtin.assert:
+        that:
+          - fail2ban_installed.rc == 0
+        fail_msg: "fail2ban is not installed"
+
+    - name: Check UFW status
+      ansible.builtin.command: ufw status
+      register: ufw_status
+      changed_when: false
+
+    - name: Assert UFW is active
+      ansible.builtin.assert:
+        that:
+          - "'Status: active' in ufw_status.stdout"
+        fail_msg: "UFW is not active: {{ ufw_status.stdout }}"
+
+    - name: Check UFW default incoming policy
+      ansible.builtin.command: ufw status verbose
+      register: ufw_verbose
+      changed_when: false
+
+    - name: Assert UFW default deny incoming
+      ansible.builtin.assert:
+        that:
+          - "'deny (incoming)' in ufw_verbose.stdout"
+        fail_msg: "UFW default incoming is not deny: {{ ufw_verbose.stdout }}"
+
+    - name: Assert UFW allows OpenSSH
+      ansible.builtin.assert:
+        that:
+          - "'OpenSSH' in ufw_status.stdout"
+        fail_msg: "UFW does not allow OpenSSH: {{ ufw_status.stdout }}"
+
+    - name: Check SSH config - PermitRootLogin
+      ansible.builtin.command: grep '^PermitRootLogin no' /etc/ssh/sshd_config
+      register: ssh_root_login
+      changed_when: false
+
+    - name: Assert PermitRootLogin is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_root_login.rc == 0
+        fail_msg: "PermitRootLogin is not set to 'no'"
+
+    - name: Check SSH config - ChallengeResponseAuthentication
+      ansible.builtin.command: grep '^ChallengeResponseAuthentication no' /etc/ssh/sshd_config
+      register: ssh_challenge
+      changed_when: false
+
+    - name: Assert ChallengeResponseAuthentication is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_challenge.rc == 0
+        fail_msg: "ChallengeResponseAuthentication is not set to 'no'"
+
+    - name: Check SSH config - UsePAM
+      ansible.builtin.command: grep '^UsePAM no' /etc/ssh/sshd_config
+      register: ssh_pam
+      changed_when: false
+
+    - name: Assert UsePAM is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_pam.rc == 0
+        fail_msg: "UsePAM is not set to 'no'"

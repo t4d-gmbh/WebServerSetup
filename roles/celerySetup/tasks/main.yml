@@ -92,4 +92,3 @@
     - name: Run handlers immediately
       meta: flush_handlers
   when: template_result.changed  # Only start the service if the template changed
-

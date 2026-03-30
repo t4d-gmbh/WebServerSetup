@@ -84,7 +84,7 @@
       #   become: yes
       #   register: certbot_result
       #   changed_when: "'Congratulations' in certbot_result.stdout"
-      # 
+      #
       # - name: Set up auto-renewal for Certbot
       #   cron:
       #     name: "Certbot auto-renewal"

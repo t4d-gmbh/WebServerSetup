@@ -12,18 +12,35 @@
     state: present
   become: true
 
-- name: Start and enable UFW
+- name: Set UFW default deny incoming
   become: true
-  service:
-    name: ufw
-    state: started
-    enabled: true
+  ufw:
+    direction: incoming
+    policy: deny
+
+- name: Set UFW default allow outgoing
+  become: true
+  ufw:
+    direction: outgoing
+    policy: allow
+
+- name: Enable UFW
+  become: true
+  ufw:
+    state: enabled
 
 - name: Enable UFW logging
   ufw:
     logging: on
   become: true
-    
+
+- name: Start and enable fail2ban
+  become: true
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+
 - name: Configure SSH
   become: true
   block:
@@ -45,7 +62,7 @@
       apt:
         name: nginx
         state: present
-    - name: Allow HTTPS traffic
+    - name: Allow Nginx Full traffic
       ufw:
         rule: allow
         name: 'Nginx Full'
@@ -73,47 +90,60 @@
       apt:
         name: nfs-common
         state: present
-    - name: Allow NFS
+    - name: Allow NFS TCP
       ufw:
         rule: allow
-        name: 'nfs'
+        port: "2049"
+        proto: tcp
+      notify: Restart UFW
+    - name: Allow NFS UDP
+      ufw:
+        rule: allow
+        port: "2049"
+        proto: udp
       notify: Restart UFW
   when: "'nfs' in enable_services"
 
 - name: Configure Tailscale
   become: true
   block:
+    - name: Add Tailscale GPG key
+      ansible.builtin.apt_key:
+        url: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.noarmor.gpg"
+        state: present
     - name: Add Tailscale repository
       apt_repository:
-        repo: "deb https://pkgs.tailscale.com/stable/debian/ $(lsb_release -cs) main"
+        repo: "deb https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
         state: present
     - name: Install Tailscale
       apt:
         name: tailscale
         state: present
+        update_cache: yes
     - name: Allow Tailscale UDP
       ufw:
         rule: allow
-        port: 41641
+        port: "41641"
         proto: udp
       notify: Restart UFW
     - name: Allow Tailscale TCP
       ufw:
         rule: allow
-        port: 443
+        port: "443"
         proto: tcp
       notify: Restart UFW
   when: "'tailscale' in enable_services"
 
-# - name: Configure SSH to use key-based authentication only
-#   lineinfile:
-#     path: /etc/ssh/sshd_config
-#     regexp: '^#?{{ item.key }}'
-#     line: '{{ item.key }} {{ item.value }}'
-#   loop:
-#     - { key: 'PasswordAuthentication', value: 'no' }
-#     # - { key: 'PermitRootLogin', value: 'no' }
-#     - { key: 'ChallengeResponseAuthentication', value: 'no' }
-#     - { key: 'UsePAM', value: 'no' }
-#   become: true
-#   notify: Restart SSH
+- name: Harden SSH configuration
+  become: true
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?{{ item.key }}'
+    line: '{{ item.key }} {{ item.value }}'
+  loop:
+    # NOTE: PasswordAuthentication is handled by the init_ansible role
+    - { key: 'PermitRootLogin', value: 'no' }
+    - { key: 'ChallengeResponseAuthentication', value: 'no' }
+    - { key: 'UsePAM', value: 'no' }
+  notify: Restart SSH
+  when: "'ssh' in enable_services"

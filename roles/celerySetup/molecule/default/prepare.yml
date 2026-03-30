@@ -1,0 +1,29 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+
+    - name: Create django user
+      ansible.builtin.user:
+        name: django
+        groups: www-data
+        state: present
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "/opt/testapp/testapp"
+        state: directory
+        owner: django
+        group: www-data
+        mode: '0755'

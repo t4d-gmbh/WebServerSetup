@@ -1,0 +1,19 @@
+---
+# Ansible-lint configuration
+
+# Skip rules that conflict with this project's conventions
+skip_list:
+  - role-name  # Roles use camelCase (hardenServer, etc.)
+  - name[casing]  # Allow flexible task naming
+  - yaml[truthy]  # Allow 'yes'/'no' in addition to 'true'/'false'
+
+# Warn but don't fail on these
+warn_list:
+  - command-instead-of-module
+  - no-changed-when
+  - yaml[line-length]
+
+# Exclude molecule/test artifacts from linting
+exclude_paths:
+  - .cache/
+  - .github/

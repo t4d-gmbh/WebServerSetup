@@ -1,0 +1,9 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present

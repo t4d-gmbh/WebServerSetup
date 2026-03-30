@@ -1,0 +1,79 @@
+---
+- name: Verify init_ansible
+  hosts: all
+  become: true
+  tasks:
+    - name: Check that ansible user exists
+      ansible.builtin.command: id testansible
+      register: user_check
+      changed_when: false
+
+    - name: Assert user exists
+      ansible.builtin.assert:
+        that:
+          - user_check.rc == 0
+        fail_msg: "User testansible does not exist"
+
+    - name: Assert user is in sudo group
+      ansible.builtin.assert:
+        that:
+          - "'sudo' in user_check.stdout"
+        fail_msg: "User testansible is not in sudo group"
+
+    - name: Check .ssh directory exists with correct permissions
+      ansible.builtin.stat:
+        path: /home/testansible/.ssh
+      register: ssh_dir
+
+    - name: Assert .ssh directory exists
+      ansible.builtin.assert:
+        that:
+          - ssh_dir.stat.exists
+          - ssh_dir.stat.isdir
+          - ssh_dir.stat.mode == '0700'
+        fail_msg: ".ssh directory missing or wrong permissions"
+
+    - name: Check authorized_keys exists
+      ansible.builtin.stat:
+        path: /home/testansible/.ssh/authorized_keys
+      register: auth_keys
+
+    - name: Assert authorized_keys exists with correct permissions
+      ansible.builtin.assert:
+        that:
+          - auth_keys.stat.exists
+          - auth_keys.stat.mode == '0600'
+        fail_msg: "authorized_keys missing or wrong permissions"
+
+    - name: Check authorized_keys contains the test key
+      ansible.builtin.command: grep 'molecule@test' /home/testansible/.ssh/authorized_keys
+      register: key_check
+      changed_when: false
+
+    - name: Assert key is present
+      ansible.builtin.assert:
+        that:
+          - key_check.rc == 0
+        fail_msg: "Public key not found in authorized_keys"
+
+    - name: Check sudoers entry
+      ansible.builtin.command: grep 'testansible.*NOPASSWD' /etc/sudoers
+      register: sudoers_check
+      changed_when: false
+
+    - name: Assert sudoers entry exists
+      ansible.builtin.assert:
+        that:
+          - sudoers_check.rc == 0
+        fail_msg: "Sudoers NOPASSWD entry not found for testansible"
+
+    - name: Check PasswordAuthentication is disabled
+      ansible.builtin.command: grep '^PasswordAuthentication no' /etc/ssh/sshd_config
+      register: pwd_auth
+      changed_when: false
+
+    - name: Assert PasswordAuthentication is disabled
+      ansible.builtin.assert:
+        that:
+          - pwd_auth.rc == 0
+        fail_msg: "PasswordAuthentication is not set to 'no'"

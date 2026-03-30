@@ -1,0 +1,48 @@
+---
+- name: Verify postgresqlSetup
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+        fail_msg: "Docker is not installed"
+
+    - name: Check Docker service is running
+      ansible.builtin.service_facts:
+
+    - name: Assert Docker service is running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['docker.service'] is defined
+          - ansible_facts.services['docker.service'].state == 'running'
+        fail_msg: "Docker service is not running"
+
+    - name: Check PostgreSQL container is running
+      ansible.builtin.command: docker ps --filter name=test-postgresql --format '{{ '{{' }}.Names{{ '}}' }}'
+      register: pg_container
+      changed_when: false
+
+    - name: Assert PostgreSQL container is running
+      ansible.builtin.assert:
+        that:
+          - "'test-postgresql' in pg_container.stdout"
+        fail_msg: "PostgreSQL container is not running"
+
+    - name: Check data directory exists
+      ansible.builtin.stat:
+        path: /var/lib/postgresql/data/pgdata
+      register: data_dir
+
+    - name: Assert data directory exists
+      ansible.builtin.assert:
+        that:
+          - data_dir.stat.exists
+          - data_dir.stat.isdir
+        fail_msg: "PostgreSQL data directory does not exist"

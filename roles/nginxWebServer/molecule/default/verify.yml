@@ -1,0 +1,50 @@
+---
+- name: Verify nginxWebServer
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Nginx is installed
+      ansible.builtin.command: nginx -v
+      register: nginx_version
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Nginx is installed
+      ansible.builtin.assert:
+        that:
+          - nginx_version.rc == 0
+        fail_msg: "Nginx is not installed"
+
+    - name: Check Nginx site config exists
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-available/testapp.conf
+      register: nginx_conf
+
+    - name: Assert Nginx config exists
+      ansible.builtin.assert:
+        that:
+          - nginx_conf.stat.exists
+        fail_msg: "Nginx config for testapp not found"
+
+    - name: Check Nginx site is enabled
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-enabled/testapp.conf
+      register: nginx_enabled
+
+    - name: Assert Nginx site is enabled
+      ansible.builtin.assert:
+        that:
+          - nginx_enabled.stat.exists
+          - nginx_enabled.stat.islnk
+        fail_msg: "Nginx site testapp is not enabled"
+
+    - name: Check default site is removed
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-enabled/default
+      register: nginx_default
+
+    - name: Assert default site is removed
+      ansible.builtin.assert:
+        that:
+          - not nginx_default.stat.exists
+        fail_msg: "Default Nginx site still enabled"

@@ -1,8 +1,8 @@
 ---
 
 docker_user: 'dancer'
+authentik_base_path: '/data/docker/authentik'
 AUTHENTIK_CONTAINER_NAME: 'authentik-server'
 AUTHENTIK_TAG: "2025.6.3"
-AUTHENTIK_ERROR_REPORTING__ENABLED: true
 AUTHENTIK:
   server_url: "https://auth.myserver.net"

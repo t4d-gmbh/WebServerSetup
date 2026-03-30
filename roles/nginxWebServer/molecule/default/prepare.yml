@@ -1,0 +1,20 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Create dummy SSL certificate for testing
+      ansible.builtin.command: >
+        openssl req -x509 -nodes -days 1
+        -newkey rsa:2048
+        -keyout /etc/ssl/private/test.key
+        -out /etc/ssl/certs/test.pem
+        -subj '/CN=test.example.com'
+      args:
+        creates: /etc/ssl/certs/test.pem
+
+    - name: Create app static directory
+      ansible.builtin.file:
+        path: /opt/testapp/static
+        state: directory
+        mode: '0755'

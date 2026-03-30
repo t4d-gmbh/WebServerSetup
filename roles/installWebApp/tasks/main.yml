@@ -71,7 +71,7 @@
 
 - name: Set the secret key fact
   set_fact:
-    secret_key: "{{ existing_secret.content | b64decode }}" 
+    secret_key: "{{ existing_secret.content | b64decode }}"
   when: secret_file.stat.exists
   become: yes
 

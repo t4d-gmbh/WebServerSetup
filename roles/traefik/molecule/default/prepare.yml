@@ -1,0 +1,31 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+
+    - name: Install Docker
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+
+    - name: Add testuser to docker group
+      ansible.builtin.user:
+        name: testuser
+        groups: docker
+        append: true
+
+    - name: Install ACL package
+      ansible.builtin.package:
+        name: acl
+        state: present

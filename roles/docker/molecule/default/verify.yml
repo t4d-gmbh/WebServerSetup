@@ -1,0 +1,37 @@
+---
+- name: Verify docker
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+          - "'Docker version' in docker_version.stdout"
+        fail_msg: "Docker is not installed"
+
+    - name: Check user is in docker group
+      ansible.builtin.command: id testuser
+      register: user_groups
+      changed_when: false
+
+    - name: Assert user is in docker group
+      ansible.builtin.assert:
+        that:
+          - "'docker' in user_groups.stdout"
+        fail_msg: "testuser is not in docker group"
+
+    - name: Check Docker service is running
+      ansible.builtin.service_facts:
+
+    - name: Assert Docker service is running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['docker.service'] is defined
+          - ansible_facts.services['docker.service'].state == 'running'
+        fail_msg: "Docker service is not running"

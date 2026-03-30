@@ -4,10 +4,10 @@ This Ansible collection provides a set of roles designed to automate the setup a
 ## Roles Included
 
 *   **[Basic Configuration](roles/basic_config/README.md)** ⚙️
-    Manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance [conversation history].
+    Manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance.
 *   **[Init Ansible](roles/init_ansible/README.md)** 👤
     Sets up a new user for Ansible automation, configures sudo access, sets up SSH keys, and disables password authentication for enhanced security.
-*   **[Harden Server](roles/harden_server/README.md)** 🔒
+*   **[Harden Server](roles/hardenServer/README.md)** 🔒
     Hardens an Ubuntu server by implementing security best practices, including configuring the Uncomplicated Firewall (UFW) and securing SSH access.
 *   **[PostgreSQL Setup](roles/postgresql_setup/README.md)** 🐘
     Installs and configures PostgreSQL using Docker, ensuring that the necessary packages are installed and a PostgreSQL container is created and running.
