@@ -54,6 +54,8 @@
   command: openssl x509 -in {{ cert_path }} -checkend 86400
   register: cert_check
   ignore_errors: yes
+  tags:
+    - molecule-notest
 
 - name: Obtain SSL certificate
   become: yes
@@ -63,9 +65,13 @@
     -d {{ domain_name }} --rsa-key-size 4096 --cert-path {{ cert_path }} --key-path {{ key_path }}
   register: certbot_output
   when: cert_check.rc != 0  # Only run if the certificate is not valid or does not exist
+  tags:
+    - molecule-notest
 
 - debug:
     var: certbot_output.stdout
+  tags:
+    - molecule-notest
 
 # Not sure if this is needed anymore
 - name: Set up a cron job for Certbot renewal
