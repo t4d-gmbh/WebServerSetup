@@ -6,3 +6,9 @@
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
+
+    - name: Create app subdirectory (normally created by git clone)
+      ansible.builtin.file:
+        path: /opt/testapp/testapp
+        state: directory
+        mode: '0755'

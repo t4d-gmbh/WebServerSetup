@@ -1,6 +1,6 @@
 # Ansible Role: OpenCPU
 
-![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-opencpu.yml/badge.svg)
+![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-opencpu.yml?label=molecule)
 
 This Ansible role builds, installs and configures an OpenCPU container.
 By means of container labels the instance is configured to use authentik as authentication proxy effectively securing the installation from un-authorized access.

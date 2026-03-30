@@ -1,6 +1,6 @@
 # Ansible Role: Certbot
 
-![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-certbot.yml/badge.svg)
+![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-certbot.yml?label=molecule)
 
 This Ansible role installs and configures Certbot for obtaining and managing SSL certificates using the Infomaniak DNS plugin. It sets up a Python virtual environment, installs necessary dependencies, and ensures that SSL certificates are valid and renewed automatically.
 

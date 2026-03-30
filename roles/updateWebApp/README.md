@@ -1,6 +1,6 @@
 # Ansible Role: Update Web App
 
-![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-updateWebApp.yml/badge.svg)
+![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-updateWebApp.yml?label=molecule)
 
 This Ansible role updates and manages a Django web application. It fetches the latest changes from the Git repository, installs dependencies, collects static files, and applies database migrations.
 

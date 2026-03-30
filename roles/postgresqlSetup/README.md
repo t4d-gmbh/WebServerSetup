@@ -1,6 +1,6 @@
 # Ansible Role: PostgreSQL Setup
 
-![Molecule](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-postgresqlSetup.yml/badge.svg)
+![molecule](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-postgresqlSetup.yml?label=molecule)
 
 This Ansible role installs and configures PostgreSQL using Docker. It ensures that the necessary packages are installed, Docker is set up, and a PostgreSQL container is created and running.
 

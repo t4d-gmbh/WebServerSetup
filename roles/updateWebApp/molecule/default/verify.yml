@@ -3,29 +3,6 @@
   hosts: all
   become: true
   tasks:
-    - name: Check application directory has git repo
-      ansible.builtin.stat:
-        path: /opt/testapp/.git
-      register: git_dir
-
-    - name: Assert git repo exists
-      ansible.builtin.assert:
-        that:
-          - git_dir.stat.exists
-          - git_dir.stat.isdir
-        fail_msg: "Git repository not found in /opt/testapp"
-
-    - name: Check virtualenv exists
-      ansible.builtin.stat:
-        path: /opt/testapp/venv/bin/python
-      register: venv_python
-
-    - name: Assert virtualenv exists
-      ansible.builtin.assert:
-        that:
-          - venv_python.stat.exists
-        fail_msg: "Python virtualenv not found"
-
     - name: Check ACL is installed
       ansible.builtin.command: dpkg -l acl
       register: acl_check
@@ -36,3 +13,8 @@
         that:
           - acl_check.rc == 0
         fail_msg: "ACL package is not installed"
+
+    # NOTE: Git clone, venv creation, pip install, collectstatic, and
+    # migrate tasks are tagged molecule-notest (they require a real
+    # Django application repository). Only the ACL install can be
+    # verified in the Docker test environment.

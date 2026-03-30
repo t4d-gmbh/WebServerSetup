@@ -3,9 +3,16 @@
   hosts: all
   become: true
   tasks:
-    - name: Update apt cache
+    - name: Install and start Nginx
       ansible.builtin.apt:
+        name: nginx
+        state: present
         update_cache: true
+
+    - name: Start Nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: started
 
     - name: Create dummy SSL certificate for testing
       ansible.builtin.command: >
