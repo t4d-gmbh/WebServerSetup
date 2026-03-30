@@ -1,0 +1,16 @@
+---
+- name: Converge - Docker + Authentik + Headscale
+  hosts: all
+  become: true
+  tasks:
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: docker
+
+    - name: Include authentik role
+      ansible.builtin.include_role:
+        name: authentik
+
+    - name: Include headscale role
+      ansible.builtin.include_role:
+        name: headscale

@@ -1,0 +1,101 @@
+---
+- name: Verify compound - Full Stack
+  hosts: all
+  become: true
+  tasks:
+    # basic_config
+    - name: Check swap file exists
+      ansible.builtin.stat:
+        path: /testswap
+      register: swap_file
+
+    - name: Assert swap file exists
+      ansible.builtin.assert:
+        that:
+          - swap_file.stat.exists
+          - swap_file.stat.mode == '0600'
+        fail_msg: "Swap file does not exist or has wrong permissions"
+
+    # docker
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+        fail_msg: "Docker is not installed"
+
+    # traefik
+    - name: Check traefik config exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/traefik.yaml
+      register: traefik_config
+
+    - name: Assert traefik config exists
+      ansible.builtin.assert:
+        that:
+          - traefik_config.stat.exists
+        fail_msg: "Traefik config does not exist"
+
+    # authentik
+    - name: Check authentik compose exists
+      ansible.builtin.stat:
+        path: /data/docker/authentik/docker-compose.yml
+      register: auth_compose
+
+    - name: Assert authentik compose exists
+      ansible.builtin.assert:
+        that:
+          - auth_compose.stat.exists
+        fail_msg: "Authentik docker-compose.yml does not exist"
+
+    # opencpu
+    - name: Check opencpu compose exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/docker-compose.yml
+      register: ocp_compose
+
+    - name: Assert opencpu compose exists
+      ansible.builtin.assert:
+        that:
+          - ocp_compose.stat.exists
+        fail_msg: "OpenCPU docker-compose.yml does not exist"
+
+    # Check containers
+    - name: Check running containers
+      ansible.builtin.command: docker ps --format '{% raw %}{{.Names}}{% endraw %}'
+      register: running_containers
+      changed_when: false
+
+    - name: Assert traefik is running
+      ansible.builtin.assert:
+        that:
+          - "'traefik' in running_containers.stdout"
+        fail_msg: "Traefik container is not running"
+
+    - name: Assert authentik server is running
+      ansible.builtin.assert:
+        that:
+          - "'authentik-server' in running_containers.stdout"
+        fail_msg: "Authentik server container is not running"
+
+    - name: Assert opencpu is running
+      ansible.builtin.assert:
+        that:
+          - "'opencpu' in running_containers.stdout"
+        fail_msg: "OpenCPU container is not running"
+
+    # Verify proxy network has multiple containers
+    - name: Check proxy network
+      ansible.builtin.command: docker network inspect proxy --format '{% raw %}{{range .Containers}}{{.Name}} {{end}}{% endraw %}'
+      register: proxy_members
+      changed_when: false
+
+    - name: Assert multiple containers on proxy network
+      ansible.builtin.assert:
+        that:
+          - "'traefik' in proxy_members.stdout"
+        fail_msg: "Traefik not connected to proxy network"

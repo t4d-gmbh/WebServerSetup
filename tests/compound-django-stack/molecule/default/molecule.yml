@@ -1,0 +1,81 @@
+---
+role_name_check: 1
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../roles"
+  inventory:
+    host_vars:
+      instance:
+        # hardenServer
+        enable_services:
+          - ssh
+          - nginx
+        # postgresqlSetup
+        postgresql_version: "16-alpine"
+        postgresql_container_name: "test-postgresql"
+        db_name: "testdb"
+        db_user: "testuser"
+        vault_db_password: "testpassword"
+        postgresql_port: 5432
+        postgresql_data_dir: "/var/lib/postgresql/data"
+        postgresql_pgdata_parent: "/var/lib/postgresql/data"
+        # certbot
+        vault_infomaniak_DNS_key: "test-dns-key"
+        certbot_email: "test@example.com"
+        domain_name: "test.example.com"
+        cert_path: "/etc/ssl/certs/test.pem"
+        key_path: "/etc/ssl/private/test.key"
+        # nginxWebServer
+        app_name: testapp
+        server_name: test.example.com
+        # installWebApp
+        git_remote: "github.com/"
+        git_repository_path: "octocat/Hello-World.git"
+        git_repository_branch: master
+        vault_repository_token: ""
+        db_host: "localhost"
+        db_port: "5432"
+        db_engine: "django.db.backends.sqlite3"
+        vault_email_config:
+          email_host: "localhost"
+          email_port: "587"
+          email_use_tls: "True"
+          email_host_user: ""
+          email_host_password: ""
+          email_default_from: ""
+        # gunicornSetup
+        gunicorn_workers: 2
+        # celerySetup
+        celery_user: django
+        celery_group: www-data
+        celery_worker_name: "worker1"
+        celery_time_limit: 300
+        celery_concurrency: 4
+        celery_log_level: "DEBUG"
+        celery_log_file: "/var/log/celery/%n%I.log"
+        celery_pid_file: "/var/run/celery/%n.pid"
+        rabbitmq_version: "latest"
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

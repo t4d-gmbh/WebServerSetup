@@ -1,0 +1,32 @@
+---
+- name: Converge - Django Stack
+  hosts: all
+  become: true
+  tasks:
+    - name: Include hardenServer role
+      ansible.builtin.include_role:
+        name: hardenServer
+
+    - name: Include postgresqlSetup role
+      ansible.builtin.include_role:
+        name: postgresqlSetup
+
+    - name: Include certbot role
+      ansible.builtin.include_role:
+        name: certbot
+
+    - name: Include nginxWebServer role
+      ansible.builtin.include_role:
+        name: nginxWebServer
+
+    - name: Include installWebApp role
+      ansible.builtin.include_role:
+        name: installWebApp
+
+    - name: Include celerySetup role
+      ansible.builtin.include_role:
+        name: celerySetup
+
+    - name: Include gunicornSetup role
+      ansible.builtin.include_role:
+        name: gunicornSetup

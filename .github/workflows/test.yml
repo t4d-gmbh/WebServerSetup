@@ -109,6 +109,13 @@ jobs:
           pip install ansible-core molecule molecule-plugins[docker] docker
           ansible-galaxy collection install -r requirements.yml
 
+      - name: Verify test directory exists
+        run: |
+          echo "Listing tests/ directory:"
+          ls -la tests/ || echo "tests/ directory does not exist"
+          echo "---"
+          ls -la tests/${{ matrix.scenario }}/molecule/default/ || echo "scenario directory does not exist"
+
       - name: Run Molecule compound tests
         run: molecule test
         working-directory: tests/${{ matrix.scenario }}
