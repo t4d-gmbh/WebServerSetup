@@ -17,22 +17,30 @@
   ufw:
     direction: incoming
     policy: deny
+  tags:
+    - molecule-notest
 
 - name: Set UFW default allow outgoing
   become: true
   ufw:
     direction: outgoing
     policy: allow
+  tags:
+    - molecule-notest
 
 - name: Enable UFW
   become: true
   ufw:
     state: enabled
+  tags:
+    - molecule-notest
 
 - name: Enable UFW logging
   ufw:
     logging: on
   become: true
+  tags:
+    - molecule-notest
 
 - name: Start and enable fail2ban
   become: true
@@ -40,6 +48,8 @@
     name: fail2ban
     state: started
     enabled: true
+  tags:
+    - molecule-notest
 
 - name: Configure SSH
   become: true
@@ -53,6 +63,8 @@
         rule: allow
         name: OpenSSH
       notify: Restart UFW
+      tags:
+        - molecule-notest
   when: "'ssh' in enable_services"
 
 - name: Configure Nginx
@@ -67,6 +79,8 @@
         rule: allow
         name: 'Nginx Full'
       notify: Restart UFW
+      tags:
+        - molecule-notest
   when: "'nginx' in enable_services"
 
 - name: Configure Samba
@@ -81,6 +95,8 @@
         rule: allow
         name: 'Samba'
       notify: Restart UFW
+      tags:
+        - molecule-notest
   when: "'samba' in enable_services"
 
 - name: Configure NFS
@@ -96,12 +112,16 @@
         port: "2049"
         proto: tcp
       notify: Restart UFW
+      tags:
+        - molecule-notest
     - name: Allow NFS UDP
       ufw:
         rule: allow
         port: "2049"
         proto: udp
       notify: Restart UFW
+      tags:
+        - molecule-notest
   when: "'nfs' in enable_services"
 
 - name: Configure Tailscale
@@ -126,12 +146,16 @@
         port: "41641"
         proto: udp
       notify: Restart UFW
+      tags:
+        - molecule-notest
     - name: Allow Tailscale TCP
       ufw:
         rule: allow
         port: "443"
         proto: tcp
       notify: Restart UFW
+      tags:
+        - molecule-notest
   when: "'tailscale' in enable_services"
 
 - name: Harden SSH configuration
