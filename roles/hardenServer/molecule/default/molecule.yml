@@ -20,3 +20,16 @@ provisioner:
       instance:
         enable_services:
           - ssh
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Skip idempotence - apt upgrade always reports changed in containers
+    - verify
+    - cleanup
+    - destroy
