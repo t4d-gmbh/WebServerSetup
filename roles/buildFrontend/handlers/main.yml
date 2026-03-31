@@ -1,0 +1,12 @@
+---
+- name: Restart Gunicorn service
+  service:
+    name: gunicorn
+    state: restarted
+  become: yes
+
+- name: Restart web server
+  service:
+    name: nginx
+    state: restarted
+  become: yes

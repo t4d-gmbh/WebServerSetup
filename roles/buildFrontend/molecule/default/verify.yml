@@ -1,0 +1,53 @@
+---
+- name: Verify buildFrontend
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Node.js is installed
+      ansible.builtin.command: node --version
+      register: node_version
+      changed_when: false
+
+    - name: Assert Node.js is installed
+      ansible.builtin.assert:
+        that:
+          - node_version.rc == 0
+          - "'v22' in node_version.stdout"
+        fail_msg: "Node.js v22 is not installed: {{ node_version.stdout | default('not found') }}"
+
+    - name: Check npm is installed
+      ansible.builtin.command: npm --version
+      register: npm_version
+      changed_when: false
+
+    - name: Assert npm is installed
+      ansible.builtin.assert:
+        that:
+          - npm_version.rc == 0
+        fail_msg: "npm is not installed"
+
+    - name: Check NodeSource repository is configured
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/nodesource.list
+      register: nodesource_repo
+
+    - name: Assert NodeSource repository exists
+      ansible.builtin.assert:
+        that:
+          - nodesource_repo.stat.exists
+        fail_msg: "NodeSource repository not configured"
+
+    - name: Check ACL is installed
+      ansible.builtin.command: dpkg -l acl
+      register: acl_check
+      changed_when: false
+
+    - name: Assert ACL is installed
+      ansible.builtin.assert:
+        that:
+          - acl_check.rc == 0
+        fail_msg: "ACL package is not installed"
+
+    # NOTE: npm ci, npm run build, and collectstatic are tagged
+    # molecule-notest because they require a real application with
+    # package.json, package-lock.json, and a Django project.

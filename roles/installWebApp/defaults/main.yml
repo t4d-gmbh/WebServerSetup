@@ -12,3 +12,6 @@ vault_email_config:
   email_host_user: ''
   email_host_password: ''
   email_default_from: ''
+
+# Vite dev mode (set to False for production deployments)
+vite_dev_mode: "False"

@@ -1,0 +1,32 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install GPG (needed for NodeSource apt_key)
+      ansible.builtin.apt:
+        name:
+          - gpg
+          - gpg-agent
+        state: present
+
+    - name: Create django user
+      ansible.builtin.user:
+        name: django
+        state: present
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: /opt/testapp
+        state: directory
+        owner: django
+        mode: '0755'
+
+    - name: Install ACL
+      ansible.builtin.package:
+        name: acl
+        state: present

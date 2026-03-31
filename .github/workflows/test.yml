@@ -61,6 +61,7 @@ jobs:
           - traefik
           - opencpu
           - updateWebApp
+          - buildFrontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
