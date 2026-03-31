@@ -1,0 +1,74 @@
+---
+- name: Verify hardenServer
+  hosts: all
+  become: true
+  tasks:
+    - name: Check UFW is installed
+      ansible.builtin.command: which ufw
+      register: ufw_installed
+      changed_when: false
+
+    - name: Assert UFW is installed
+      ansible.builtin.assert:
+        that:
+          - ufw_installed.rc == 0
+        fail_msg: "UFW is not installed"
+
+    - name: Check fail2ban is installed
+      ansible.builtin.command: which fail2ban-client
+      register: fail2ban_installed
+      changed_when: false
+
+    - name: Assert fail2ban is installed
+      ansible.builtin.assert:
+        that:
+          - fail2ban_installed.rc == 0
+        fail_msg: "fail2ban is not installed"
+
+    - name: Check OpenSSH is installed
+      ansible.builtin.command: which sshd
+      register: sshd_installed
+      changed_when: false
+
+    - name: Assert OpenSSH is installed
+      ansible.builtin.assert:
+        that:
+          - sshd_installed.rc == 0
+        fail_msg: "OpenSSH server is not installed"
+
+    - name: Check SSH config - PermitRootLogin
+      ansible.builtin.command: grep '^PermitRootLogin no' /etc/ssh/sshd_config
+      register: ssh_root_login
+      changed_when: false
+
+    - name: Assert PermitRootLogin is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_root_login.rc == 0
+        fail_msg: "PermitRootLogin is not set to 'no'"
+
+    - name: Check SSH config - ChallengeResponseAuthentication
+      ansible.builtin.command: grep '^ChallengeResponseAuthentication no' /etc/ssh/sshd_config
+      register: ssh_challenge
+      changed_when: false
+
+    - name: Assert ChallengeResponseAuthentication is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_challenge.rc == 0
+        fail_msg: "ChallengeResponseAuthentication is not set to 'no'"
+
+    - name: Check SSH config - UsePAM
+      ansible.builtin.command: grep '^UsePAM no' /etc/ssh/sshd_config
+      register: ssh_pam
+      changed_when: false
+
+    - name: Assert UsePAM is disabled
+      ansible.builtin.assert:
+        that:
+          - ssh_pam.rc == 0
+        fail_msg: "UsePAM is not set to 'no'"
+
+    # NOTE: UFW activation, firewall rules, and fail2ban service status
+    # cannot be tested in Docker containers (no iptables/netfilter).
+    # These tasks are tagged with molecule-notest and skipped during converge.

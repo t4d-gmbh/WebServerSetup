@@ -1,0 +1,76 @@
+---
+- name: Verify compound - Docker + Authentik + Headscale
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+        fail_msg: "Docker is not installed"
+
+    - name: Check proxy network exists
+      ansible.builtin.command: docker network inspect proxy
+      register: proxy_net
+      changed_when: false
+
+    - name: Assert proxy network exists
+      ansible.builtin.assert:
+        that:
+          - proxy_net.rc == 0
+        fail_msg: "Docker proxy network does not exist"
+
+    - name: Check authentik docker-compose exists
+      ansible.builtin.stat:
+        path: /data/docker/authentik/docker-compose.yml
+      register: auth_compose
+
+    - name: Assert authentik compose exists
+      ansible.builtin.assert:
+        that:
+          - auth_compose.stat.exists
+        fail_msg: "Authentik docker-compose.yml does not exist"
+
+    - name: Check headscale docker-compose exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale/docker-compose.yml
+      register: hs_compose
+
+    - name: Assert headscale compose exists
+      ansible.builtin.assert:
+        that:
+          - hs_compose.stat.exists
+        fail_msg: "Headscale docker-compose.yml does not exist"
+
+    - name: Check headscale config exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale/config.yaml
+      register: hs_config
+
+    - name: Assert headscale config exists
+      ansible.builtin.assert:
+        that:
+          - hs_config.stat.exists
+        fail_msg: "Headscale config.yaml does not exist"
+
+    - name: Check authentik containers are running
+      ansible.builtin.command: docker ps --format '{% raw %}{{.Names}}{% endraw %}'
+      register: running_containers
+      changed_when: false
+
+    - name: Assert authentik server is running
+      ansible.builtin.assert:
+        that:
+          - "'authentik-server' in running_containers.stdout"
+        fail_msg: "Authentik server container is not running"
+
+    - name: Assert headscale is running
+      ansible.builtin.assert:
+        that:
+          - "'headscale' in running_containers.stdout"
+        fail_msg: "Headscale container is not running"

@@ -1,0 +1,61 @@
+---
+- name: Verify celerySetup
+  hosts: all
+  become: true
+  tasks:
+    - name: Check celery service file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/celery.service
+      register: celery_service
+
+    - name: Assert celery service unit exists
+      ansible.builtin.assert:
+        that:
+          - celery_service.stat.exists
+        fail_msg: "celery.service unit file does not exist"
+
+    - name: Check celery log directory exists
+      ansible.builtin.stat:
+        path: /var/log/celery
+      register: celery_log_dir
+
+    - name: Assert celery log directory exists
+      ansible.builtin.assert:
+        that:
+          - celery_log_dir.stat.exists
+          - celery_log_dir.stat.isdir
+        fail_msg: "celery log directory does not exist"
+
+    - name: Check celery run directory exists
+      ansible.builtin.stat:
+        path: /var/run/celery
+      register: celery_run_dir
+
+    - name: Assert celery run directory exists
+      ansible.builtin.assert:
+        that:
+          - celery_run_dir.stat.exists
+          - celery_run_dir.stat.isdir
+        fail_msg: "celery run directory does not exist"
+
+    - name: Check celery config file exists
+      ansible.builtin.stat:
+        path: /etc/conf.d/celery
+      register: celery_config
+
+    - name: Assert celery config exists
+      ansible.builtin.assert:
+        that:
+          - celery_config.stat.exists
+        fail_msg: "celery config file does not exist"
+
+    - name: Check ACL is installed
+      ansible.builtin.command: dpkg -l acl
+      register: acl_check
+      changed_when: false
+
+    - name: Assert ACL is installed
+      ansible.builtin.assert:
+        that:
+          - acl_check.rc == 0
+        fail_msg: "ACL package is not installed"

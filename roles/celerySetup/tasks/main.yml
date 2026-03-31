@@ -83,13 +83,18 @@
         state: started
         enabled: yes
       become: yes
+      tags:
+        - molecule-notest
 
     - name: Notify the handler to restart Celery service
       debug:
         msg: "Notifying handler to restart Celery service."
       notify: Restart Celery Service
+      tags:
+        - molecule-notest
 
     - name: Run handlers immediately
       meta: flush_handlers
+      tags:
+        - molecule-notest
   when: template_result.changed  # Only start the service if the template changed
-

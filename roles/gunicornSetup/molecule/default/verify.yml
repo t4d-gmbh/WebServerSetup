@@ -1,0 +1,49 @@
+---
+- name: Verify gunicornSetup
+  hosts: all
+  become: true
+  tasks:
+    - name: Check gunicorn is installed in venv
+      ansible.builtin.stat:
+        path: /opt/testapp/venv/bin/gunicorn
+      register: gunicorn_bin
+
+    - name: Assert gunicorn is installed
+      ansible.builtin.assert:
+        that:
+          - gunicorn_bin.stat.exists
+        fail_msg: "gunicorn not found in virtualenv"
+
+    - name: Check gunicorn socket unit file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/gunicorn.socket
+      register: socket_file
+
+    - name: Assert gunicorn socket unit exists
+      ansible.builtin.assert:
+        that:
+          - socket_file.stat.exists
+        fail_msg: "gunicorn.socket unit file does not exist"
+
+    - name: Check gunicorn service unit file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/gunicorn.service
+      register: service_file
+
+    - name: Assert gunicorn service unit exists
+      ansible.builtin.assert:
+        that:
+          - service_file.stat.exists
+        fail_msg: "gunicorn.service unit file does not exist"
+
+    - name: Read gunicorn service file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/gunicorn.service
+      register: service_content
+
+    - name: Assert service file references correct app and workers
+      ansible.builtin.assert:
+        that:
+          - "'--workers 2' in (service_content.content | b64decode)"
+          - "'testapp.wsgi:application' in (service_content.content | b64decode)"
+        fail_msg: "gunicorn service file has wrong configuration"

@@ -1,0 +1,28 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - python3-pip
+          - python3-venv
+          - acl
+        state: present
+        update_cache: true
+
+    - name: Create django user
+      ansible.builtin.user:
+        name: django
+        groups: www-data
+        state: present
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "/opt/testapp/testapp"
+        state: directory
+        owner: django
+        group: www-data
+        mode: '0755'

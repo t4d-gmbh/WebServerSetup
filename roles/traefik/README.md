@@ -1,5 +1,7 @@
 # Ansible Role: Traefik
 
+[![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-traefik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-traefik.yml)
+
 This Ansible role installs and configures Traefik, a modern reverse proxy and load balancer. It sets up the necessary configuration files, creates a Docker Compose file for running Traefik, and ensures that the Traefik container is started and managed properly.
 
 ## Requirements

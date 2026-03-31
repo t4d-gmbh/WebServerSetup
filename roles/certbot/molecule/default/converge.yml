@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include certbot"
+      ansible.builtin.include_role:
+        name: certbot
+      tags:
+        - molecule-converge

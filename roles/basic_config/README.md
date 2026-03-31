@@ -1,36 +1,44 @@
-### **Basic Configuration** ⚙️
+# Ansible Role: Basic Configuration
 
-This role manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance. It ensures that your system has adequate swap space and that memory management settings are adjusted according to best practices for server environments.
+[![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-basic_config.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-basic_config.yml)
 
-#### Actions Performed
+This role manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal server performance. When `swapfile_size` is set, it creates and activates a swap file and tunes memory management kernel parameters. When `swapfile_size` is left as `null` (the default), the entire role is skipped.
 
-*   **Checks for existing swap configuration**: Verifies if any swap space is already active on the system.
-*   **Ensures adequate disk space**: Checks available disk space on the root partition before attempting to create a swap file.
-*   **Creates a swap file**: If `swapfile_size` is provided and the swap file does not exist, it creates a new swap file using the `dd` command to prevent "holes" in the file, which is a community-recommended method for swap usage.
-    The DigitalOcean tutorial initially suggested `fallocate` for this.
-*   **Sets secure file permissions**: Configures the swap file with **strict permissions (`0600`)**, allowing only the root user to read and write, thereby preventing significant security implications.
-*   **Marks the file as swap space**: Initializes the newly created file as Linux swap space using `mkswap`.
-*   **Activates the swap file**: Enables the swap file for immediate use by the system using `swapon`.
-*   **Makes swap permanent**: Adds an entry to `/etc/fstab` to ensure the swap file is activated automatically on system reboots, backing up the original `fstab` file first.
-*   **Adjusts `vm.swappiness`**: Configures how aggressively the system swaps data out of RAM to the swap space.
-    For servers, a **lower value (e.g., 10)** is often preferred to keep more data in faster RAM and reduce disk I/O, as interactions with swap are slower than RAM.
-*   **Adjusts `vm.vfs_cache_pressure`**: Controls how much the kernel prioritizes caching filesystem metadata (like *inode* and *dentry* information).
-    A **lower value (e.g., 50)** helps retain this frequently accessed and costly-to-lookup data in the cache, improving overall filesystem performance.
+## Requirements
 
-#### Variables
+- Ansible 2.9 or higher
+- Access to a server with root privileges
+- The `ansible.posix` collection (for `sysctl` tasks)
 
-The role can be configured using the following variables:
+## Role Variables
 
-*   **`swapfile_size`**: (Optional) Specifies the desired size of the swap file, e.g., `"1G"` or `"2048M"`.
-    *   **If this variable is `none` or an empty string, no swap file will be created or configured**.
-    *   Generally, an amount equal to or double the system's RAM is a good starting point, though anything over 4G may be unnecessary if only used as a RAM fallback.
-*   **`swapfile_path`**: (Default: `/swapfile`) The absolute path where the swap file will be created.
-*   **`swappiness_value`**: (Default: `10`) A value between 0 and 100 that determines how often the system swaps data to disk. Lower values (closer to 0) are generally recommended for servers.
-*   **`vfs_cache_pressure_value`**: (Default: `50`) A value between 0 and 100 that influences how much the system prioritizes caching filesystem metadata. A lower value (e.g., 50) is recommended for better performance.
+| Variable | Default | Description |
+|---|---|---|
+| `swapfile_size` | `null` | Size of the swap file, e.g. `"1G"` or `"2048M"`. When `null` or empty, no swap is configured and the role is skipped entirely. Only uppercase `G` and `M` suffixes are supported. |
+| `swapfile_path` | `"/swapfile"` | Absolute path where the swap file will be created. |
+| `swappiness_value` | `"10"` | Kernel `vm.swappiness` parameter (0-100). Lower values prioritize keeping data in RAM. A value of 10 is generally recommended for servers. |
+| `vfs_cache_pressure_value` | `"50"` | Kernel `vm.vfs_cache_pressure` parameter. Lower values retain filesystem metadata (inode/dentry) in cache longer, improving filesystem performance. |
 
-#### Example Usage
+All variables have defaults -- none are strictly required. However, setting `swapfile_size` to a valid value (e.g. `"2G"`) is necessary for the role to perform any action.
 
-To use this role in your playbook, include it in your roles list and define the necessary variables. For instance:
+## Dependencies
+
+None. This role has no dependencies on other roles, but the `ansible.posix` collection must be installed.
+
+## Tasks Overview
+
+1. **Check if swap file exists**: Uses `stat` to check whether the file at `swapfile_path` already exists.
+2. **Create swap file**: Creates the swap file with `dd` (only if it does not already exist).
+3. **Set file permissions**: Sets the swap file to `0600` (root read/write only).
+4. **Format as swap**: Runs `mkswap` to initialize the file as swap space (only when the file was newly created).
+5. **Activate swap**: Runs `swapon` to enable the swap file. Gracefully handles the case where it is already active.
+6. **Persist in fstab**: Adds an entry to `/etc/fstab` so the swap file is activated automatically on reboot.
+7. **Tune vm.swappiness**: Sets the kernel swappiness parameter via `sysctl`.
+8. **Tune vm.vfs_cache_pressure**: Sets the kernel vfs_cache_pressure parameter via `sysctl`.
+
+All tasks are wrapped in a block that is skipped when `swapfile_size` is `null` or empty.
+
+## Example Playbook
 
 ```yaml
 ---
@@ -41,7 +49,22 @@ To use this role in your playbook, include it in your roles list and define the 
     - role: t4d.WebServerSetup.basic_config
       vars:
         swapfile_size: "2G"
-        swappiness_value: 10
-        vfs_cache_pressure_value: 50
+        swappiness_value: "10"
+        vfs_cache_pressure_value: "50"
 ```
-This example would configure a 2GB swap file and set the `swappiness` and `vfs_cache_pressure` to their recommended server values.
+
+This example creates a 2GB swap file at `/swapfile` and sets the kernel memory parameters to their recommended server values.
+
+## Notes
+
+- **Sizing guidance**: An amount equal to or double the system's RAM is a common starting point. Anything over 4G is generally unnecessary if swap is only used as a RAM fallback.
+- **Idempotency**: The role is safe to run multiple times. Swap file creation and formatting are skipped if the file already exists, and `swapon` gracefully handles an already-active swap file.
+- **Supported size formats**: Only `G` (gigabytes) and `M` (megabytes) suffixes are supported, e.g. `"2G"`, `"512M"`. Integer values only -- decimals like `"1.5G"` are not supported.
+
+## License
+
+This role is licensed under the GNU GPLv3 License.
+
+## Author Information
+
+This role was created in 2025 by Jonas I Liechti @ T4D.ch.

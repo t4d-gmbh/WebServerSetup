@@ -1,0 +1,20 @@
+---
+- name: Verify updateWebApp
+  hosts: all
+  become: true
+  tasks:
+    - name: Check ACL is installed
+      ansible.builtin.command: dpkg -l acl
+      register: acl_check
+      changed_when: false
+
+    - name: Assert ACL is installed
+      ansible.builtin.assert:
+        that:
+          - acl_check.rc == 0
+        fail_msg: "ACL package is not installed"
+
+    # NOTE: Git clone, venv creation, pip install, collectstatic, and
+    # migrate tasks are tagged molecule-notest (they require a real
+    # Django application repository). Only the ACL install can be
+    # verified in the Docker test environment.
