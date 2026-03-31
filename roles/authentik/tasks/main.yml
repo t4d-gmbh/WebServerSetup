@@ -1,5 +1,5 @@
 ---
-- name: Ensure docker exists
+- name: Ensure docker user exists
   user:
     name: "{{ docker_user }}"
     state: present
@@ -12,11 +12,11 @@
   loop:
     - proxy
     - backup
-    
+
 - name: Create authentik configuration directory
   become: yes
   file:
-    path: /data/docker/authentik
+    path: "{{ authentik_base_path }}"
     state: directory
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
@@ -25,7 +25,7 @@
 - name: Create subdirectories in authentik data directory
   become: yes
   file:
-    path: "/data/docker/authentik/{{ item }}"
+    path: "{{ authentik_base_path }}/{{ item }}"
     state: directory
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
@@ -41,7 +41,7 @@
 - name: Create Dockerfile for backup service
   become: yes
   ansible.builtin.copy:
-    dest: /data/docker/authentik/Dockerfile.backup
+    dest: "{{ authentik_base_path }}/Dockerfile.backup"
     content: |
       FROM postgres:16.9
       RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
@@ -55,10 +55,10 @@
 - name: Create entrypoint script for backup service
   become: yes
   ansible.builtin.copy:
-    dest: /data/docker/authentik/entrypoint.sh
+    dest: "{{ authentik_base_path }}/entrypoint.sh"
     content: |
       #!/bin/bash
-      echo "0 2 * * * pg_dump -h postgresql -U ${POSGTRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar" | crontab -
+      echo "0 2 * * * pg_dump -h postgresql -U ${POSTGRES_USER} -F t ${POSTGRES_DB} > /backups/authentik_postgres_backup.tar" | crontab -
       cron -f
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
@@ -68,7 +68,7 @@
   become: yes
   template:
     src: docker-compose.yml.j2
-    dest: /data/docker/authentik/docker-compose.yml
+    dest: "{{ authentik_base_path }}/docker-compose.yml"
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
     mode: '0644'
@@ -77,7 +77,7 @@
   become: yes
   template:
     src: .env.j2
-    dest: /data/docker/authentik/.env
+    dest: "{{ authentik_base_path }}/.env"
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
     mode: '0644'
@@ -94,7 +94,7 @@
   become: yes
   become_user: "{{ docker_user }}"
   community.docker.docker_compose_v2:
-    project_src: /data/docker/authentik
+    project_src: "{{ authentik_base_path }}"
     state: present
   register: authentik_compose_result
   retries: 3

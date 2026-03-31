@@ -46,8 +46,3 @@
     line: 'PasswordAuthentication no'
     state: present
   notify: Restart SSH service  # Notify the handler
-
-- name: Restart SSH service
-  service:
-    name: ssh
-    state: restarted

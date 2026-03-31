@@ -53,7 +53,7 @@
     source: pull
   notify:
     - Run OpenCPU docker compose
-    
+
 - name: Present OpenCPU docker-compose file
   become: true
   ansible.builtin.template:

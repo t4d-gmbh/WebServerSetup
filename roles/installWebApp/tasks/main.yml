@@ -33,6 +33,8 @@
     version: "{{ git_repository_branch }}"  # Specify the branch or tag you want to clone
     force: yes
   become: yes
+  tags:
+    - molecule-notest
 
 # set the secret
 - name: Ensure the application directory exists
@@ -71,7 +73,7 @@
 
 - name: Set the secret key fact
   set_fact:
-    secret_key: "{{ existing_secret.content | b64decode }}" 
+    secret_key: "{{ existing_secret.content | b64decode }}"
   when: secret_file.stat.exists
   become: yes
 
@@ -147,25 +149,33 @@
   args:
     creates: /opt/{{ app_name }}/venv
   become: yes
-  become_user: django  # Run this task as the django user become: yes
+  become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest
 
 - name: Install requirements
   pip:
     requirements: /opt/{{ app_name }}/requirements.txt
     virtualenv: /opt/{{ app_name }}/venv
   become: yes
-  become_user: django  # Run this task as the django user become: yes
+  become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest
 
 - name: Collect static files
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
   args:
     chdir: /opt/{{ app_name }}
   become: yes
-  become_user: django  # Run this task as the django user become: yes
+  become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest
 
 - name: Apply database migrations
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower}}/manage.py migrate
   args:
     chdir: /opt/{{ app_name }}
   become: yes
-  become_user: django  # Run this task as the django user become: yes
+  become_user: django  # Run this task as the django user
+  tags:
+    - molecule-notest

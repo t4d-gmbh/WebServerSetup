@@ -1,0 +1,41 @@
+---
+role_name_check: 1
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../"
+  inventory:
+    host_vars:
+      instance:
+        postgresql_version: "16-alpine"
+        postgresql_container_name: "test-postgresql"
+        db_name: "testdb"
+        db_user: "testuser"
+        vault_db_password: "testpassword"
+        postgresql_port: 5432
+        postgresql_data_dir: "/var/lib/postgresql/data"
+        postgresql_pgdata_parent: "/var/lib/postgresql/data"
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Skip idempotence - Docker container management
+    - verify
+    - cleanup
+    - destroy

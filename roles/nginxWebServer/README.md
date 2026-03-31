@@ -1,5 +1,7 @@
 # Ansible Role: Nginx Web Server
 
+[![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-nginxWebServer.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-nginxWebServer.yml)
+
 This Ansible role installs and configures Nginx as a web server for a Django application. It sets up the necessary Nginx configuration to serve the application and manage SSL certificates.
 
 ## Requirements

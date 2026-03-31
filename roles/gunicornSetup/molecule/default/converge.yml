@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include gunicornSetup"
+      ansible.builtin.include_role:
+        name: gunicornSetup

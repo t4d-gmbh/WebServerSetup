@@ -1,0 +1,4 @@
+---
+- name: Reload Nginx
+  become: yes
+  command: nginx -s reload

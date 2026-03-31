@@ -1,36 +1,54 @@
 # Ansible Collection: Webserver🌐 Automation
+
+![Lint](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/test.yml/badge.svg)
+
 This Ansible collection provides a set of roles designed to automate the setup and management of web servers, specifically tailored for deploying Django applications. The collection includes roles for user initialization, server hardening, PostgreSQL setup, SSL certificate management, Nginx configuration, web application installation, Gunicorn setup, and application updates, as well as container management with Docker, Headscale, and Traefik.
+
+## Integration Tests
+
+These compound tests verify that roles work together correctly as full deployment stacks:
+
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml) **Django Application Stack** ([example playbook](examples/DjangoWebApp.md))
+    End-to-end deployment of a Django web application: server hardening, PostgreSQL database, SSL certificates via Certbot, Nginx reverse proxy, application installation with Celery task queue and Gunicorn WSGI server.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-full-stack.yml) **Full Infrastructure Stack** ([example playbook](examples/FullInfrastructure.md))
+    Complete container infrastructure: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml) **VPN Stack** ([example playbook](examples/HeadscaleVPN.md))
+    Docker-based VPN infrastructure: Authentik for user authentication paired with Headscale (self-hosted Tailscale) for secure mesh networking, fronted by Traefik.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml) **R Analytics Stack** ([example playbook](examples/RAnalytics.md))
+    Authenticated R computing environment: OpenCPU server for running R scripts via a REST API, secured behind Authentik and accessible through Traefik.
 
 ## Roles Included
 
-*   **[Basic Configuration](roles/basic_config/README.md)** ⚙️
-    Manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance [conversation history].
-*   **[Init Ansible](roles/init_ansible/README.md)** 👤
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-basic_config.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-basic_config.yml) **[Basic Configuration](roles/basic_config/README.md)** ⚙️  
+    Manages **foundational server configurations**, primarily focusing on **swap space management** and **kernel parameter tuning** for optimal performance.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-init_ansible.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-init_ansible.yml) **[Init Ansible](roles/init_ansible/README.md)** 👤  
     Sets up a new user for Ansible automation, configures sudo access, sets up SSH keys, and disables password authentication for enhanced security.
-*   **[Harden Server](roles/harden_server/README.md)** 🔒
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-hardenServer.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-hardenServer.yml) **[Harden Server](roles/hardenServer/README.md)** 🔒  
     Hardens an Ubuntu server by implementing security best practices, including configuring the Uncomplicated Firewall (UFW) and securing SSH access.
-*   **[PostgreSQL Setup](roles/postgresql_setup/README.md)** 🐘
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-postgresqlSetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-postgresqlSetup.yml) **[PostgreSQL Setup](roles/postgresqlSetup/README.md)** 🐘  
     Installs and configures PostgreSQL using Docker, ensuring that the necessary packages are installed and a PostgreSQL container is created and running.
-*   **[Certbot](roles/certbot/README.md)** 🔑
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-certbot.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-certbot.yml) **[Certbot](roles/certbot/README.md)** 🔑  
     Installs and configures Certbot for obtaining and managing SSL certificates using the Infomaniak DNS plugin, ensuring automatic renewal of certificates.
-*   **[Nginx Web Server](roles/nginx_web_server/README.md)** 🌍
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-nginxWebServer.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-nginxWebServer.yml) **[Nginx Web Server](roles/nginxWebServer/README.md)** 🌍  
     Installs and configures Nginx as a web server for a Django application, managing SSL certificates and serving static files.
-*   **[Install Web App](roles/install_web_app/README.md)** 📦
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-installWebApp.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-installWebApp.yml) **[Install Web App](roles/installWebApp/README.md)** 📦  
     Installs and configures a Django web application, setting up the necessary environment, creating a dedicated user, and managing application secrets.
-*   **[Gunicorn Setup](roles/gunicorn_setup/README.md)** 🚀
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gunicornSetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gunicornSetup.yml) **[Gunicorn Setup](roles/gunicornSetup/README.md)** 🚀  
     Sets up Gunicorn as a WSGI server for your web application, configuring it to run as a systemd service.
-*   **[Celery Setup](roles/celery_setup/README.md)** 🍃
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-celerySetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-celerySetup.yml) **[Celery Setup](roles/celerySetup/README.md)** 🍃  
     Sets up Celery as a task queue for your web application, configuring RabbitMQ as a message broker and managing Celery as a systemd service.
-*   **[Update Web App](roles/update_web_app/README.md)** 🔄
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-updateWebApp.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-updateWebApp.yml) **[Update Web App](roles/updateWebApp/README.md)** 🔄  
     Updates and manages a Django web application by fetching the latest changes from the Git repository, installing dependencies, collecting static files, and applying database migrations.
-*   **[Docker Setup](roles/docker_setup/README.md)** 🐳
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-docker.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-docker.yml) **[Docker Setup](roles/docker/README.md)** 🐳  
     Installs Docker and Docker Compose, configures the Docker service, and adds the specified user to the Docker group for container management.
-*   **[Headscale](roles/headscale/README.md)** 🛠️
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-headscale.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-headscale.yml) **[Headscale](roles/headscale/README.md)** 🛠️  
     Installs and configures Headscale, a self-hosted implementation of Tailscale, including setting up necessary directories, configuration files, and starting the Headscale container.
-*   **[Traefik](roles/traefik/README.md)** 🚦
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-traefik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-traefik.yml) **[Traefik](roles/traefik/README.md)** 🚦  
     Installs and configures Traefik as a reverse proxy and load balancer, managing routing for services and providing SSL termination with Let's Encrypt.
-*   **[Authentik](roles/authentik/README.md)** 🛂
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-authentik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-authentik.yml) **[Authentik](roles/authentik/README.md)** 🛂  
     Installs and configures Authentik in a docker container and provides the necessary configuration for Traefik to include the service into the reverse proxy.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-opencpu.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-opencpu.yml) **[OpenCPU](roles/opencpu/README.md)** 📊  
+    Installs and configures OpenCPU as a Docker container with Traefik integration and optional Authentik authentication.
 
 ## Usage Examples
 You find more complete usage examples under `examples/`.

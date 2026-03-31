@@ -1,0 +1,29 @@
+---
+- name: Converge - Full Stack (basic_config + docker + traefik + authentik + opencpu)
+  hosts: all
+  become: true
+  tasks:
+    - name: Include basic_config role
+      ansible.builtin.include_role:
+        name: basic_config
+
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: docker
+
+    - name: Create external proxy network
+      community.docker.docker_network:
+        name: proxy
+        state: present
+
+    - name: Include traefik role
+      ansible.builtin.include_role:
+        name: traefik
+
+    - name: Include authentik role
+      ansible.builtin.include_role:
+        name: authentik
+
+    - name: Include opencpu role
+      ansible.builtin.include_role:
+        name: opencpu

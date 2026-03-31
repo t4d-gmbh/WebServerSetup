@@ -1,0 +1,62 @@
+---
+- name: Verify certbot
+  hosts: all
+  become: true
+  tasks:
+    - name: Check certbot is installed
+      ansible.builtin.stat:
+        path: /usr/bin/certbot
+      register: certbot_bin
+
+    - name: Assert certbot binary exists
+      ansible.builtin.assert:
+        that:
+          - certbot_bin.stat.exists
+        fail_msg: "certbot binary not found at /usr/bin/certbot"
+
+    - name: Check certbot venv exists
+      ansible.builtin.stat:
+        path: /opt/certbot/venv/bin/certbot
+      register: certbot_venv
+
+    - name: Assert certbot venv exists
+      ansible.builtin.assert:
+        that:
+          - certbot_venv.stat.exists
+        fail_msg: "certbot venv not found"
+
+    - name: Check /etc/letsencrypt directory exists
+      ansible.builtin.stat:
+        path: /etc/letsencrypt
+      register: le_dir
+
+    - name: Assert letsencrypt directory exists
+      ansible.builtin.assert:
+        that:
+          - le_dir.stat.exists
+          - le_dir.stat.isdir
+        fail_msg: "/etc/letsencrypt directory does not exist"
+
+    - name: Check Infomaniak credentials file exists
+      ansible.builtin.stat:
+        path: /etc/letsencrypt/infomaniak.ini
+      register: infomaniak_creds
+
+    - name: Assert credentials file exists with secure permissions
+      ansible.builtin.assert:
+        that:
+          - infomaniak_creds.stat.exists
+          - infomaniak_creds.stat.mode == '0600'
+        fail_msg: "Infomaniak credentials file missing or wrong permissions"
+
+    - name: Check cron job for certbot renewal
+      ansible.builtin.command: crontab -l
+      register: cron_list
+      changed_when: false
+      failed_when: false
+
+    - name: Assert certbot renewal cron exists
+      ansible.builtin.assert:
+        that:
+          - "'certbot renew' in cron_list.stdout"
+        fail_msg: "Certbot renewal cron job not found"

@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include init_ansible"
+      ansible.builtin.include_role:
+        name: init_ansible

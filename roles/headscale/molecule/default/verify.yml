@@ -1,0 +1,49 @@
+---
+- name: Verify headscale
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Headscale config directory exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale
+      register: hs_dir
+
+    - name: Assert config directory exists
+      ansible.builtin.assert:
+        that:
+          - hs_dir.stat.exists
+          - hs_dir.stat.isdir
+        fail_msg: "Headscale config directory does not exist"
+
+    - name: Check Headscale data directory exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale/lib
+      register: hs_data_dir
+
+    - name: Assert data directory exists
+      ansible.builtin.assert:
+        that:
+          - hs_data_dir.stat.exists
+        fail_msg: "Headscale data directory does not exist"
+
+    - name: Check config.yaml exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale/config.yaml
+      register: hs_config
+
+    - name: Assert config.yaml exists
+      ansible.builtin.assert:
+        that:
+          - hs_config.stat.exists
+        fail_msg: "Headscale config.yaml does not exist"
+
+    - name: Check docker-compose.yml exists
+      ansible.builtin.stat:
+        path: /data/docker/headscale/docker-compose.yml
+      register: hs_compose
+
+    - name: Assert docker-compose.yml exists
+      ansible.builtin.assert:
+        that:
+          - hs_compose.stat.exists
+        fail_msg: "Headscale docker-compose.yml does not exist"

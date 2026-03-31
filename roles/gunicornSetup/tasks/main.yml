@@ -51,6 +51,8 @@
     state: started
     enabled: yes
   become: yes
+  tags:
+    - molecule-notest
 
 - name: Enable and start Gunicorn service
   systemd:
@@ -58,3 +60,5 @@
     enabled: yes
     state: started
   become: yes
+  tags:
+    - molecule-notest

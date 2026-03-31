@@ -1,0 +1,54 @@
+---
+- name: Verify compound - Docker + Authentik + OpenCPU
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+        fail_msg: "Docker is not installed"
+
+    - name: Check authentik docker-compose exists
+      ansible.builtin.stat:
+        path: /data/docker/authentik/docker-compose.yml
+      register: auth_compose
+
+    - name: Assert authentik compose exists
+      ansible.builtin.assert:
+        that:
+          - auth_compose.stat.exists
+        fail_msg: "Authentik docker-compose.yml does not exist"
+
+    - name: Check opencpu docker-compose exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/docker-compose.yml
+      register: ocp_compose
+
+    - name: Assert opencpu compose exists
+      ansible.builtin.assert:
+        that:
+          - ocp_compose.stat.exists
+        fail_msg: "OpenCPU docker-compose.yml does not exist"
+
+    - name: Check running containers
+      ansible.builtin.command: docker ps --format '{% raw %}{{.Names}}{% endraw %}'
+      register: running_containers
+      changed_when: false
+
+    - name: Assert authentik server is running
+      ansible.builtin.assert:
+        that:
+          - "'authentik-server' in running_containers.stdout"
+        fail_msg: "Authentik server container is not running"
+
+    - name: Assert opencpu is running
+      ansible.builtin.assert:
+        that:
+          - "'opencpu' in running_containers.stdout"
+        fail_msg: "OpenCPU container is not running"

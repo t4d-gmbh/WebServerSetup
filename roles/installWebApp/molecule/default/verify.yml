@@ -1,0 +1,92 @@
+---
+- name: Verify installWebApp
+  hosts: all
+  become: true
+  tasks:
+    - name: Check django user exists
+      ansible.builtin.command: id django
+      register: django_user
+      changed_when: false
+
+    - name: Assert django user exists
+      ansible.builtin.assert:
+        that:
+          - django_user.rc == 0
+        fail_msg: "django user does not exist"
+
+    - name: Assert django user is in www-data group
+      ansible.builtin.assert:
+        that:
+          - "'www-data' in django_user.stdout"
+        fail_msg: "django user is not in www-data group"
+
+    - name: Check application directory exists
+      ansible.builtin.stat:
+        path: /opt/testapp
+      register: app_dir
+
+    - name: Assert application directory exists
+      ansible.builtin.assert:
+        that:
+          - app_dir.stat.exists
+          - app_dir.stat.isdir
+        fail_msg: "/opt/testapp directory does not exist"
+
+    - name: Check config directory exists
+      ansible.builtin.stat:
+        path: /etc/testapp
+      register: config_dir
+
+    - name: Assert config directory exists
+      ansible.builtin.assert:
+        that:
+          - config_dir.stat.exists
+          - config_dir.stat.isdir
+        fail_msg: "/etc/testapp directory does not exist"
+
+    - name: Check secret key file exists
+      ansible.builtin.stat:
+        path: /etc/testapp/secret_key.txt
+      register: secret_file
+
+    - name: Assert secret key file exists with secure permissions
+      ansible.builtin.assert:
+        that:
+          - secret_file.stat.exists
+          - secret_file.stat.mode == '0600'
+        fail_msg: "Secret key file missing or wrong permissions"
+
+    - name: Check static directory exists
+      ansible.builtin.stat:
+        path: /opt/testapp/static
+      register: static_dir
+
+    - name: Assert static directory exists
+      ansible.builtin.assert:
+        that:
+          - static_dir.stat.exists
+          - static_dir.stat.isdir
+        fail_msg: "static directory does not exist"
+
+    - name: Check media directory exists
+      ansible.builtin.stat:
+        path: /opt/testapp/media
+      register: media_dir
+
+    - name: Assert media directory exists
+      ansible.builtin.assert:
+        that:
+          - media_dir.stat.exists
+          - media_dir.stat.isdir
+        fail_msg: "media directory does not exist"
+
+    - name: Check ACL package is installed
+      ansible.builtin.command: dpkg -l acl
+      register: acl_check
+      changed_when: false
+
+    - name: Assert ACL is installed
+      ansible.builtin.assert:
+        that:
+          - acl_check.rc == 0
+        fail_msg: "ACL package is not installed"

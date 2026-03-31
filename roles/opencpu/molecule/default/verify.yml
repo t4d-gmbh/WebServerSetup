@@ -1,0 +1,49 @@
+---
+- name: Verify opencpu
+  hosts: all
+  become: true
+  tasks:
+    - name: Check OpenCPU directory exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu
+      register: opencpu_dir
+
+    - name: Assert OpenCPU directory exists
+      ansible.builtin.assert:
+        that:
+          - opencpu_dir.stat.exists
+          - opencpu_dir.stat.isdir
+        fail_msg: "OpenCPU directory does not exist"
+
+    - name: Check OpenCPU container directory exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/opencpu
+      register: opencpu_container_dir
+
+    - name: Assert container directory exists
+      ansible.builtin.assert:
+        that:
+          - opencpu_container_dir.stat.exists
+        fail_msg: "OpenCPU container directory does not exist"
+
+    - name: Check Dockerfile exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/opencpu/Dockerfile
+      register: opencpu_dockerfile
+
+    - name: Assert Dockerfile exists
+      ansible.builtin.assert:
+        that:
+          - opencpu_dockerfile.stat.exists
+        fail_msg: "OpenCPU Dockerfile does not exist"
+
+    - name: Check docker-compose.yml exists
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/docker-compose.yml
+      register: opencpu_compose
+
+    - name: Assert docker-compose.yml exists
+      ansible.builtin.assert:
+        that:
+          - opencpu_compose.stat.exists
+        fail_msg: "OpenCPU docker-compose.yml does not exist"

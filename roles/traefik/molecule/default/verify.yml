@@ -1,0 +1,72 @@
+---
+- name: Verify traefik
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Traefik directory exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik
+      register: traefik_dir
+
+    - name: Assert Traefik directory exists
+      ansible.builtin.assert:
+        that:
+          - traefik_dir.stat.exists
+          - traefik_dir.stat.isdir
+        fail_msg: "Traefik directory does not exist"
+
+    - name: Check traefik.yaml exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/traefik.yaml
+      register: traefik_config
+
+    - name: Assert traefik.yaml exists
+      ansible.builtin.assert:
+        that:
+          - traefik_config.stat.exists
+        fail_msg: "traefik.yaml does not exist"
+
+    - name: Check docker-compose.yml exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/docker-compose.yml
+      register: traefik_compose
+
+    - name: Assert docker-compose.yml exists
+      ansible.builtin.assert:
+        that:
+          - traefik_compose.stat.exists
+        fail_msg: "docker-compose.yml does not exist"
+
+    - name: Check .env file exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/.env
+      register: traefik_env
+
+    - name: Assert .env exists
+      ansible.builtin.assert:
+        that:
+          - traefik_env.stat.exists
+        fail_msg: ".env file does not exist"
+
+    - name: Check users directory exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/users
+      register: traefik_users_dir
+
+    - name: Assert users directory exists
+      ansible.builtin.assert:
+        that:
+          - traefik_users_dir.stat.exists
+          - traefik_users_dir.stat.isdir
+        fail_msg: "Traefik users directory does not exist"
+
+    - name: Check users.txt exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/users/users.txt
+      register: traefik_users
+
+    - name: Assert users.txt exists
+      ansible.builtin.assert:
+        that:
+          - traefik_users.stat.exists
+        fail_msg: "users.txt does not exist"

@@ -1,0 +1,50 @@
+---
+name: "Compound - Full Stack"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "roles/basic_config/**"
+      - "roles/docker/**"
+      - "roles/traefik/**"
+      - "roles/authentik/**"
+      - "roles/opencpu/**"
+      - "tests/compound-full-stack/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "roles/basic_config/**"
+      - "roles/docker/**"
+      - "roles/traefik/**"
+      - "roles/authentik/**"
+      - "roles/opencpu/**"
+      - "tests/compound-full-stack/**"
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+jobs:
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-core molecule molecule-plugins[docker] docker
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run Molecule tests
+        run: molecule test
+        working-directory: tests/compound-full-stack
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"

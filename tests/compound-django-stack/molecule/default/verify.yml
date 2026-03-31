@@ -1,0 +1,156 @@
+---
+- name: Verify compound - Django Stack
+  hosts: all
+  become: true
+  tasks:
+    # hardenServer
+    - name: Check UFW is installed
+      ansible.builtin.command: which ufw
+      register: ufw_check
+      changed_when: false
+
+    - name: Assert UFW is installed
+      ansible.builtin.assert:
+        that:
+          - ufw_check.rc == 0
+        fail_msg: "UFW is not installed"
+
+    - name: Check SSH config hardened
+      ansible.builtin.command: grep '^PermitRootLogin no' /etc/ssh/sshd_config
+      register: ssh_hardened
+      changed_when: false
+
+    - name: Assert SSH is hardened
+      ansible.builtin.assert:
+        that:
+          - ssh_hardened.rc == 0
+        fail_msg: "SSH not hardened - PermitRootLogin not set to no"
+
+    # postgresqlSetup
+    - name: Check PostgreSQL container is running
+      ansible.builtin.command: docker ps --filter name=test-postgresql --format '{% raw %}{{.Names}}{% endraw %}'
+      register: pg_container
+      changed_when: false
+
+    - name: Assert PostgreSQL is running
+      ansible.builtin.assert:
+        that:
+          - "'test-postgresql' in pg_container.stdout"
+        fail_msg: "PostgreSQL container is not running"
+
+    # certbot
+    - name: Check certbot is installed
+      ansible.builtin.stat:
+        path: /usr/bin/certbot
+      register: certbot_bin
+
+    - name: Assert certbot is installed
+      ansible.builtin.assert:
+        that:
+          - certbot_bin.stat.exists
+        fail_msg: "Certbot is not installed"
+
+    - name: Check Infomaniak credentials
+      ansible.builtin.stat:
+        path: /etc/letsencrypt/infomaniak.ini
+      register: infomaniak_creds
+
+    - name: Assert credentials file exists
+      ansible.builtin.assert:
+        that:
+          - infomaniak_creds.stat.exists
+          - infomaniak_creds.stat.mode == '0600'
+        fail_msg: "Infomaniak credentials missing or wrong permissions"
+
+    # nginxWebServer
+    - name: Check Nginx site config exists
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-available/testapp.conf
+      register: nginx_conf
+
+    - name: Assert Nginx config exists
+      ansible.builtin.assert:
+        that:
+          - nginx_conf.stat.exists
+        fail_msg: "Nginx config for testapp not found"
+
+    - name: Check Nginx site is enabled
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-enabled/testapp.conf
+      register: nginx_enabled
+
+    - name: Assert Nginx site is enabled
+      ansible.builtin.assert:
+        that:
+          - nginx_enabled.stat.exists
+        fail_msg: "Nginx testapp site not enabled"
+
+    # installWebApp
+    - name: Check django user exists
+      ansible.builtin.command: id django
+      register: django_user
+      changed_when: false
+
+    - name: Assert django user exists
+      ansible.builtin.assert:
+        that:
+          - django_user.rc == 0
+        fail_msg: "django user does not exist"
+
+    - name: Check app config directory
+      ansible.builtin.stat:
+        path: /etc/testapp
+      register: app_config
+
+    - name: Assert app config exists
+      ansible.builtin.assert:
+        that:
+          - app_config.stat.exists
+        fail_msg: "/etc/testapp directory does not exist"
+
+    - name: Check secret key file
+      ansible.builtin.stat:
+        path: /etc/testapp/secret_key.txt
+      register: secret_file
+
+    - name: Assert secret key exists
+      ansible.builtin.assert:
+        that:
+          - secret_file.stat.exists
+          - secret_file.stat.mode == '0600'
+        fail_msg: "Secret key file missing or wrong permissions"
+
+    # gunicornSetup
+    - name: Check gunicorn service file
+      ansible.builtin.stat:
+        path: /etc/systemd/system/gunicorn.service
+      register: gunicorn_service
+
+    - name: Assert gunicorn service exists
+      ansible.builtin.assert:
+        that:
+          - gunicorn_service.stat.exists
+        fail_msg: "Gunicorn service file does not exist"
+
+    # celerySetup
+    - name: Check celery service file
+      ansible.builtin.stat:
+        path: /etc/systemd/system/celery.service
+      register: celery_service
+
+    - name: Assert celery service exists
+      ansible.builtin.assert:
+        that:
+          - celery_service.stat.exists
+        fail_msg: "Celery service file does not exist"
+
+    - name: Check celery config
+      ansible.builtin.stat:
+        path: /etc/conf.d/celery
+      register: celery_config
+
+    - name: Assert celery config exists
+      ansible.builtin.assert:
+        that:
+          - celery_config.stat.exists
+        fail_msg: "Celery config file does not exist"
