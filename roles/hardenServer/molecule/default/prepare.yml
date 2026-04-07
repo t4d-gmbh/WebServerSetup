@@ -11,3 +11,36 @@
       ansible.builtin.apt:
         name: openssh-server
         state: present
+
+    - name: Create sshtest user
+      ansible.builtin.user:
+        name: sshtest
+        shell: /bin/bash
+        state: present
+
+    - name: Create .ssh directory for sshtest
+      ansible.builtin.file:
+        path: /home/sshtest/.ssh
+        state: directory
+        owner: sshtest
+        group: sshtest
+        mode: '0700'
+
+    - name: Generate ed25519 keypair for SSH functional test
+      ansible.builtin.command:
+        cmd: ssh-keygen -t ed25519 -N '' -f /home/sshtest/.ssh/id_ed25519
+        creates: /home/sshtest/.ssh/id_ed25519
+
+    - name: Add public key to authorized_keys
+      ansible.builtin.copy:
+        src: /home/sshtest/.ssh/id_ed25519.pub
+        dest: /home/sshtest/.ssh/authorized_keys
+        remote_src: true
+        owner: sshtest
+        group: sshtest
+        mode: '0600'
+
+    - name: Start sshd
+      ansible.builtin.service:
+        name: ssh
+        state: started

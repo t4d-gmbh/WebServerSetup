@@ -47,27 +47,34 @@
           - ssh_root_login.rc == 0
         fail_msg: "PermitRootLogin is not set to 'no'"
 
-    - name: Check SSH config - ChallengeResponseAuthentication
-      ansible.builtin.command: grep '^ChallengeResponseAuthentication no' /etc/ssh/sshd_config
-      register: ssh_challenge
+    - name: Check SSH config - KbdInteractiveAuthentication
+      ansible.builtin.command: grep '^KbdInteractiveAuthentication no' /etc/ssh/sshd_config
+      register: ssh_kbd
       changed_when: false
 
-    - name: Assert ChallengeResponseAuthentication is disabled
+    - name: Assert KbdInteractiveAuthentication is disabled
       ansible.builtin.assert:
         that:
-          - ssh_challenge.rc == 0
-        fail_msg: "ChallengeResponseAuthentication is not set to 'no'"
+          - ssh_kbd.rc == 0
+        fail_msg: "KbdInteractiveAuthentication is not set to 'no'"
 
-    - name: Check SSH config - UsePAM
-      ansible.builtin.command: grep '^UsePAM no' /etc/ssh/sshd_config
-      register: ssh_pam
+    - name: Test SSH key-based login still works after hardening
+      ansible.builtin.command: >
+        ssh -i /home/sshtest/.ssh/id_ed25519
+            -o StrictHostKeyChecking=no
+            -o BatchMode=yes
+            -o ConnectTimeout=10
+            sshtest@127.0.0.1
+            echo success
+      register: ssh_test
       changed_when: false
 
-    - name: Assert UsePAM is disabled
+    - name: Assert SSH key-based login succeeds after hardening
       ansible.builtin.assert:
         that:
-          - ssh_pam.rc == 0
-        fail_msg: "UsePAM is not set to 'no'"
+          - ssh_test.rc == 0
+          - "'success' in ssh_test.stdout"
+        fail_msg: "SSH key-based login failed after hardening: {{ ssh_test.stderr }}"
 
     # NOTE: UFW activation, firewall rules, and fail2ban service status
     # cannot be tested in Docker containers (no iptables/netfilter).
