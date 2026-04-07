@@ -1,0 +1,39 @@
+---
+role_name_check: 1
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../"
+  inventory:
+    host_vars:
+      instance:
+        app_name: testapp
+        node_major_version: 22
+        frontend_app_path: "/opt/testapp"
+        frontend_build_command: "npm run build"
+        frontend_clean_install: true
+        django_project_dir: "testapp"
+        frontend_run_collectstatic: false
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

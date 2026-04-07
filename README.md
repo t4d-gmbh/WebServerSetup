@@ -35,6 +35,8 @@ These compound tests verify that roles work together correctly as full deploymen
     Installs and configures a Django web application, setting up the necessary environment, creating a dedicated user, and managing application secrets.
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gunicornSetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gunicornSetup.yml) **[Gunicorn Setup](roles/gunicornSetup/README.md)** 🚀  
     Sets up Gunicorn as a WSGI server for your web application, configuring it to run as a systemd service.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-buildFrontend.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-buildFrontend.yml) **[Build Frontend](roles/buildFrontend/README.md)** 🎨  
+    Installs Node.js and builds frontend assets (Vite, Tailwind CSS) for Django applications, running `npm ci` and the configured build command.
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-celerySetup.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-celerySetup.yml) **[Celery Setup](roles/celerySetup/README.md)** 🍃  
     Sets up Celery as a task queue for your web application, configuring RabbitMQ as a message broker and managing Celery as a systemd service.
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-updateWebApp.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-updateWebApp.yml) **[Update Web App](roles/updateWebApp/README.md)** 🔄  

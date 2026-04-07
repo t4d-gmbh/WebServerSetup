@@ -104,6 +104,10 @@ This playbook provisions the server from scratch. Run it once for the initial de
     # Gunicorn
     gunicorn_workers: 3
 
+    # Frontend build (optional -- remove buildFrontend from roles if not needed)
+    # Set to the Node.js major version required by your project
+    node_major_version: 22
+
     # Celery (optional -- remove celerySetup from roles if not needed)
     celery_concurrency: 4
 
@@ -122,9 +126,12 @@ This playbook provisions the server from scratch. Run it once for the initial de
     - t4d.WebServerSetup.certbot
     - t4d.WebServerSetup.nginxWebServer
     - t4d.WebServerSetup.installWebApp
+    - t4d.WebServerSetup.buildFrontend    # Build Vite/Tailwind frontend assets
     - t4d.WebServerSetup.celerySetup
     - t4d.WebServerSetup.gunicornSetup
 ```
+
+> **Note:** The `buildFrontend` role is optional. If your Django application does not have a `package.json` or npm-based frontend build step, remove it from the roles list.
 
 Run the setup:
 
@@ -151,6 +158,7 @@ This playbook updates an already-deployed application. It pulls the latest code,
     git_repository_branch: main   # branch or tag to deploy
   roles:
     - t4d.WebServerSetup.updateWebApp
+    - t4d.WebServerSetup.buildFrontend    # Rebuild frontend assets after code update
 ```
 
 Run the update:
@@ -236,9 +244,10 @@ After running the setup playbook, your server will have:
 4. **SSL certificates**: Automatically obtained via Certbot using DNS challenge, with a cron job for automatic renewal.
 5. **Nginx**: Reverse proxy serving the Django application over HTTPS, with static and media file serving.
 6. **Django application**: Cloned from Git, installed in a Python virtualenv at `/opt/<app_name>/`, running as the `django` user, with a generated secret key stored securely at `/etc/<app_name>/secret_key.txt`.
-7. **RabbitMQ** (Docker container): Message broker for Celery task processing.
-8. **Celery**: Background task worker running as a systemd service.
-9. **Gunicorn**: WSGI server running as a systemd service with a Unix socket, proxied by Nginx.
+7. **Frontend assets**: Node.js installed, npm dependencies resolved, and Vite/Tailwind CSS compiled into production-ready hashed assets collected into `STATIC_ROOT`.
+8. **RabbitMQ** (Docker container): Message broker for Celery task processing.
+9. **Celery**: Background task worker running as a systemd service.
+10. **Gunicorn**: WSGI server running as a systemd service with a Unix socket, proxied by Nginx.
 
 ### Service Architecture
 
@@ -300,6 +309,7 @@ sudo systemctl reload nginx
 - [Certbot](../roles/certbot/README.md) -- SSL certificate management
 - [Nginx Web Server](../roles/nginxWebServer/README.md) -- Reverse proxy configuration
 - [Install Web App](../roles/installWebApp/README.md) -- Django application setup
+- [Build Frontend](../roles/buildFrontend/README.md) -- Node.js + Vite/Tailwind frontend build
 - [Celery Setup](../roles/celerySetup/README.md) -- Celery + RabbitMQ
 - [Gunicorn Setup](../roles/gunicornSetup/README.md) -- Gunicorn WSGI server
 - [Update Web App](../roles/updateWebApp/README.md) -- Application updates

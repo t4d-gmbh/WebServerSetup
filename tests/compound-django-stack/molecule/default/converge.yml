@@ -23,6 +23,10 @@
       ansible.builtin.include_role:
         name: installWebApp
 
+    - name: Include buildFrontend role
+      ansible.builtin.include_role:
+        name: buildFrontend
+
     - name: Include celerySetup role
       ansible.builtin.include_role:
         name: celerySetup

@@ -1,0 +1,18 @@
+---
+# Node.js major version to install (via NodeSource repository)
+node_major_version: 22
+
+# Path to the app root (where package.json lives)
+frontend_app_path: "/opt/{{ app_name }}"
+
+# npm command to run for production build
+frontend_build_command: "npm run build"
+
+# Whether to run npm ci (clean install from lockfile) or npm install
+frontend_clean_install: true
+
+# The Django project subdirectory (where manage.py lives)
+django_project_dir: "{{ app_name | lower }}"
+
+# Whether to run collectstatic after the frontend build
+frontend_run_collectstatic: true
