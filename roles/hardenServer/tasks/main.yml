@@ -167,7 +167,8 @@
   loop:
     # NOTE: PasswordAuthentication is handled by the init_ansible role
     - { key: 'PermitRootLogin', value: 'no' }
-    - { key: 'ChallengeResponseAuthentication', value: 'no' }
-    - { key: 'UsePAM', value: 'no' }
+    # KbdInteractiveAuthentication replaces the deprecated ChallengeResponseAuthentication (OpenSSH 8.7+)
+    - { key: 'KbdInteractiveAuthentication', value: 'no' }
+    # NOTE: UsePAM must remain enabled - PAM handles session/account setup even for pubkey auth
   notify: Restart SSH
   when: "'ssh' in enable_services"

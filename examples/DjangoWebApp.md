@@ -239,7 +239,7 @@ https://oauth2:<token>@<git_remote><git_repository_path>
 After running the setup playbook, your server will have:
 
 1. **System tuning**: Swap file and optimized kernel parameters.
-2. **Server hardening**: UFW firewall (deny all, allow SSH + Nginx), fail2ban, SSH hardening (no root login, no challenge-response auth, no PAM).
+2. **Server hardening**: UFW firewall (deny all, allow SSH + Nginx), fail2ban, SSH hardening (no root login, no keyboard-interactive auth).
 3. **PostgreSQL** (Docker container): Database for the Django application, running as a Docker container with persistent storage.
 4. **SSL certificates**: Automatically obtained via Certbot using DNS challenge, with a cron job for automatic renewal.
 5. **Nginx**: Reverse proxy serving the Django application over HTTPS, with static and media file serving.
