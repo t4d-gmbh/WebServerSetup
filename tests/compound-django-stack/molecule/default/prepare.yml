@@ -6,7 +6,7 @@
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
-
+ 
     - name: Install OpenSSH server (needed for hardenServer)
       ansible.builtin.apt:
         name: openssh-server
@@ -43,5 +43,4 @@
         path: /opt/testapp/static
         state: directory
         mode: '0755'
-
 

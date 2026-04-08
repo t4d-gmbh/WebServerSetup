@@ -1,16 +1,16 @@
 - name: Update and upgrade packages
+  become: true
   apt:
     update_cache: yes
     upgrade: dist
-  become: yes
 
 - name: Install necessary packages
+  become: true
   apt:
     name:
       - ufw
       - fail2ban
     state: present
-  become: true
 
 - name: Set UFW default deny incoming
   become: true
@@ -36,9 +36,9 @@
     - molecule-notest
 
 - name: Enable UFW logging
+  become: true
   ufw:
     logging: on
-  become: true
   tags:
     - molecule-notest
 

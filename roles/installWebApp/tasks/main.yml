@@ -8,7 +8,6 @@
     state: present
   become: yes
 
-
 - name: Ensure the application directory exists
   file:
     path: /opt/{{ app_name }}
