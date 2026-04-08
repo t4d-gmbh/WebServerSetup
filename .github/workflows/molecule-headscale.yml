@@ -22,6 +22,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: CI Diagnostics
+        run: |
+          set -euo pipefail
+          mkdir -p ci-diagnostics
+          DIAG=ci-diagnostics/diagnostics.txt
+          echo "CI Diagnostics - $(date -u)" > "$DIAG"
+          echo "" >> "$DIAG"
+          echo "OS/Kernel:" >> "$DIAG"
+          uname -a >> "$DIAG"
+          if [ -f /etc/os-release ]; then cat /etc/os-release >> "$DIAG"; fi
+          echo "" >> "$DIAG"
+          echo "Docker" >> "$DIAG"
+          docker version 2>&1 | head -n 20 >> "$DIAG"
+          echo "" >> "$DIAG"
+          echo "Docker info (summary)" >> "$DIAG"
+          docker info --format '{{json .}}' 2>/dev/null | tr -d '\r' >> "$DIAG" || true
+          echo "" >> "$DIAG"
+          echo "Containerd" >> "$DIAG"
+          if command -v containerd >/dev/null 2>&1; then containerd --version 2>&1 | head -n 2 >> "$DIAG"; else echo "containerd not found" >> "$DIAG"; fi
+          echo "" >> "$DIAG"
+          echo "Filesystem Overlay" >> "$DIAG"
+          mount | rg overlay || true >> "$DIAG"
+          echo "" >> "$DIAG"
+          echo "Docker data dir usage" >> "$DIAG"
+          du -sh /var/lib/docker 2>/dev/null || true >> "$DIAG"
+          echo "" >> "$DIAG"
+          echo "GitHub Runner" >> "$DIAG"
+          echo "RUNNER_OS=${RUNNER_OS:-unknown}" >> "$DIAG"
+          echo "RUNNER_ARCH=${RUNNER_ARCH:-unknown}" >> "$DIAG"
+          echo "RUNNER_NAME=${RUNNER_NAME:-unknown}" >> "$DIAG"
+        shell: bash
+
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-diagnostics-headscale
+          path: ci-diagnostics/diagnostics.txt
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
