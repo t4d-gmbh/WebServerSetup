@@ -44,14 +44,4 @@
         state: directory
         mode: '0755'
 
-    - name: Install Docker
-      ansible.builtin.apt:
-        name:
-          - docker.io
-          - python3-docker
-        state: present
 
-    - name: Start Docker service
-      ansible.builtin.service:
-        name: docker
-        state: started
