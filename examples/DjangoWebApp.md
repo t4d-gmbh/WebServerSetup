@@ -37,7 +37,7 @@ Your Django application must be set up to use [`python-decouple`](https://pypi.o
 | `EMAIL_HOST_PASSWORD` | SMTP password |
 | `DEFAULT_FROM_EMAIL` | Default sender email address |
 
-The application must also include a `requirements.txt` at the repository root.
+The application must include either a `pyproject.toml` or a `requirements.txt` at the repository root. If both are present, `pyproject.toml` takes priority.
 
 ## Directory Structure
 

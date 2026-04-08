@@ -65,7 +65,7 @@ To use this role, add it to your Ansible playbook as follows:
 9. **Set Permissions**: Configures permissions for the application directories and files.
 10. **Install ACL Package**: Ensures the ACL package is installed for managing permissions.
 11. **Create Virtual Environment**: Sets up a Python virtual environment for the application.
-12. **Install Requirements**: Installs the required Python packages from `requirements.txt`.
+12. **Install Requirements**: Installs the required Python packages from `pyproject.toml` (preferred) or `requirements.txt`. Fails if neither is present.
 
 ## Usage
 

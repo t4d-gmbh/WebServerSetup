@@ -24,12 +24,42 @@
   tags:
     - molecule-notest
 
-- name: Install requirements
+- name: Check for pyproject.toml
+  stat:
+    path: /opt/{{ app_name }}/pyproject.toml
+  register: req_pyproject
+  become: yes
+
+- name: Check for requirements.txt
+  stat:
+    path: /opt/{{ app_name }}/requirements.txt
+  register: req_txt
+  become: yes
+
+- name: Fail if neither pyproject.toml nor requirements.txt is present
+  fail:
+    msg: "Neither pyproject.toml nor requirements.txt found in /opt/{{ app_name }}"
+  when: not req_pyproject.stat.exists and not req_txt.stat.exists
+  tags:
+    - molecule-notest
+
+- name: Install requirements from pyproject.toml
+  pip:
+    name: /opt/{{ app_name }}
+    virtualenv: /opt/{{ app_name }}/venv
+  become: yes
+  become_user: django
+  when: req_pyproject.stat.exists
+  tags:
+    - molecule-notest
+
+- name: Install requirements from requirements.txt
   pip:
     requirements: /opt/{{ app_name }}/requirements.txt
     virtualenv: /opt/{{ app_name }}/venv
   become: yes
-  become_user: django  # Run this task as the django user
+  become_user: django
+  when: not req_pyproject.stat.exists and req_txt.stat.exists
   tags:
     - molecule-notest
 

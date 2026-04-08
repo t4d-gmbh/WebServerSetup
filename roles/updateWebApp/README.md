@@ -39,7 +39,7 @@ To use this role, add it to your Ansible playbook as follows:
 1. **Ensure ACL Package is Installed**: Installs the ACL package for managing permissions.
 2. **Fetch Latest Changes from Git Repository**: Pulls the latest changes from the specified Git repository.
 3. **Create Virtual Environment**: Sets up a Python virtual environment for the application if it doesn't already exist.
-4. **Install Requirements**: Installs the required Python packages from `requirements.txt` within the virtual environment.
+4. **Install Requirements**: Installs the required Python packages from `pyproject.toml` (preferred) or `requirements.txt` within the virtual environment. Fails if neither is present.
 5. **Collect Static Files**: Gathers static files for the Django application.
 6. **Apply Database Migrations**: Applies any pending database migrations.
 
