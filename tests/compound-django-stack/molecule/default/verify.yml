@@ -85,6 +85,17 @@
           - nginx_enabled.stat.exists
         fail_msg: "Nginx testapp site not enabled"
 
+    - name: Check Django app root responds with 200
+      ansible.builtin.uri:
+        url: http://localhost/
+        method: GET
+        status_code: 200
+        timeout: 20
+      register: django_http
+      retries: 6
+      delay: 5
+      until: django_http.status == 200
+
     # installWebApp
     - name: Check django user exists
       ansible.builtin.command: id django
