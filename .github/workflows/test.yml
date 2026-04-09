@@ -3,13 +3,12 @@ name: Test Ansible Roles
 
 on:
   push:
-    branches: [main, cleaning-up]
+    branches: [main]
   pull_request:
     branches: [main]
   schedule:
     # Run on the 1st of every month at 06:00 UTC
     - cron: "0 6 1 * *"
-  workflow_dispatch:
 
 jobs:
   lint:
