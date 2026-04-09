@@ -25,11 +25,14 @@
       changed_when: "'Setting up swapspace version' in mkswap_result.stdout"
       when: not swap_file_stat.stat.exists
 
+    - name: Check if swap is already active
+      ansible.builtin.command: "swapon --show=NAME --noheadings"
+      register: active_swaps
+      changed_when: false
+
     - name: Enable the swap file
       ansible.builtin.command: "swapon {{ swapfile_path }}"
-      register: swapon_result
-      changed_when: swapon_result.rc == 0
-      failed_when: swapon_result.rc != 0 and 'already in use' not in (swapon_result.stderr | default(''))
+      when: swapfile_path not in (active_swaps.stdout_lines | default([]))
       tags:
         - molecule-notest
 
