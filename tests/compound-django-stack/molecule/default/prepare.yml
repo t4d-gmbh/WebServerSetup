@@ -6,22 +6,18 @@
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
-
     - name: Install OpenSSH server (needed for hardenServer)
       ansible.builtin.apt:
         name: openssh-server
         state: present
-
     - name: Install Nginx and start it (needed for nginxWebServer reload)
       ansible.builtin.apt:
         name: nginx
         state: present
-
     - name: Start Nginx
       ansible.builtin.service:
         name: nginx
         state: started
-
     - name: Create dummy SSL certificate
       ansible.builtin.command: >
         openssl req -x509 -nodes -days 1
@@ -31,17 +27,13 @@
         -subj '/CN=test.example.com'
       args:
         creates: /etc/ssl/certs/test.pem
-
     - name: Create app subdirectory (normally created by git clone)
       ansible.builtin.file:
         path: /opt/testapp/testapp
         state: directory
         mode: '0755'
-
     - name: Create static directory
       ansible.builtin.file:
         path: /opt/testapp/static
         state: directory
         mode: '0755'
-
-

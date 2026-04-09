@@ -1,10 +1,11 @@
 ---
 - name: Update apt package index
+  become: true
   apt:
     update_cache: yes
-  become: true
 
 - name: Install required packages for Docker installation
+  become: true
   apt:
     name:
       - apt-transport-https
@@ -12,49 +13,48 @@
       - curl
       - software-properties-common
     state: present
-  become: true
 
 - name: Install Docker
+  become: true
   apt:
     name:
       - docker.io
       - python3-docker
     state: present
-  become: true
-
 
 - name: Ensure Docker service is running
+  become: true
   service:
     name: docker
     state: started
     enabled: true
-  become: true
 
 - name: Pull PostgreSQL Docker image
+  become: true
   community.docker.docker_image_pull:
     name: postgres
     tag: "{{ postgresql_version }}"
   register: pulled_image
-  become: true
 
 - name: Remove existing PostgreSQL container if image tag changed
+  become: true
   community.docker.docker_container:
     name: "{{ postgresql_container_name }}"
     state: absent
     force_kill: true
   when: pulled_image.changed
-  become: true
 
 - name: Ensure host postgres data dir exists
+  become: true
   file:
     path: "{{ postgresql_data_dir }}/pgdata"
     state: directory
     owner: 999
     group: 999
-    mode: "0700"
-  become: true
+    mode: '0700'
 
 - name: Create PostgreSQL container from specific tag
+  become: true
   community.docker.docker_container:
     name: "{{ postgresql_container_name  }}"
     image: "postgres:{{ postgresql_version }}"
@@ -69,4 +69,3 @@
       PGDATA: "{{ postgresql_pgdata_parent }}/pgdata"
     volumes:
       - "{{ postgresql_data_dir }}:{{ postgresql_pgdata_parent }}"
-  become: true
