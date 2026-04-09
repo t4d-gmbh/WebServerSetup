@@ -9,6 +9,7 @@ on:
   schedule:
     # Run on the 1st of every month at 06:00 UTC
     - cron: "0 6 1 * *"
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -124,11 +125,11 @@ jobs:
           ANSIBLE_FORCE_COLOR: "1"
           MOLECULE_DISTRO: ubuntu2204
 
-  tag:
-    name: Create monthly release tag
+  release:
+    name: Release
     runs-on: ubuntu-latest
     needs: [molecule, compound]
-    # Only tag on scheduled runs or manual dispatch against main
+    # Only release on scheduled runs or manual dispatch against main
     if: >-
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
       && github.ref == 'refs/heads/main'
@@ -140,8 +141,8 @@ jobs:
         with:
           fetch-depth: 0  # Need full history for tag listing
 
-      - name: Compute next tag
-        id: compute_tag
+      - name: Compute next version
+        id: version
         run: |
           YEAR=$(date -u +%Y)
           MONTH=$(date -u +%-m)
@@ -158,10 +159,32 @@ jobs:
             NEXT="${PREFIX}.$((RUNNING + 1))"
           fi
 
-          echo "tag=${NEXT}" >> "$GITHUB_OUTPUT"
-          echo "Computed next tag: ${NEXT}"
+          echo "version=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "Computed next version: ${NEXT}"
+
+      - name: Update galaxy.yml version
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.version.outputs.version }}/" galaxy.yml
+          echo "Updated galaxy.yml to version ${{ steps.version.outputs.version }}"
+          grep '^version:' galaxy.yml
+
+      - name: Commit version bump to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add galaxy.yml
+          git commit -m "release: bump version to ${{ steps.version.outputs.version }}"
+          git push origin main
 
       - name: Create and push tag
         run: |
-          git tag "${{ steps.compute_tag.outputs.tag }}"
-          git push origin "${{ steps.compute_tag.outputs.tag }}"
+          git tag "${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" \
+            --title "Release ${{ steps.version.outputs.version }}" \
+            --notes "Release ${{ steps.version.outputs.version }}"
