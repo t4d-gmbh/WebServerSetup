@@ -1,9 +1,17 @@
 ---
-- name: Restart Gunicorn service
+- name: Check if Gunicorn service exists
+  stat:
+    path: /etc/systemd/system/gunicorn.service
+  register: _gunicorn_service_file
+  listen: Restart Gunicorn service
+
+- name: Restart Gunicorn if installed
   service:
     name: gunicorn
     state: restarted
   become: yes
+  when: _gunicorn_service_file.stat.exists
+  listen: Restart Gunicorn service
 
 - name: Restart web server
   service:
