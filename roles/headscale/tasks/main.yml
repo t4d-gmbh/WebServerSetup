@@ -1,5 +1,5 @@
 ---
-- name: Ensure dancer_user exists
+- name: Ensure user exists
   user:
     name: "{{ dancer_user }}"
     state: present
