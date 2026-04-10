@@ -1,6 +1,6 @@
 namespace: t4d
 name: WebServerSetup
-version: 1.0.0
+version: 2026.4.2
 description: Ansible collection for automating the setup and management of web servers, specifically tailored for deploying Django applications.
 readme: README.md
 license_file: LICENSE
