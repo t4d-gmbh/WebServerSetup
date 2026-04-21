@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./_static/logo.png" alt="WebServerSetup Logo" width="400">
+<img src="https://raw.githubusercontent.com/t4d-gmbh/WebServerSetup/main/_static/logo.svg" alt="WebServerSetup Logo" width="400">
 
 <p>
   <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml">
