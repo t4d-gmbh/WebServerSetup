@@ -17,21 +17,22 @@
   </a>
 
 </p>
-<h1>Ansible Collection: Webserver Setups IaC-style</h1>
-<p>A practical guide to mastering
+<h1>WebSwerverSetup</h1>
+Ansible Collection: Webserver Setups IaC-style</h1>
+<p>An Ansible Collection for automated
   <br>
-  modern compute infrastructure
+   Webserver Setups
+   <br>
+   IaC-style
 </p>
 <br><br>
-<pre><small>A course provided by</small>
+<pre><small>A project provided by</small>
 <br>
 
 <a href="https://github.com/t4d-gmbh"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/wb/T4D_deploy.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/bw/T4D_deploy.svg"><img alt="T4D Logo" src="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/bw/T4D_deploy.svg" width="220" style="vertical-align: middle;"></picture></a>
 </pre>
 </div>
 <!-- README-header -->
-
-![Lint](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/test.yml/badge.svg)
 
 This Ansible collection provides a set of roles designed to automate the setup and management of web servers, specifically tailored for deploying Django applications. The collection includes roles for user initialization, server hardening, PostgreSQL setup, SSL certificate management, Nginx configuration, web application installation, Gunicorn setup, and application updates, as well as container management with Docker, Headscale, and Traefik.
 
