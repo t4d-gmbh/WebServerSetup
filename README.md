@@ -18,12 +18,11 @@
 
 </p>
 <h1>Web Server Setup</h1>
-<p>An Ansible Collection for 
-  <br> automated deployments
+<p>Automated Deployments
   <br> IaC-style
 </p>
 <br><br>
-<pre><small>A project provided by</small>
+<pre><small>An Ansible Collection provided by</small>
 <br>
 <a href="https://github.com/t4d-gmbh"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/wb/T4D_deploy.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/bw/T4D_deploy.svg"><img alt="T4D Logo" src="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/bw/T4D_deploy.svg" width="220" style="vertical-align: middle;"></picture></a>
 </pre>
