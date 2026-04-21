@@ -1,4 +1,35 @@
-# Ansible Collection: Webserver🌐 Automation
+<div align="center">
+
+<img src="./_static/logo.png" alt="WebServerSetup Logo" width="400">
+
+<p>
+  <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=Django%20Application%20Stack" alt="Django Application Stack">
+  </a>
+  <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-full-stack.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=Full%20Infrastructure%20Stack" alt="Full Infrastructure Stack">
+  </a>
+  <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=VPN%20Stack" alt="VPN Stack">
+  </a>
+  <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=R%20Analytics%20Stack" alt="R Analytics Stack">
+  </a>
+
+</p>
+<h1>Ansible Collection: Webserver Setups IaC-style</h1>
+<p>A practical guide to mastering
+  <br>
+  modern compute infrastructure
+</p>
+<br><br>
+<pre><small>A course provided by</small>
+<br>
+
+<a href="https://github.com/t4d-gmbh"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/wb/T4D_discover.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/logo/bw/T4D_discover.svg"><img alt="T4D Logo" src="https://raw.githubusercontent.com/t4d-gmbh/.github/main/static/bw/T4D_discover.svg" width="220" style="vertical-align: middle;"></picture></a>
+</pre>
+</div>
+<!-- README-header -->
 
 ![Lint](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/test.yml/badge.svg)
 
@@ -8,13 +39,13 @@ This Ansible collection provides a set of roles designed to automate the setup a
 
 These compound tests verify that roles work together correctly as full deployment stacks:
 
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-django-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-django-stack.yml) **Django Application Stack** ([example playbook](examples/DjangoWebApp.md))
+*   **Django Application Stack** ([example playbook](examples/DjangoWebApp.md))
     End-to-end deployment of a Django web application: server hardening, PostgreSQL database, SSL certificates via Certbot, Nginx reverse proxy, application installation with Celery task queue and Gunicorn WSGI server.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-full-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-full-stack.yml) **Full Infrastructure Stack** ([example playbook](examples/FullInfrastructure.md))
+*   **Full Infrastructure Stack** ([example playbook](examples/FullInfrastructure.md))
     Complete container infrastructure: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml) **VPN Stack** ([example playbook](examples/HeadscaleVPN.md))
+*   **VPN Stack** ([example playbook](examples/HeadscaleVPN.md))
     Docker-based VPN infrastructure: Authentik for user authentication paired with Headscale (self-hosted Tailscale) for secure mesh networking, fronted by Traefik.
-*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml) **R Analytics Stack** ([example playbook](examples/RAnalytics.md))
+*   **R Analytics Stack** ([example playbook](examples/RAnalytics.md))
     Authenticated R computing environment: OpenCPU server for running R scripts via a REST API, secured behind Authentik and accessible through Traefik.
 
 ## Roles Included
