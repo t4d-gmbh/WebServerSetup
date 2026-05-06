@@ -91,6 +91,16 @@
     mode: '0700'
   become: true
 
+- name: Ensure the log file directory exists
+  file:
+    path: "{{ log_file | dirname }}"
+    state: directory
+    owner: django
+    group: django
+    mode: '0755'
+  become: yes
+  when: log_file | length > 0
+
 - name: Ensure the static and media folders exist
   file:
     path: "{{ item }}"

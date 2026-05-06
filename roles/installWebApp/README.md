@@ -37,6 +37,14 @@ The Django application to install must be configured to use `python-decouple` an
 - `vault_email_config`: A dictionary with the django email configuration.
   It should be stored securely in a vault file (hence the `vault_` prefix).
   For an example with the django default values, see `/defautls/main.yml`.
+- `log_level`: Global log level for all app loggers. Valid values: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. Defaults to `WARNING`.
+- `log_file`: Optional absolute path to a log file (e.g. `/var/log/myapp/django.log`). Leave empty (default) for console-only logging via stderr. When set, the role creates the parent directory and assigns it to the `django` user.
+- `app_log_levels`: Optional list of single-key dicts to override the log level per Django app. The key is the app name (lowercased), the value is the log level. Emits `LOG_LEVEL_<APPNAME>=<LEVEL>` entries in the `.env` file. Defaults to `[]` (no overrides; all apps inherit `log_level`). Example:
+  ```yaml
+  app_log_levels:
+    - backends: DEBUG
+    - bayesian_networks: INFO
+  ```
 
 ## Dependencies
 
@@ -60,8 +68,9 @@ To use this role, add it to your Ansible playbook as follows:
 4. **Clone the Repository**: Clones the application code from the specified Git repository.
 5. **Ensure Secret Directory Exists**: Creates a directory for storing application secrets.
 6. **Manage Secret Key**: Generates a new secret key if one does not exist and stores it securely.
-7. **Create .env File**: Sets up a `.env` file for the Django application with database and secret key information.
-8. **Ensure Static and Media Folders Exist**: Creates directories for static and media files.
+7. **Create .env File**: Sets up a `.env` file for the Django application with database, secret key, and logging configuration.
+8. **Ensure Log Directory Exists**: Creates the parent directory of `log_file` (owned by `django`) when `log_file` is set.
+9. **Ensure Static and Media Folders Exist**: Creates directories for static and media files.
 9. **Set Permissions**: Configures permissions for the application directories and files.
 10. **Install ACL Package**: Ensures the ACL package is installed for managing permissions.
 11. **Create Virtual Environment**: Sets up a Python virtual environment for the application.

@@ -1,0 +1,40 @@
+---
+- name: Verify logging scenario
+  hosts: all
+  become: true
+  tasks:
+    - name: Check log directory exists
+      ansible.builtin.stat:
+        path: /var/log/testapp
+      register: log_dir
+
+    - name: Assert log directory exists with correct owner and permissions
+      ansible.builtin.assert:
+        that:
+          - log_dir.stat.exists
+          - log_dir.stat.isdir
+          - log_dir.stat.pw_name == 'django'
+          - log_dir.stat.mode == '0755'
+        fail_msg: "Log directory /var/log/testapp missing, wrong owner, or wrong permissions"
+
+    - name: Read .env file
+      ansible.builtin.slurp:
+        src: /opt/testapp/testapp/.env
+      register: env_file
+
+    - name: Set env content fact
+      ansible.builtin.set_fact:
+        env_content: "{{ env_file.content | b64decode }}"
+
+    - name: Assert LOG_FILE is set correctly in .env
+      ansible.builtin.assert:
+        that:
+          - "'LOG_FILE=/var/log/testapp/django.log' in env_content"
+        fail_msg: "LOG_FILE not set correctly in .env"
+
+    - name: Assert per-app log level overrides are present in .env
+      ansible.builtin.assert:
+        that:
+          - "'LOG_LEVEL_BACKENDS=DEBUG' in env_content"
+          - "'LOG_LEVEL_ACCOUNTS=INFO' in env_content"
+        fail_msg: "Per-app log level overrides missing or incorrect in .env"

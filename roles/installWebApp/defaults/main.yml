@@ -15,3 +15,17 @@ vault_email_config:
 
 # Vite dev mode (set to False for production deployments)
 vite_dev_mode: "False"
+
+# Logging
+# Global log level applied to all app loggers. Valid values: DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_level: "WARNING"
+# Optional absolute path to the log file. The parent directory must exist;
+# it is created by this role when non-empty. Leave empty for console-only logging.
+log_file: ""
+# Optional per-app log level overrides. List of single-key dicts {appname: level}.
+# The appname is uppercased and prefixed with LOG_LEVEL_ in the .env file.
+# Example:
+#   app_log_levels:
+#     - backends: DEBUG
+#     - bayesian_networks: INFO
+app_log_levels: []
