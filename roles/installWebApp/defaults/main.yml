@@ -29,3 +29,7 @@ log_file: ""
 #     - backends: DEBUG
 #     - bayesian_networks: INFO
 app_log_levels: []
+
+# Cache
+cache_backend: "django.core.cache.backends.db.DatabaseCache"
+cache_location: "django_cache"

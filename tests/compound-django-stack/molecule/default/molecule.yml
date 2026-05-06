@@ -58,6 +58,8 @@ provisioner:
           email_host_user: ""
           email_host_password: ""
           email_default_from: ""
+        cache_backend: "django.core.cache.backends.db.DatabaseCache"
+        cache_location: "django_cache"
         # gunicornSetup
         gunicorn_workers: 2
         # celerySetup

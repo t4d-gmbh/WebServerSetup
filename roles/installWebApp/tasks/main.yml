@@ -215,6 +215,17 @@
   args:
     chdir: /opt/{{ app_name }}
   become: yes
-  become_user: django  # Run this task as the django user
+  become_user: django
+  tags:
+    - molecule-notest
+
+- name: Ensure Django cache table exists
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py createcachetable
+  args:
+    chdir: /opt/{{ app_name }}
+  become: yes
+  become_user: django
+  register: createcachetable_result
+  changed_when: "'already exists' not in createcachetable_result.stdout"
   tags:
     - molecule-notest
