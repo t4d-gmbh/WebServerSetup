@@ -101,6 +101,24 @@
   become: yes
   when: log_file | length > 0
 
+- name: Stat the log file
+  stat:
+    path: "{{ log_file }}"
+  register: log_file_stat
+  become: yes
+  when: log_file | length > 0
+
+- name: Ensure log file has correct ownership if it exists
+  file:
+    path: "{{ log_file }}"
+    owner: django
+    group: django
+    mode: '0640'
+  become: yes
+  when:
+    - log_file | length > 0
+    - log_file_stat.stat.exists
+
 - name: Ensure the static and media folders exist
   file:
     path: "{{ item }}"

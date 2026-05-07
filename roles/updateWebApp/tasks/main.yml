@@ -5,6 +5,34 @@
     state: present
   become: yes
 
+- name: Ensure the log file directory exists
+  file:
+    path: "{{ log_file | dirname }}"
+    state: directory
+    owner: django
+    group: django
+    mode: '0755'
+  become: yes
+  when: log_file | length > 0
+
+- name: Stat the log file
+  stat:
+    path: "{{ log_file }}"
+  register: log_file_stat
+  become: yes
+  when: log_file | length > 0
+
+- name: Ensure log file has correct ownership if it exists
+  file:
+    path: "{{ log_file }}"
+    owner: django
+    group: django
+    mode: '0640'
+  become: yes
+  when:
+    - log_file | length > 0
+    - log_file_stat.stat.exists
+
 - name: Fetch the latest changes from the Git repository
   git:
     repo: "https://oauth2:{{ vault_repository_token }}@{{ git_remote }}{{ git_repository_path }}"
@@ -79,9 +107,11 @@
 - name: Apply database migrations
   command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py migrate
   args:
-    chdir:
+    chdir: /opt/{{ app_name }}
   register: migrate_result
   ignore_errors: yes
+  become: yes
+  become_user: django
   tags:
     - molecule-notest
 
@@ -96,5 +126,16 @@
       fail:
         msg: "Migration failed with an unexpected error: {{ migrate_result.stderr }}"
       when: migrate_result.rc != 0 and "No migrations to apply" not in migrate_result.stderr
+  tags:
+    - molecule-notest
+
+- name: Ensure Django cache table exists
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py createcachetable
+  args:
+    chdir: /opt/{{ app_name }}
+  become: yes
+  become_user: django
+  register: createcachetable_result
+  changed_when: "'already exists' not in createcachetable_result.stdout"
   tags:
     - molecule-notest
