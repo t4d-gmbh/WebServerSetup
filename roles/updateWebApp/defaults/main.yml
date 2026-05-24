@@ -4,3 +4,8 @@
 # Use "{{ app_name | lower }}" for the legacy layout where manage.py lives
 # inside a subdirectory named after the application.
 django_project_subdir: "."
+
+# Logging — mirrors installWebApp defaults so this role works standalone
+log_level: "WARNING"
+log_file: ""
+app_log_levels: []
