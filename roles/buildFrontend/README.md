@@ -21,8 +21,20 @@ This role installs Node.js and builds frontend assets (Vite, Tailwind CSS, etc.)
 | `frontend_app_path` | `"/opt/{{ app_name }}"` | Path where `package.json` lives. |
 | `frontend_build_command` | `"npm run build"` | The command to run for the production build. Can be changed to `yarn build`, `pnpm build`, etc. |
 | `frontend_clean_install` | `true` | If `true`, uses `npm ci` (clean install from lockfile). If `false`, uses `npm install`. |
-| `django_project_dir` | `"{{ app_name \| lower }}"` | The Django project subdirectory (where `manage.py` lives), relative to `frontend_app_path`. |
+| `django_project_subdir` | `"."` | Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root — standard Django layout). Set to `"{{ app_name \| lower }}"` for the legacy layout. |
 | `frontend_run_collectstatic` | `true` | Whether to run `manage.py collectstatic` after the build. |
+
+#### Migration Note — `django_project_subdir`
+
+**Breaking change.** This variable was previously named `django_project_dir` and defaulted to `"{{ app_name | lower }}"`. It has been renamed to `django_project_subdir` and the default is now `"."` for consistency with `installWebApp`, `updateWebApp`, `gunicornSetup`, and `celerySetup`.
+
+Existing deployments where `manage.py` lives inside a `<app_name>/` subdirectory must set in `group_vars/all/main.yml`:
+
+```yaml
+django_project_subdir: "{{ app_name | lower }}"
+```
+
+A single setting covers all five roles.
 
 ## Dependencies
 

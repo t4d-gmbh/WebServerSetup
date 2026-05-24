@@ -11,8 +11,11 @@ frontend_build_command: "npm run build"
 # Whether to run npm ci (clean install from lockfile) or npm install
 frontend_clean_install: true
 
-# The Django project subdirectory (where manage.py lives)
-django_project_dir: "{{ app_name | lower }}"
+# Subdirectory within /opt/{{ app_name }} that contains manage.py.
+# Use "." for repositories where manage.py is at the repository root.
+# Use "{{ app_name | lower }}" for the legacy layout where manage.py lives
+# inside a subdirectory named after the application.
+django_project_subdir: "."
 
 # Whether to run collectstatic after the frontend build
 frontend_run_collectstatic: true

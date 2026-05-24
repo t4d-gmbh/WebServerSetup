@@ -75,7 +75,7 @@
 - name: Collect static files
   command: >
     /opt/{{ app_name }}/venv/bin/python
-    /opt/{{ app_name }}/{{ django_project_dir }}/manage.py
+    /opt/{{ app_name }}/{{ django_project_subdir }}/manage.py
     collectstatic --noinput
   args:
     chdir: "/opt/{{ app_name }}"
