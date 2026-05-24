@@ -7,7 +7,7 @@ Type=forking
 User={{ celery_user }}
 Group={{ celery_group }}
 EnvironmentFile=/etc/conf.d/celery
-WorkingDirectory=/opt/{{ app_name }}/{{ app_name | lower }}
+WorkingDirectory=/opt/{{ app_name }}/{{ django_project_subdir }}
 ExecStart=/bin/sh -c '${CELERY_BIN} -A $CELERY_APP multi start $CELERYD_NODES \
     --pidfile=${CELERYD_PID_FILE} --logfile=${CELERYD_LOG_FILE} \
     --loglevel="${CELERYD_LOG_LEVEL}" $CELERYD_OPTS'

@@ -1,0 +1,6 @@
+---
+# Subdirectory within /opt/{{ app_name }} that contains manage.py (and wsgi.py).
+# Use "." for repositories where manage.py is at the repository root.
+# Use "{{ app_name | lower }}" for the legacy layout where manage.py lives
+# inside a subdirectory named after the application.
+django_project_subdir: "."

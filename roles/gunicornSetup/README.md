@@ -15,6 +15,15 @@ This Ansible role sets up Gunicorn as a WSGI server for your web application. It
 
 - `app_name`: The name of your application (used for directory and service naming).
 - `gunicorn_workers`: The number of Gunicorn worker processes to spawn.
+- `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py` and `wsgi.py`. Defaults to `"."` (repository root). Set to `"{{ app_name | lower }}"` for the legacy layout.
+
+#### Migration Note — `django_project_subdir`
+
+The `WorkingDirectory` for the Gunicorn systemd service is now controlled by `django_project_subdir` (default `"."`). **Existing deployments** where `wsgi.py` lives inside a `<app_name>/` subdirectory must set:
+
+```yaml
+django_project_subdir: "{{ app_name | lower }}"
+```
 
 ## Dependencies
 

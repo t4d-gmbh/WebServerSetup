@@ -45,6 +45,17 @@ The Django application to install must be configured to use `python-decouple` an
     - backends: DEBUG
     - bayesian_networks: INFO
   ```
+- `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root — standard Django layout). Set to `"{{ app_name | lower }}"` for the legacy layout where `manage.py` lives inside a subdirectory named after the application.
+
+#### Migration Note — `django_project_subdir`
+
+The working directory for `manage.py` calls is now controlled by `django_project_subdir` (default `"."`). **Existing deployments** where `manage.py` lives inside a `<app_name>/` subdirectory must set in `group_vars/all/main.yml`:
+
+```yaml
+django_project_subdir: "{{ app_name | lower }}"
+```
+
+This single setting covers `installWebApp`, `updateWebApp`, `gunicornSetup`, and `celerySetup`.
 
 ## Dependencies
 

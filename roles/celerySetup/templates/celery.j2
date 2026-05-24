@@ -20,7 +20,7 @@ CELERY_APP="{{ app_name | lower }}"
 CELERYD_MULTI="multi"
 
 # Where to chdir at start.
-CELERYD_CHDIR="/opt/{{ app_name }}/{{ app_name | lower}}/"
+CELERYD_CHDIR="/opt/{{ app_name }}/{{ django_project_subdir }}/"
 
 # Extra command-line arguments to the worker
 CELERYD_OPTS="--time-limit={{ celery_time_limit }} --concurrency={{ celery_concurrency }}"
