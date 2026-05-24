@@ -4,14 +4,3 @@
 # Use "{{ app_name | lower }}" for the legacy layout where manage.py lives
 # inside a subdirectory named after the application.
 django_project_subdir: "."
-
-rabbitmq_version: latest
-# celery config options
-celery_worker_name: "worker1"
-celery_time_limit: 300
-celery_concurrency: 8
-celery_log_level: "DEBUG"
-celery_log_file: "/var/log/celery/%n%I.log"
-celery_pid_file: "/var/run/celery/%n.pid"
-celery_user: "django"
-celery_group: "www-data"

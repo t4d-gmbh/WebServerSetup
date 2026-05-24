@@ -85,7 +85,7 @@
 - name: Make sure the .env file is present
   template:
     src: .env.j2
-    dest: /opt/{{ app_name }}/{{ app_name | lower }}/.env
+    dest: /opt/{{ app_name }}/{{ django_project_subdir }}/.env
     owner: django
     group: django
     mode: '0700'
@@ -220,7 +220,7 @@
     - molecule-notest
 
 - name: Collect static files
-  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py collectstatic --noinput
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ django_project_subdir }}/manage.py collectstatic --noinput
   args:
     chdir: /opt/{{ app_name }}
   become: yes
@@ -229,7 +229,7 @@
     - molecule-notest
 
 - name: Apply database migrations
-  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower}}/manage.py migrate
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ django_project_subdir }}/manage.py migrate
   args:
     chdir: /opt/{{ app_name }}
   become: yes
@@ -238,7 +238,7 @@
     - molecule-notest
 
 - name: Ensure Django cache table exists
-  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ app_name | lower }}/manage.py createcachetable
+  command: /opt/{{ app_name }}/venv/bin/python /opt/{{ app_name }}/{{ django_project_subdir }}/manage.py createcachetable
   args:
     chdir: /opt/{{ app_name }}
   become: yes

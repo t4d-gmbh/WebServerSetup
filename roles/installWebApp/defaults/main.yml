@@ -30,6 +30,12 @@ log_file: ""
 #     - bayesian_networks: INFO
 app_log_levels: []
 
+# Django project subdirectory — path relative to /opt/{{ app_name }} where manage.py lives.
+# Default "." assumes manage.py is at the repository root (standard Django layout).
+# Existing deployments with manage.py in a subdirectory must set this explicitly:
+#   django_project_subdir: "{{ app_name | lower }}"
+django_project_subdir: "."
+
 # Cache
 cache_backend: "django.core.cache.backends.db.DatabaseCache"
 cache_location: "django_cache"

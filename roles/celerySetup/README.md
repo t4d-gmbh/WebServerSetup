@@ -23,6 +23,15 @@ It installs necessary packages, configures RabbitMQ as a message broker, and set
 - `celery_pid_file`: Path for Celery PID files (default: "/var/run/celery/%n.pid").
 - `celery_user`: User under which Celery will run (default: "django").
 - `celery_group`: Group under which Celery will run (default: "www-data").
+- `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root). Set to `"{{ app_name | lower }}"` for the legacy layout.
+
+#### Migration Note — `django_project_subdir`
+
+`WorkingDirectory` in the Celery service file and `CELERYD_CHDIR` in the Celery config are now controlled by `django_project_subdir` (default `"."`). **Existing deployments** where `manage.py` lives inside a `<app_name>/` subdirectory must set:
+
+```yaml
+django_project_subdir: "{{ app_name | lower }}"
+```
 
 ## Dependencies
 
