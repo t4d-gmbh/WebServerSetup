@@ -1,0 +1,28 @@
+---
+- name: Verify nginxWebServer (http_redirect_off)
+  hosts: all
+  become: true
+  tasks:
+    - name: Read rendered nginx config
+      ansible.builtin.slurp:
+        src: /etc/nginx/sites-available/testapp.conf
+      register: nginx_conf_content
+
+    - name: Assert HTTP-to-HTTPS redirect is absent
+      ansible.builtin.assert:
+        that:
+          - "'return 301 https://' not in (nginx_conf_content.content | b64decode)"
+        fail_msg: "Expected no HTTPS redirect when nginx_https_only=false"
+
+    - name: Assert port 80 serves the app directly
+      ansible.builtin.assert:
+        that:
+          - "'listen 80' in (nginx_conf_content.content | b64decode)"
+          - "'proxy_pass http://unix:/opt/testapp/gunicorn.sock' in (nginx_conf_content.content | b64decode)"
+        fail_msg: "Expected port 80 to serve the app when nginx_https_only=false"
+
+    - name: Assert client_max_body_size is set (port 80 block)
+      ansible.builtin.assert:
+        that:
+          - "'client_max_body_size 10M' in (nginx_conf_content.content | b64decode)"
+        fail_msg: "Expected client_max_body_size 10M in nginx config"

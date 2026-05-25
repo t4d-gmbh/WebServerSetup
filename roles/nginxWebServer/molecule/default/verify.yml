@@ -48,3 +48,20 @@
         that:
           - not nginx_default.stat.exists
         fail_msg: "Default Nginx site still enabled"
+
+    - name: Read rendered nginx config
+      ansible.builtin.slurp:
+        src: /etc/nginx/sites-available/testapp.conf
+      register: nginx_conf_content
+
+    - name: Assert HTTP-to-HTTPS redirect is present (default nginx_https_only=true)
+      ansible.builtin.assert:
+        that:
+          - "'return 301 https://$host$request_uri' in (nginx_conf_content.content | b64decode)"
+        fail_msg: "Expected HTTPS redirect by default (nginx_https_only=true)"
+
+    - name: Assert client_max_body_size is set in the 443 block
+      ansible.builtin.assert:
+        that:
+          - "'client_max_body_size 10M' in (nginx_conf_content.content | b64decode)"
+        fail_msg: "Expected client_max_body_size 10M in nginx config"

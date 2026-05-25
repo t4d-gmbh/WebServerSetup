@@ -18,6 +18,8 @@ This Ansible role installs and configures Nginx as a web server for a Django app
 - `key_path`: The path to the SSL certificate key file.
 - `static_root`: The path to the static files directory.
 - `media_root`: The path to the media files directory.
+- `nginx_https_only`: If `true` (default), all HTTP requests are permanently redirected to HTTPS (301). If `false`, the application is served on both port 80 and port 443 without any redirect.
+- `nginx_client_max_body_size`: Maximum allowed size of the client request body (e.g. for file uploads). Defaults to `"10M"`. Accepts nginx size notation (`10M`, `50M`, `0` to disable the limit).
 
 ## Dependencies
 

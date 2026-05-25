@@ -1,0 +1,8 @@
+---
+# When true (default), all HTTP requests are permanently redirected to HTTPS.
+# When false, the app is served on both port 80 and port 443 without a redirect.
+nginx_https_only: true
+
+# Maximum allowed size of the client request body (e.g. for file uploads).
+# Accepts nginx size notation: "10M", "50M", "0" to disable the limit.
+nginx_client_max_body_size: "10M"
