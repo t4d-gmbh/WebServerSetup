@@ -90,3 +90,14 @@
         that:
           - acl_check.rc == 0
         fail_msg: "ACL package is not installed"
+
+    - name: Read .env file
+      ansible.builtin.slurp:
+        src: /opt/testapp/.env
+      register: dotenv_content
+
+    - name: Assert no Extra section when env_extra_vars and vault_env_extra_vars are not set
+      ansible.builtin.assert:
+        that:
+          - "'# Extra' not in (dotenv_content.content | b64decode)"
+        fail_msg: "Extra section should not appear when env_extra_vars is empty"

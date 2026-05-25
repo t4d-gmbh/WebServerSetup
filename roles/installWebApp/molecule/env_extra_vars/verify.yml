@@ -1,0 +1,103 @@
+---
+- name: Verify env_extra_vars in .env file
+  hosts: all
+  become: true
+  tasks:
+
+    # --- Value correctness: vault wins on conflict ---
+
+    - name: Source .env and read PLAIN_API_URL
+      ansible.builtin.shell: |
+        set -a && . /opt/testapp/.env && set +a && printf '%s' "$PLAIN_API_URL"
+      register: plain_api_url
+      changed_when: false
+
+    - name: Assert vault value wins over plain value for PLAIN_API_URL
+      ansible.builtin.assert:
+        that:
+          - plain_api_url.stdout == "https://overridden.example.com"
+        fail_msg: "PLAIN_API_URL should be vault value 'https://overridden.example.com', got: '{{ plain_api_url.stdout }}'"
+
+    # --- Value correctness: plain var ---
+
+    - name: Source .env and read FEATURE_FLAG
+      ansible.builtin.shell: |
+        set -a && . /opt/testapp/.env && set +a && printf '%s' "$FEATURE_FLAG"
+      register: feature_flag
+      changed_when: false
+
+    - name: Assert FEATURE_FLAG is set from env_extra_vars
+      ansible.builtin.assert:
+        that:
+          - feature_flag.stdout == "true"
+        fail_msg: "FEATURE_FLAG should be 'true', got: '{{ feature_flag.stdout }}'"
+
+    # --- Value correctness: value with spaces (quoting test) ---
+
+    - name: Source .env and read SPACED_VALUE
+      ansible.builtin.shell: |
+        set -a && . /opt/testapp/.env && set +a && printf '%s' "$SPACED_VALUE"
+      register: spaced_value
+      changed_when: false
+
+    - name: Assert SPACED_VALUE preserves spaces (single-quote wrapping)
+      ansible.builtin.assert:
+        that:
+          - spaced_value.stdout == "hello world"
+        fail_msg: "SPACED_VALUE should be 'hello world', got: '{{ spaced_value.stdout }}'"
+
+    # --- Value correctness: vault-only var ---
+
+    - name: Source .env and read SECRET_TOKEN
+      ansible.builtin.shell: |
+        set -a && . /opt/testapp/.env && set +a && printf '%s' "$SECRET_TOKEN"
+      register: secret_token
+      changed_when: false
+
+    - name: Assert SECRET_TOKEN is set from vault_env_extra_vars
+      ansible.builtin.assert:
+        that:
+          - secret_token.stdout == "vault_secret_value"
+        fail_msg: "SECRET_TOKEN should be 'vault_secret_value', got: '{{ secret_token.stdout }}'"
+
+    # --- Format: no indented lines anywhere in .env ---
+
+    - name: Check for indented lines in .env
+      ansible.builtin.shell: grep -Pn '^\s+\S' /opt/testapp/.env || true
+      register: indent_check
+      changed_when: false
+
+    - name: Assert no indented lines
+      ansible.builtin.assert:
+        that:
+          - indent_check.stdout == ""
+        fail_msg: "Found indented lines in .env (Jinja indent bug):\n{{ indent_check.stdout }}"
+
+    # --- Format: no blank lines within the Extra section ---
+
+    - name: Check for blank lines within Extra section
+      ansible.builtin.shell: |
+        awk '
+          /^# Extra$/ { in_extra=1; next }
+          in_extra && /^$/ { print NR": unexpected blank line in Extra section"; found=1 }
+          in_extra && /^[A-Z_]+=/ { next }
+          in_extra { in_extra=0 }
+          END { exit found+0 }
+        ' /opt/testapp/.env
+      register: blank_line_check
+      changed_when: false
+      failed_when: blank_line_check.rc != 0
+
+    - name: Assert no blank lines in Extra section
+      ansible.builtin.assert:
+        that:
+          - blank_line_check.rc == 0
+        fail_msg: "Blank lines found inside Extra section:\n{{ blank_line_check.stdout }}"
+
+    # --- Format: .env is sourceable without errors ---
+
+    - name: Assert .env file is sourceable by bash without errors
+      ansible.builtin.shell: bash -c 'set -a && . /opt/testapp/.env'
+      register: source_check
+      changed_when: false
+      failed_when: source_check.rc != 0

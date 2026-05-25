@@ -39,3 +39,13 @@ django_project_subdir: "."
 # Cache
 cache_backend: "django.core.cache.backends.db.DatabaseCache"
 cache_location: "django_cache"
+
+# Extra environment variables appended to the .env file.
+# env_extra_vars holds plain (non-secret) key/value pairs.
+# vault_env_extra_vars holds secret key/value pairs (store in Ansible Vault).
+# Both are merged; vault_env_extra_vars wins on key conflicts.
+# Values must not contain single quotes. If a value contains spaces or shell
+# special characters ($, #, &, etc.), the single-quote wrapping in the template
+# ensures it is bash-safe — no additional escaping needed on the Ansible side.
+env_extra_vars: {}
+vault_env_extra_vars: {}

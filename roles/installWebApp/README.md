@@ -46,6 +46,18 @@ The Django application to install must be configured to use `python-decouple` an
     - bayesian_networks: INFO
   ```
 - `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root — standard Django layout). Set to `"{{ app_name | lower }}"` for the legacy layout where `manage.py` lives inside a subdirectory named after the application.
+- `env_extra_vars`: Optional dict of additional plain (non-secret) key/value pairs to append to the `.env` file. Defaults to `{}`. Example:
+  ```yaml
+  env_extra_vars:
+    THIRD_PARTY_API_URL: "https://api.example.com"
+    FEATURE_FLAG: "true"
+  ```
+- `vault_env_extra_vars`: Optional dict of secret key/value pairs to append to the `.env` file. Should be stored in Ansible Vault. Merged with `env_extra_vars`; vault values win on key conflicts. Defaults to `{}`. Example:
+  ```yaml
+  vault_env_extra_vars:
+    THIRD_PARTY_API_KEY: "supersecret"
+  ```
+  > **Note:** Values must not contain single quotes. Values with spaces or shell special characters (`$`, `#`, `&`, etc.) are safe — they are wrapped in single quotes in the rendered `.env` file.
 
 #### Migration Note — `django_project_subdir`
 
@@ -79,7 +91,7 @@ To use this role, add it to your Ansible playbook as follows:
 4. **Clone the Repository**: Clones the application code from the specified Git repository.
 5. **Ensure Secret Directory Exists**: Creates a directory for storing application secrets.
 6. **Manage Secret Key**: Generates a new secret key if one does not exist and stores it securely.
-7. **Create .env File**: Sets up a `.env` file for the Django application with database, secret key, and logging configuration.
+7. **Create .env File**: Sets up a `.env` file for the Django application with database, secret key, logging configuration, and any extra variables.
 8. **Ensure Log Directory Exists**: Creates the parent directory of `log_file` (owned by `django`) when `log_file` is set.
 9. **Ensure Static and Media Folders Exist**: Creates directories for static and media files.
 9. **Set Permissions**: Configures permissions for the application directories and files.
