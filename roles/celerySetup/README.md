@@ -15,6 +15,8 @@ It installs necessary packages, configures RabbitMQ as a message broker, and set
 ## Role Variables
 
 - `rabbitmq_version`: The version of RabbitMQ to pull (default: latest).
+- `rabbitmq_log_max_size`: Maximum size of the RabbitMQ container log file before rotation (default: `"10m"`). Accepts Docker log size notation (`10m`, `100m`, etc.).
+- `rabbitmq_log_max_file`: Number of rotated RabbitMQ container log files to retain (default: `"3"`).
 - `celery_worker_name`: The name of the Celery worker (default: "worker1").
 - `celery_time_limit`: Time limit for Celery tasks (default: 300 seconds).
 - `celery_concurrency`: Number of concurrent Celery tasks (default: 8).
@@ -52,7 +54,7 @@ To use this role, add it to your Ansible playbook as follows:
 1. **Ensure ACL Package is Installed**: Installs the ACL package to manage permissions.
 2. **Create Celery systemd Service File**: Configures a systemd service for Celery.
 3. **Pull RabbitMQ Docker Image**: Pulls the specified RabbitMQ Docker image.
-4. **Run RabbitMQ Container**: Starts the RabbitMQ container with the necessary configurations.
+4. **Run RabbitMQ Container**: Starts the RabbitMQ container with log rotation configured.
 5. **Deploy Temporary Files**: Creates temporary files for Celery configuration.
 6. **Ensure Configuration Directory Exists**: Ensures the `/etc/conf.d` directory exists.
 7. **Ensure Celery Specific Folders Exist**: Creates necessary directories for Celery logs and runtime.

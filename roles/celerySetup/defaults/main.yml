@@ -6,6 +6,9 @@
 django_project_subdir: "."
 
 rabbitmq_version: latest
+# RabbitMQ container log rotation — prevents the container log from growing unbounded
+rabbitmq_log_max_size: "10m"
+rabbitmq_log_max_file: "3"
 # celery config options
 celery_worker_name: "worker1"
 celery_time_limit: 300

@@ -44,6 +44,10 @@
         env:
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
+        log_driver: json-file
+        log_options:
+          max-size: "{{ rabbitmq_log_max_size }}"
+          max-file: "{{ rabbitmq_log_max_file }}"
       become: yes
 
     - name: Deploy the temp files
