@@ -38,7 +38,7 @@
       User=django
       Group=www-data
       WorkingDirectory=/opt/{{ app_name }}/{{ django_project_subdir }}
-      ExecStart=/opt/{{ app_name }}/venv/bin/gunicorn --access-logfile - --workers {{ gunicorn_workers }} --bind unix:/opt/{{ app_name }}/gunicorn.sock {{ app_name | lower }}.wsgi:application
+      ExecStart=/opt/{{ app_name }}/venv/bin/gunicorn --access-logfile - --workers {{ gunicorn_workers }} --max-requests {{ gunicorn_max_requests }} --max-requests-jitter {{ gunicorn_max_requests_jitter }} --bind unix:/opt/{{ app_name }}/gunicorn.sock {{ app_name | lower }}.wsgi:application
 
       [Install]
       WantedBy=multi-user.target

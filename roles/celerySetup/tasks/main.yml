@@ -41,9 +41,12 @@
         published_ports:
           - "5672:5672"  # RabbitMQ default port
           - "15672:15672"  # RabbitMQ management UI
+        memory: "{{ rabbitmq_memory_limit }}"
         env:
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
+          RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "{{ rabbitmq_vm_memory_high_watermark }}"
+          RABBITMQ_VM_MEMORY_HIGH_WATERMARK_PAGING_RATIO: "{{ rabbitmq_vm_memory_high_watermark_paging_ratio }}"
         log_driver: json-file
         log_options:
           max-size: "{{ rabbitmq_log_max_size }}"
@@ -74,6 +77,24 @@
       loop:
         - /var/log/celery
         - /var/run/celery
+
+    - name: Deploy logrotate config for Celery logs
+      become: true
+      copy:
+        dest: /etc/logrotate.d/{{ app_name | lower }}-celery
+        content: |
+          /var/log/celery/*.log {
+              daily
+              rotate 14
+              compress
+              delaycompress
+              missingok
+              notifempty
+              copytruncate
+          }
+        owner: root
+        group: root
+        mode: '0644'
 
     - name: Create celery config file
       template:

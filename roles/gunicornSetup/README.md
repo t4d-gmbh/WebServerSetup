@@ -15,6 +15,8 @@ This Ansible role sets up Gunicorn as a WSGI server for your web application. It
 
 - `app_name`: The name of your application (used for directory and service naming).
 - `gunicorn_workers`: The number of Gunicorn worker processes to spawn.
+- `gunicorn_max_requests`: Number of requests a worker handles before being recycled (default: `500`). Prevents unbounded RSS growth from Django memory leaks.
+- `gunicorn_max_requests_jitter`: Random jitter added to `gunicorn_max_requests` (default: `50`). Staggers worker restarts to avoid thundering-herd behaviour.
 - `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py` and `wsgi.py`. Defaults to `"."` (repository root). Set to `"{{ app_name | lower }}"` for the legacy layout.
 
 #### Migration Note — `django_project_subdir`

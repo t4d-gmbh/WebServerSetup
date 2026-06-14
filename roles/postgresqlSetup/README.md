@@ -19,6 +19,10 @@ This Ansible role installs and configures PostgreSQL using Docker. It ensures th
 - `db_name`: The name of the PostgreSQL database to create.
 - `db_user`: The PostgreSQL user to create.
 - `vault_db_password`: The password for the PostgreSQL user (should be stored securely).
+- `postgresql_log_max_size`: Maximum size of the PostgreSQL container log file before rotation (default: `"10m"`). Accepts Docker log size notation (`10m`, `100m`, etc.).
+- `postgresql_log_max_file`: Number of rotated PostgreSQL container log files to retain (default: `"3"`).
+- `postgresql_memory_limit`: Docker memory limit for the PostgreSQL container (default: `"512m"`). Prevents the container from competing unboundedly for RAM.
+- `postgresql_shm_size`: Shared memory size for the PostgreSQL container (default: `"128m"`). Maps to `--shm-size`, which PostgreSQL uses for shared buffers.
 
 ## Dependencies
 

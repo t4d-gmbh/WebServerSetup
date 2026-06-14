@@ -119,6 +119,25 @@
     - log_file | length > 0
     - log_file_stat.stat.exists
 
+- name: Deploy logrotate config for Django log
+  become: true
+  copy:
+    dest: /etc/logrotate.d/{{ app_name | lower }}-django
+    content: |
+      {{ log_file }} {
+          daily
+          rotate 14
+          compress
+          delaycompress
+          missingok
+          notifempty
+          copytruncate
+      }
+    owner: root
+    group: root
+    mode: '0644'
+  when: log_file | length > 0
+
 - name: Ensure the static and media folders exist
   file:
     path: "{{ item }}"

@@ -38,7 +38,7 @@ The Django application to install must be configured to use `python-decouple` an
   It should be stored securely in a vault file (hence the `vault_` prefix).
   For an example with the django default values, see `/defautls/main.yml`.
 - `log_level`: Global log level for all app loggers. Valid values: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. Defaults to `WARNING`.
-- `log_file`: Optional absolute path to a log file (e.g. `/var/log/myapp/django.log`). Leave empty (default) for console-only logging via stderr. When set, the role creates the parent directory and assigns it to the `django` user.
+- `log_file`: Optional absolute path to a log file (e.g. `/var/log/myapp/django.log`). Leave empty (default) for console-only logging via stderr. When set, the role creates the parent directory, assigns it to the `django` user, and deploys a logrotate config that rotates the file daily (14 compressed copies retained).
 - `app_log_levels`: Optional list of single-key dicts to override the log level per Django app. The key is the app name (lowercased), the value is the log level. Emits `LOG_LEVEL_<APPNAME>=<LEVEL>` entries in the `.env` file. Defaults to `[]` (no overrides; all apps inherit `log_level`). Example:
   ```yaml
   app_log_levels:
@@ -93,11 +93,12 @@ To use this role, add it to your Ansible playbook as follows:
 6. **Manage Secret Key**: Generates a new secret key if one does not exist and stores it securely.
 7. **Create .env File**: Sets up a `.env` file for the Django application with database, secret key, logging configuration, and any extra variables.
 8. **Ensure Log Directory Exists**: Creates the parent directory of `log_file` (owned by `django`) when `log_file` is set.
-9. **Ensure Static and Media Folders Exist**: Creates directories for static and media files.
-9. **Set Permissions**: Configures permissions for the application directories and files.
-10. **Install ACL Package**: Ensures the ACL package is installed for managing permissions.
-11. **Create Virtual Environment**: Sets up a Python virtual environment for the application.
-12. **Install Requirements**: Installs the required Python packages from `pyproject.toml` (preferred) or `requirements.txt`. Fails if neither is present.
+9. **Deploy logrotate config for Django log**: Installs a logrotate config under `/etc/logrotate.d/` to rotate `log_file` daily (14 compressed copies). Only deployed when `log_file` is set. Uses `copytruncate` because Django keeps the log file descriptor open.
+10. **Ensure Static and Media Folders Exist**: Creates directories for static and media files.
+10. **Set Permissions**: Configures permissions for the application directories and files.
+11. **Install ACL Package**: Ensures the ACL package is installed for managing permissions.
+12. **Create Virtual Environment**: Sets up a Python virtual environment for the application.
+13. **Install Requirements**: Installs the required Python packages from `pyproject.toml` (preferred) or `requirements.txt`. Fails if neither is present.
 
 ## Usage
 

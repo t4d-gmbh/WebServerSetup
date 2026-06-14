@@ -38,3 +38,27 @@
           - "'LOG_LEVEL_BACKENDS=DEBUG' in env_content"
           - "'LOG_LEVEL_ACCOUNTS=INFO' in env_content"
         fail_msg: "Per-app log level overrides missing or incorrect in .env"
+
+    - name: Check logrotate config for Django log exists
+      ansible.builtin.stat:
+        path: /etc/logrotate.d/testapp-django
+      register: django_logrotate
+
+    - name: Assert logrotate config exists with correct permissions
+      ansible.builtin.assert:
+        that:
+          - django_logrotate.stat.exists
+          - django_logrotate.stat.mode == '0644'
+        fail_msg: "Django logrotate config missing or wrong permissions"
+
+    - name: Read logrotate config
+      ansible.builtin.slurp:
+        src: /etc/logrotate.d/testapp-django
+      register: django_logrotate_content
+
+    - name: Assert logrotate config references correct log file and uses copytruncate
+      ansible.builtin.assert:
+        that:
+          - "'/var/log/testapp/django.log' in (django_logrotate_content.content | b64decode)"
+          - "'copytruncate' in (django_logrotate_content.content | b64decode)"
+        fail_msg: "Django logrotate config has wrong content"

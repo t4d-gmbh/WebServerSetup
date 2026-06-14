@@ -69,3 +69,9 @@
       PGDATA: "{{ postgresql_pgdata_parent }}/pgdata"
     volumes:
       - "{{ postgresql_data_dir }}:{{ postgresql_pgdata_parent }}"
+    memory: "{{ postgresql_memory_limit }}"
+    shm_size: "{{ postgresql_shm_size }}"
+    log_driver: "json-file"
+    log_options:
+      max-size: "{{ postgresql_log_max_size }}"
+      max-file: "{{ postgresql_log_max_file }}"
