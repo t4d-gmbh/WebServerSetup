@@ -9,3 +9,7 @@ django_project_subdir: "."
 # Jitter staggers restarts to avoid thundering-herd behaviour.
 gunicorn_max_requests: 500
 gunicorn_max_requests_jitter: 50
+# Optional systemd memory pressure and hard-limit controls for the full
+# Gunicorn service cgroup. Leave empty to omit the directives.
+gunicorn_memory_high: ""
+gunicorn_memory_max: ""

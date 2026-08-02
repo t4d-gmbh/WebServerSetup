@@ -48,4 +48,6 @@
           - "'testapp.wsgi:application' in (service_content.content | b64decode)"
           - "'--max-requests 500' in (service_content.content | b64decode)"
           - "'--max-requests-jitter 50' in (service_content.content | b64decode)"
+          - "'MemoryHigh=700M' in (service_content.content | b64decode)"
+          - "'MemoryMax=1G' in (service_content.content | b64decode)"
         fail_msg: "gunicorn service file has wrong configuration"

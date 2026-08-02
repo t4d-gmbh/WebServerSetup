@@ -1,0 +1,18 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=django
+Group=www-data
+WorkingDirectory=/opt/{{ app_name }}/{{ django_project_subdir }}
+{% if gunicorn_memory_high | length > 0 %}
+MemoryHigh={{ gunicorn_memory_high }}
+{% endif %}
+{% if gunicorn_memory_max | length > 0 %}
+MemoryMax={{ gunicorn_memory_max }}
+{% endif %}
+ExecStart=/opt/{{ app_name }}/venv/bin/gunicorn --access-logfile - --workers {{ gunicorn_workers }} --max-requests {{ gunicorn_max_requests }} --max-requests-jitter {{ gunicorn_max_requests_jitter }} --bind unix:/opt/{{ app_name }}/gunicorn.sock {{ app_name | lower }}.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

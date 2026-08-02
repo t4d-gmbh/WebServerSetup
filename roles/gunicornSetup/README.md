@@ -17,6 +17,8 @@ This Ansible role sets up Gunicorn as a WSGI server for your web application. It
 - `gunicorn_workers`: The number of Gunicorn worker processes to spawn.
 - `gunicorn_max_requests`: Number of requests a worker handles before being recycled (default: `500`). Prevents unbounded RSS growth from Django memory leaks.
 - `gunicorn_max_requests_jitter`: Random jitter added to `gunicorn_max_requests` (default: `50`). Staggers worker restarts to avoid thundering-herd behaviour.
+- `gunicorn_memory_high`: Optional systemd `MemoryHigh` value for the Gunicorn service cgroup (default: `""`, omitted). This is a soft memory pressure threshold.
+- `gunicorn_memory_max`: Optional systemd `MemoryMax` value for the Gunicorn service cgroup (default: `""`, omitted). This is a hard memory cap to prevent Gunicorn from consuming all host RAM.
 - `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py` and `wsgi.py`. Defaults to `"."` (repository root). Set to `"{{ app_name | lower }}"` for the legacy layout.
 
 #### Migration Note — `django_project_subdir`
@@ -65,6 +67,8 @@ To use this role, add it to your Ansible playbook as follows:
   vars:
     app_name: "my_web_app"
     gunicorn_workers: 3
+    gunicorn_memory_high: "700M"
+    gunicorn_memory_max: "1G"
   roles:
     - gunicornSetup
 ```

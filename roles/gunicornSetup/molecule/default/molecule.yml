@@ -20,6 +20,8 @@ provisioner:
       instance:
         app_name: testapp
         gunicorn_workers: 2
+        gunicorn_memory_high: "700M"
+        gunicorn_memory_max: "1G"
 scenario:
   test_sequence:
     - dependency
