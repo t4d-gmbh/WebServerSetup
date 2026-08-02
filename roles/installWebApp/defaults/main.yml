@@ -40,6 +40,9 @@ django_project_subdir: "."
 cache_backend: "django.core.cache.backends.db.DatabaseCache"
 cache_location: "django_cache"
 
+# Celery specific variables
+celery_task_always_eager: "False"
+
 # Extra environment variables appended to the .env file.
 # env_extra_vars holds plain (non-secret) key/value pairs.
 # vault_env_extra_vars holds secret key/value pairs (store in Ansible Vault).

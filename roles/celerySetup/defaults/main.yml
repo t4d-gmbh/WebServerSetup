@@ -19,7 +19,7 @@ rabbitmq_vm_memory_high_watermark_paging_ratio: "0.8"
 celery_worker_name: "worker1"
 celery_time_limit: 300
 celery_concurrency: 8
-celery_log_level: "DEBUG"
+celery_log_level: "WARNING"
 celery_log_file: "/var/log/celery/%n%I.log"
 celery_pid_file: "/var/run/celery/%n.pid"
 celery_user: "django"
