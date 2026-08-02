@@ -49,6 +49,21 @@
           - celery_config.stat.exists
         fail_msg: "celery config file does not exist"
 
+    - name: Read celery config file
+      ansible.builtin.slurp:
+        src: /etc/conf.d/celery
+      register: celery_config_content
+
+    - name: Assert celery worker options are rendered
+      ansible.builtin.assert:
+        that:
+          - "'--time-limit=300' in (celery_config_content.content | b64decode)"
+          - "'--concurrency=4' in (celery_config_content.content | b64decode)"
+          - "'--without-gossip' in (celery_config_content.content | b64decode)"
+          - "'--without-mingle' in (celery_config_content.content | b64decode)"
+          - "'--without-heartbeat' in (celery_config_content.content | b64decode)"
+        fail_msg: "celery worker options are not rendered correctly"
+
     - name: Check ACL is installed
       ansible.builtin.command: dpkg -l acl
       register: acl_check

@@ -46,6 +46,7 @@ The Django application to install must be configured to use `python-decouple` an
     - bayesian_networks: INFO
   ```
 - `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root — standard Django layout). Set to `"{{ app_name | lower }}"` for the legacy layout where `manage.py` lives inside a subdirectory named after the application.
+- `celery_task_always_eager`: Optional value for `CELERY_TASK_ALWAYS_EAGER` in the rendered `.env`. Defaults to an empty string, which omits the setting. Set to `"False"` for deployments that should use a real Celery broker.
 - `env_extra_vars`: Optional dict of additional plain (non-secret) key/value pairs to append to the `.env` file. Defaults to `{}`. Example:
   ```yaml
   env_extra_vars:

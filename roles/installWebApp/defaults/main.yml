@@ -41,7 +41,8 @@ cache_backend: "django.core.cache.backends.db.DatabaseCache"
 cache_location: "django_cache"
 
 # Celery specific variables
-celery_task_always_eager: "False"
+# Optional Celery eager mode toggle. Leave empty to omit it from the rendered .env.
+celery_task_always_eager: ""
 
 # Extra environment variables appended to the .env file.
 # env_extra_vars holds plain (non-secret) key/value pairs.

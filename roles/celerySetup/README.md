@@ -24,9 +24,10 @@ It installs necessary packages, configures RabbitMQ as a message broker, and set
 - `celery_worker_name`: The name of the Celery worker (default: "worker1").
 - `celery_time_limit`: Time limit for Celery tasks (default: 300 seconds).
 - `celery_concurrency`: Number of concurrent Celery tasks (default: 8).
-- `celery_log_level`: Logging level for Celery (default: "DEBUG").
+- `celery_log_level`: Logging level for Celery (default: "WARNING").
 - `celery_log_file`: Path for Celery log files (default: "/var/log/celery/%n%I.log").
 - `celery_pid_file`: Path for Celery PID files (default: "/var/run/celery/%n.pid").
+- `celery_extra_options`: Extra command-line options appended to `CELERYD_OPTS` (default: `""`). For RabbitMQ 4 compatibility, deployments can use this to pass options such as `--without-gossip --without-mingle --without-heartbeat`.
 - `celery_user`: User under which Celery will run (default: "django").
 - `celery_group`: Group under which Celery will run (default: "www-data").
 - `django_project_subdir`: Subdirectory within `/opt/<app_name>` that contains `manage.py`. Defaults to `"."` (repository root). Set to `"{{ app_name | lower }}"` for the legacy layout.

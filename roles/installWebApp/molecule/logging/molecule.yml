@@ -38,6 +38,7 @@ provisioner:
           email_host_password: ""
           email_default_from: ""
         log_file: "/var/log/testapp/django.log"
+        celery_task_always_eager: "False"
         app_log_levels:
           - backends: DEBUG
           - accounts: INFO

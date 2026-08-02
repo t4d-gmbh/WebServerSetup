@@ -22,5 +22,6 @@ celery_concurrency: 8
 celery_log_level: "WARNING"
 celery_log_file: "/var/log/celery/%n%I.log"
 celery_pid_file: "/var/run/celery/%n.pid"
+celery_extra_options: ""
 celery_user: "django"
 celery_group: "www-data"

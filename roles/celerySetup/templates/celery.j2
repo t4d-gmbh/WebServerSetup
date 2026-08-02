@@ -23,7 +23,7 @@ CELERYD_MULTI="multi"
 CELERYD_CHDIR="/opt/{{ app_name }}/{{ django_project_subdir }}/"
 
 # Extra command-line arguments to the worker
-CELERYD_OPTS="--time-limit={{ celery_time_limit }} --concurrency={{ celery_concurrency }}"
+CELERYD_OPTS="--time-limit={{ celery_time_limit }} --concurrency={{ celery_concurrency }}{% if celery_extra_options | length > 0 %} {{ celery_extra_options }}{% endif %}"
 # Configure node-specific settings by appending node name to arguments:
 #CELERYD_OPTS="--time-limit=300 -c 8 -c:worker2 4 -c:worker3 2 -Ofair:worker1"
 
@@ -43,4 +43,3 @@ CELERYD_GROUP="{{ celery_group }}"
 # If enabled pid and log directories will be created if missing,
 # and owned by the userid/group configured.
 CELERY_CREATE_DIRS=1
-

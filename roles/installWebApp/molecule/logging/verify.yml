@@ -39,6 +39,12 @@
           - "'LOG_LEVEL_ACCOUNTS=INFO' in env_content"
         fail_msg: "Per-app log level overrides missing or incorrect in .env"
 
+    - name: Assert Celery eager mode is rendered when configured
+      ansible.builtin.assert:
+        that:
+          - "'CELERY_TASK_ALWAYS_EAGER=False' in env_content"
+        fail_msg: "CELERY_TASK_ALWAYS_EAGER not rendered correctly in .env"
+
     - name: Check logrotate config for Django log exists
       ansible.builtin.stat:
         path: /etc/logrotate.d/testapp-django

@@ -102,6 +102,12 @@
           - "'# Extra' not in (dotenv_content.content | b64decode)"
         fail_msg: "Extra section should not appear when env_extra_vars is empty"
 
+    - name: Assert Celery eager mode is omitted when not configured
+      ansible.builtin.assert:
+        that:
+          - "'CELERY_TASK_ALWAYS_EAGER' not in (dotenv_content.content | b64decode)"
+        fail_msg: "CELERY_TASK_ALWAYS_EAGER should not appear when celery_task_always_eager is empty"
+
     - name: Check logrotate config is absent when log_file is empty
       ansible.builtin.stat:
         path: /etc/logrotate.d/testapp-django

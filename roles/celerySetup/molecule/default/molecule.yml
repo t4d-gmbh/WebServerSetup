@@ -30,6 +30,7 @@ provisioner:
         celery_log_level: "DEBUG"
         celery_log_file: "/var/log/celery/%n%I.log"
         celery_pid_file: "/var/run/celery/%n.pid"
+        celery_extra_options: "--without-gossip --without-mingle --without-heartbeat"
         rabbitmq_version: "latest"
 scenario:
   test_sequence:
