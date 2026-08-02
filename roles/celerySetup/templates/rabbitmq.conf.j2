@@ -1,2 +1,5 @@
 vm_memory_high_watermark.relative = {{ rabbitmq_vm_memory_high_watermark }}
 vm_memory_high_watermark_paging_ratio = {{ rabbitmq_vm_memory_high_watermark_paging_ratio }}
+{% for feature in rabbitmq_deprecated_feature_permits %}
+deprecated_features.permit.{{ feature }} = true
+{% endfor %}

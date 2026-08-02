@@ -138,6 +138,13 @@
           - "'vm_memory_high_watermark_paging_ratio = 0.8' in (rabbitmq_config_content.content | b64decode)"
         fail_msg: "RabbitMQ VM memory config is not set correctly"
 
+    - name: Assert RabbitMQ deprecated feature permits are rendered
+      ansible.builtin.assert:
+        that:
+          - "'deprecated_features.permit.transient_nonexcl_queues = true' in (rabbitmq_config_content.content | b64decode)"
+          - "'deprecated_features.permit.global_qos = true' in (rabbitmq_config_content.content | b64decode)"
+        fail_msg: "RabbitMQ deprecated feature permits are not rendered correctly"
+
     - name: Assert RabbitMQ config file is mounted into the container
       ansible.builtin.assert:
         that:

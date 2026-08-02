@@ -21,6 +21,7 @@ It installs necessary packages, configures RabbitMQ as a message broker, and set
 - `rabbitmq_config_dir`: Host directory where `rabbitmq.conf` is rendered before being mounted into the container (default: `/etc/rabbitmq`).
 - `rabbitmq_vm_memory_high_watermark`: RabbitMQ memory high-watermark as a fraction of the container's memory limit (default: `"0.1"`). Written to `rabbitmq.conf`; RabbitMQ blocks publishers above this threshold.
 - `rabbitmq_vm_memory_high_watermark_paging_ratio`: Fraction of the high-watermark at which RabbitMQ starts paging messages to disk (default: `"0.8"`). Written to `rabbitmq.conf`.
+- `rabbitmq_deprecated_feature_permits`: Optional list of RabbitMQ deprecated features to permit in `rabbitmq.conf` (default: `[]`). This is an explicit RabbitMQ 4 compatibility bridge for stacks that still require deprecated broker behavior, such as `transient_nonexcl_queues` or `global_qos`.
 - `celery_worker_name`: The name of the Celery worker (default: "worker1").
 - `celery_time_limit`: Time limit for Celery tasks (default: 300 seconds).
 - `celery_concurrency`: Number of concurrent Celery tasks (default: 8).

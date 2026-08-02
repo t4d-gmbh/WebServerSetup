@@ -32,6 +32,9 @@ provisioner:
         celery_pid_file: "/var/run/celery/%n.pid"
         celery_extra_options: "--without-gossip --without-mingle --without-heartbeat"
         rabbitmq_version: "latest"
+        rabbitmq_deprecated_feature_permits:
+          - transient_nonexcl_queues
+          - global_qos
 scenario:
   test_sequence:
     - dependency
