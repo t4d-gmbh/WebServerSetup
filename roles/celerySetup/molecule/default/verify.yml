@@ -99,9 +99,38 @@
           - rabbitmq_info.HostConfig.Memory == 536870912
         fail_msg: "RabbitMQ container memory limit is not 512m (536870912 bytes)"
 
-    - name: Assert RabbitMQ VM memory high-watermark env vars are set
+    - name: Check RabbitMQ config file exists
+      ansible.builtin.stat:
+        path: /etc/rabbitmq/rabbitmq.conf
+      register: rabbitmq_config
+
+    - name: Assert RabbitMQ config file exists with correct permissions
       ansible.builtin.assert:
         that:
-          - "'RABBITMQ_VM_MEMORY_HIGH_WATERMARK=0.1' in rabbitmq_info.Config.Env"
-          - "'RABBITMQ_VM_MEMORY_HIGH_WATERMARK_PAGING_RATIO=0.8' in rabbitmq_info.Config.Env"
-        fail_msg: "RabbitMQ VM memory environment variables are not set correctly"
+          - rabbitmq_config.stat.exists
+          - rabbitmq_config.stat.mode == '0644'
+        fail_msg: "RabbitMQ config file missing or wrong permissions"
+
+    - name: Read RabbitMQ config file
+      ansible.builtin.slurp:
+        src: /etc/rabbitmq/rabbitmq.conf
+      register: rabbitmq_config_content
+
+    - name: Assert RabbitMQ memory high-watermark config is set
+      ansible.builtin.assert:
+        that:
+          - "'vm_memory_high_watermark.relative = 0.1' in (rabbitmq_config_content.content | b64decode)"
+          - "'vm_memory_high_watermark_paging_ratio = 0.8' in (rabbitmq_config_content.content | b64decode)"
+        fail_msg: "RabbitMQ VM memory config is not set correctly"
+
+    - name: Assert RabbitMQ config file is mounted into the container
+      ansible.builtin.assert:
+        that:
+          - rabbitmq_info.Mounts | selectattr('Destination', 'equalto', '/etc/rabbitmq/rabbitmq.conf') | list | length == 1
+        fail_msg: "RabbitMQ config file is not mounted into the container"
+
+    - name: Assert deprecated RabbitMQ VM memory env vars are absent
+      ansible.builtin.assert:
+        that:
+          - rabbitmq_info.Config.Env | select('match', '^RABBITMQ_VM_MEMORY_HIGH_WATERMARK') | list | length == 0
+        fail_msg: "Deprecated RabbitMQ VM memory environment variables are still present"

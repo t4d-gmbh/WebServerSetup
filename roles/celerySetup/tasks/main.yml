@@ -32,6 +32,41 @@
     tag: "{{ rabbitmq_version }}"
   become: yes
 
+- name: Ensure RabbitMQ config directory exists
+  file:
+    path: "{{ rabbitmq_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: Deploy RabbitMQ config
+  template:
+    src: rabbitmq.conf.j2
+    dest: "{{ rabbitmq_config_dir }}/rabbitmq.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  register: rabbitmq_config
+  become: yes
+
+- name: Inspect existing RabbitMQ container
+  community.docker.docker_container_info:
+    name: rabbitmq
+  register: rabbitmq_container_info
+  become: yes
+
+- name: Remove RabbitMQ container with deprecated memory env vars
+  docker_container:
+    name: rabbitmq
+    state: absent
+    force_kill: true
+  become: yes
+  when:
+    - rabbitmq_container_info.exists
+    - rabbitmq_container_info.container.Config.Env | select('match', '^RABBITMQ_VM_MEMORY_HIGH_WATERMARK') | list | length > 0
+
 - name: Run RabbitMQ container
   docker_container:
     name: rabbitmq
@@ -45,8 +80,9 @@
     env:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "{{ rabbitmq_vm_memory_high_watermark }}"
-      RABBITMQ_VM_MEMORY_HIGH_WATERMARK_PAGING_RATIO: "{{ rabbitmq_vm_memory_high_watermark_paging_ratio }}"
+    volumes:
+      - "{{ rabbitmq_config_dir }}/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro"
+    restart: "{{ rabbitmq_config.changed | default(false) }}"
     log_driver: json-file
     log_options:
       max-size: "{{ rabbitmq_log_max_size }}"
