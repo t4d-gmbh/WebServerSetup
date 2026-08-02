@@ -4,3 +4,8 @@
 # Use "{{ app_name | lower }}" for the legacy layout where manage.py lives
 # inside a subdirectory named after the application.
 django_project_subdir: "."
+# Gunicorn worker memory management — workers are recycled after this many
+# requests to prevent unbounded RSS growth from Django memory leaks.
+# Jitter staggers restarts to avoid thundering-herd behaviour.
+gunicorn_max_requests: 500
+gunicorn_max_requests_jitter: 50

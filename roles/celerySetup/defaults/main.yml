@@ -9,6 +9,11 @@ rabbitmq_version: latest
 # RabbitMQ container log rotation — prevents the container log from growing unbounded
 rabbitmq_log_max_size: "10m"
 rabbitmq_log_max_file: "3"
+# RabbitMQ container memory limit and high-watermark — prevents RabbitMQ from
+# crowding out other processes on the server
+rabbitmq_memory_limit: "512m"
+rabbitmq_vm_memory_high_watermark: "0.1"
+rabbitmq_vm_memory_high_watermark_paging_ratio: "0.8"
 # celery config options
 celery_worker_name: "worker1"
 celery_time_limit: 300

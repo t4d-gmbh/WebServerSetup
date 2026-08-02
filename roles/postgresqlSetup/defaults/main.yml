@@ -7,3 +7,9 @@ postgresql_container_name: "postgresql"
 postgresql_port: 5432
 postgresql_data_dir: "/var/lib/postgresql/data"
 postgresql_pgdata_parent: "/var/lib/postgresql/data"
+# PostgreSQL container log rotation — prevents the container log from growing unbounded
+postgresql_log_max_size: "10m"
+postgresql_log_max_file: "3"
+# PostgreSQL container memory limit
+postgresql_memory_limit: "512m"
+postgresql_shm_size: "128m"

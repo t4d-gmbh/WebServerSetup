@@ -17,6 +17,9 @@ It installs necessary packages, configures RabbitMQ as a message broker, and set
 - `rabbitmq_version`: The version of RabbitMQ to pull (default: latest).
 - `rabbitmq_log_max_size`: Maximum size of the RabbitMQ container log file before rotation (default: `"10m"`). Accepts Docker log size notation (`10m`, `100m`, etc.).
 - `rabbitmq_log_max_file`: Number of rotated RabbitMQ container log files to retain (default: `"3"`).
+- `rabbitmq_memory_limit`: Docker memory limit for the RabbitMQ container (default: `"512m"`). Prevents the container from competing unboundedly for RAM.
+- `rabbitmq_vm_memory_high_watermark`: RabbitMQ memory high-watermark as a fraction of the container's memory limit (default: `"0.1"`). RabbitMQ blocks publishers above this threshold.
+- `rabbitmq_vm_memory_high_watermark_paging_ratio`: Fraction of the high-watermark at which RabbitMQ starts paging messages to disk (default: `"0.8"`).
 - `celery_worker_name`: The name of the Celery worker (default: "worker1").
 - `celery_time_limit`: Time limit for Celery tasks (default: 300 seconds).
 - `celery_concurrency`: Number of concurrent Celery tasks (default: 8).
@@ -58,7 +61,8 @@ To use this role, add it to your Ansible playbook as follows:
 5. **Deploy Temporary Files**: Creates temporary files for Celery configuration.
 6. **Ensure Configuration Directory Exists**: Ensures the `/etc/conf.d` directory exists.
 7. **Ensure Celery Specific Folders Exist**: Creates necessary directories for Celery logs and runtime.
-8. **Create Celery Config File**: Generates the Celery configuration file.
+8. **Deploy logrotate config for Celery logs**: Installs a logrotate config under `/etc/logrotate.d/` to rotate `/var/log/celery/*.log` daily, retaining 14 compressed files. Uses `copytruncate` because Celery keeps log file descriptors open.
+9. **Create Celery Config File**: Generates the Celery configuration file.
 9. **Start and Enable Celery Service**: Starts the Celery service and enables it to run on boot.
 10. **Notify Handlers to Restart Celery Service**: Notifies handlers to restart the service if configuration changes.
 

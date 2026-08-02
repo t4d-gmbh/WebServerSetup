@@ -101,3 +101,14 @@
         that:
           - "'# Extra' not in (dotenv_content.content | b64decode)"
         fail_msg: "Extra section should not appear when env_extra_vars is empty"
+
+    - name: Check logrotate config is absent when log_file is empty
+      ansible.builtin.stat:
+        path: /etc/logrotate.d/testapp-django
+      register: no_logrotate
+
+    - name: Assert logrotate config was not deployed
+      ansible.builtin.assert:
+        that:
+          - not no_logrotate.stat.exists
+        fail_msg: "Logrotate config should not be deployed when log_file is empty"

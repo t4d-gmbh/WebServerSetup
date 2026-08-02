@@ -46,3 +46,31 @@
           - data_dir.stat.exists
           - data_dir.stat.isdir
         fail_msg: "PostgreSQL data directory does not exist"
+
+    - name: Inspect PostgreSQL container configuration
+      ansible.builtin.command: docker inspect test-postgresql
+      register: pg_inspect
+      changed_when: false
+
+    - name: Set PostgreSQL container info fact
+      ansible.builtin.set_fact:
+        pg_info: "{{ pg_inspect.stdout | from_json | first }}"
+
+    - name: Assert container memory limit is set to 512m
+      ansible.builtin.assert:
+        that:
+          - pg_info.HostConfig.Memory == 536870912
+        fail_msg: "PostgreSQL container memory limit is not 512m (536870912 bytes)"
+
+    - name: Assert container log driver is json-file
+      ansible.builtin.assert:
+        that:
+          - pg_info.HostConfig.LogConfig.Type == "json-file"
+        fail_msg: "PostgreSQL container log driver is not json-file"
+
+    - name: Assert container log rotation options are set
+      ansible.builtin.assert:
+        that:
+          - pg_info.HostConfig.LogConfig.Config['max-size'] == "10m"
+          - pg_info.HostConfig.LogConfig.Config['max-file'] == "3"
+        fail_msg: "PostgreSQL container log rotation options are not set correctly"
