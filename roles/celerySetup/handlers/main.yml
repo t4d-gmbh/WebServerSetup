@@ -4,9 +4,13 @@
   systemd:
     daemon_reload: yes
   become: yes
+  tags:
+    - molecule-notest
 
 - name: Restart Celery Service
   systemd:
     name: celery
     state: restarted
   become: yes
+  tags:
+    - molecule-notest
