@@ -9,6 +9,7 @@
           - docker.io
           - docker-compose-v2
           - python3-docker
+          - python3-venv
         state: present
         update_cache: true
 
@@ -30,3 +31,36 @@
         owner: django
         group: www-data
         mode: '0755'
+
+    - name: Create Python venv for test app
+      ansible.builtin.command: python3 -m venv /opt/testapp/venv
+      args:
+        creates: /opt/testapp/venv/bin/python
+
+    - name: Install Celery in test app venv
+      ansible.builtin.pip:
+        name: celery
+        virtualenv: /opt/testapp/venv
+
+    - name: Create minimal test app package
+      ansible.builtin.copy:
+        dest: /opt/testapp/testapp/__init__.py
+        content: |
+          from .celery import app
+        owner: django
+        group: www-data
+        mode: '0644'
+
+    - name: Create minimal Celery app
+      ansible.builtin.copy:
+        dest: /opt/testapp/testapp/celery.py
+        content: |
+          from celery import Celery
+
+          app = Celery("testapp")
+          app.conf.broker_url = "amqp://guest:guest@localhost//"
+          app.conf.worker_enable_remote_control = False
+          app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
+        owner: django
+        group: www-data
+        mode: '0644'

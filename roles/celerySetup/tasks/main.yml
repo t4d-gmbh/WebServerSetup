@@ -89,6 +89,13 @@
       max-file: "{{ rabbitmq_log_max_file }}"
   become: yes
 
+- name: Wait for RabbitMQ AMQP port
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 5672
+    timeout: 60
+  become: yes
+
 - name: Deploy the temp files
   template:
     src: celery.conf.j2
