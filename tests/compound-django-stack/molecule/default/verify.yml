@@ -154,3 +154,25 @@
         that:
           - celery_config.stat.exists
         fail_msg: "Celery config file does not exist"
+
+    - name: Check celery binary fixture exists
+      ansible.builtin.stat:
+        path: /opt/testapp/venv/bin/celery
+      register: celery_bin
+
+    - name: Assert celery binary fixture exists
+      ansible.builtin.assert:
+        that:
+          - celery_bin.stat.exists
+        fail_msg: "Celery binary fixture does not exist"
+
+    - name: Check minimal celery app fixture exists
+      ansible.builtin.stat:
+        path: /opt/testapp/testapp/celery.py
+      register: celery_app_fixture
+
+    - name: Assert minimal celery app fixture exists
+      ansible.builtin.assert:
+        that:
+          - celery_app_fixture.stat.exists
+        fail_msg: "Minimal Celery app fixture does not exist"
