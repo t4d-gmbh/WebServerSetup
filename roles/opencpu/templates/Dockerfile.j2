@@ -15,27 +15,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends libcurl4-openss
 {% endif %}
 
 ENV R_LIBS_USER=" "
+ENV OCPU_LIBRARY="/usr/lib/opencpu/library"
 
 {% if opencpu.PRELOAD_PACKAGES | default([]) | length > 0 %}
 COPY Rprofile /etc/opencpu/Rprofile
 {% endif %}
 
 {% if package_build_enabled %}
-RUN R -e "install.packages('remotes', lib=.Library, repos='{{ opencpu.CRAN_REPOSITORY | default('https://cloud.r-project.org') }}')"
-RUN R -e "install.packages(c('rjags', 'glmmTMB'), lib=.Library, repos='{{ opencpu.CRAN_REPOSITORY | default('https://cloud.r-project.org') }}', dependencies=TRUE)"
+RUN mkdir -p "${OCPU_LIBRARY}"
+RUN R -e "install.packages('remotes', lib=Sys.getenv('OCPU_LIBRARY'), repos='{{ opencpu.CRAN_REPOSITORY | default('https://cloud.r-project.org') }}')"
+RUN R -e "install.packages(c('rjags', 'glmmTMB'), lib=Sys.getenv('OCPU_LIBRARY'), repos='{{ opencpu.CRAN_REPOSITORY | default('https://cloud.r-project.org') }}', dependencies=TRUE)"
 {% for package_item in opencpu.R_PACKAGES | default({}) | dict2items %}
 {% set package = package_item.value %}
 {% if package.enabled | default(true) | bool and package.repository is defined %}
 ARG {{ package_item.key | upper }}_BRANCH={{ package.branch | default('master') }}
 RUN git clone --depth=1 --branch "${{ package_item.key | upper }}_BRANCH" \
       "{{ package.repository }}" /tmp/{{ package_item.key }}
-RUN R -e "remotes::install_local('/tmp/{{ package_item.key }}', dependencies=TRUE, upgrade='never', lib=.Library)"
+RUN R -e ".libPaths(c(Sys.getenv('OCPU_LIBRARY'), .libPaths())); remotes::install_local('/tmp/{{ package_item.key }}', dependencies=TRUE, upgrade='never', lib=Sys.getenv('OCPU_LIBRARY'))"
 {% elif package.enabled | default(true) | bool and package.source is defined %}
 COPY {{ package_item.key }} /tmp/{{ package_item.key }}
-RUN R -e "remotes::install_local('/tmp/{{ package_item.key }}', dependencies=TRUE, upgrade='never', lib=.Library)"
+RUN R -e ".libPaths(c(Sys.getenv('OCPU_LIBRARY'), .libPaths())); remotes::install_local('/tmp/{{ package_item.key }}', dependencies=TRUE, upgrade='never', lib=Sys.getenv('OCPU_LIBRARY'))"
 {% endif %}
 {% endfor %}
-RUN R -e "packages <- c({% set ns = namespace(first=true) %}{% for package_item in opencpu.R_PACKAGES | default({}) | dict2items %}{% if package_item.value.enabled | default(true) | bool %}{% if not ns.first %}, {% endif %}'{{ package_item.value.name | default(package_item.key) }}'{% set ns.first = false %}{% endif %}{% endfor %}); stopifnot(all(vapply(packages, function(package) nzchar(find.package(package, lib.loc=.Library, quiet=TRUE)), logical(1))))"
+RUN R -e "packages <- c({% set ns = namespace(first=true) %}{% for package_item in opencpu.R_PACKAGES | default({}) | dict2items %}{% if package_item.value.enabled | default(true) | bool %}{% if not ns.first %}, {% endif %}'{{ package_item.value.name | default(package_item.key) }}'{% set ns.first = false %}{% endif %}{% endfor %}); stopifnot(all(vapply(packages, function(package) nzchar(find.package(package, lib.loc=Sys.getenv('OCPU_LIBRARY'), quiet=TRUE)), logical(1))))"
 {% endif %}
 
 # Install custom packages

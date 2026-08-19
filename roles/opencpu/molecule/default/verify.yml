@@ -64,6 +64,7 @@
           - "'COPY ABNSCRIPTS /tmp/ABNSCRIPTS' in (opencpu_dockerfile_content.content | b64decode)"
           - '"install_local" in (opencpu_dockerfile_content.content | b64decode)'
           - "'ENV R_LIBS_USER=\" \"' in (opencpu_dockerfile_content.content | b64decode)"
+          - "'ENV OCPU_LIBRARY=\"/usr/lib/opencpu/library\"' in (opencpu_dockerfile_content.content | b64decode)"
           - "'COPY Rprofile /etc/opencpu/Rprofile' in (opencpu_dockerfile_content.content | b64decode)"
           - "'abnScripts' in (opencpu_rprofile_content.content | b64decode)"
           - "'library(package, character.only = TRUE)' in (opencpu_rprofile_content.content | b64decode)"
@@ -94,7 +95,8 @@
       ansible.builtin.command:
         cmd: >-
           docker exec opencpu R --vanilla -e
-          ".libPaths(c('/usr/lib/opencpu/library', .libPaths()));
+          "stopifnot(Sys.getenv('OCPU_LIBRARY') == '/usr/lib/opencpu/library');
+          .libPaths(c('/usr/lib/opencpu/library', .libPaths()));
           stopifnot(requireNamespace('abnScripts', quietly=TRUE,
           lib.loc='/usr/lib/opencpu/library'));
           stopifnot(nzchar(find.package('abnScripts',
