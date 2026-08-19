@@ -94,8 +94,8 @@
       ansible.builtin.command:
         cmd: >-
           docker exec opencpu R --vanilla -e
-          "stopifnot(requireNamespace('abnScripts', quietly=TRUE));
-          stopifnot('/usr/lib/opencpu/library' %in% .libPaths());
+          ".libPaths(c('/usr/lib/opencpu/library', .libPaths()));
+          stopifnot(requireNamespace('abnScripts', quietly=TRUE));
           stopifnot(file.exists('/etc/opencpu/Rprofile'))"
       register: package_installation
       changed_when: false
@@ -105,6 +105,22 @@
         that:
           - package_installation.rc == 0
         fail_msg: "abnScripts was not installed into the OpenCPU image"
+
+    - name: Verify OpenCPU preload profile loads the package
+      ansible.builtin.command:
+        cmd: >-
+          docker exec opencpu R --vanilla -e
+          ".libPaths(c('/usr/lib/opencpu/library', .libPaths()));
+          source('/etc/opencpu/Rprofile');
+          stopifnot('package:abnScripts' %in% search())"
+      register: preload_profile
+      changed_when: false
+
+    - name: Assert OpenCPU preload profile works
+      ansible.builtin.assert:
+        that:
+          - preload_profile.rc == 0
+        fail_msg: "The OpenCPU preload profile did not load abnScripts"
 
     - name: Verify OpenCPU preloaded package API
       ansible.builtin.command:
