@@ -173,6 +173,26 @@ Users will then be redirected to Authentik for login before accessing the OpenCP
 
 ## Customizing R Packages
 
+For packages maintained in Git repositories or as local R package sources, use
+the structured `R_PACKAGES` configuration. Local sources are copied from the
+Ansible controller, not read from the target server:
+
+```yaml
+opencpu:
+  R_PACKAGES:
+    ABN:
+      enabled: true
+      repository: "https://github.com/furrer-lab/abn.git"
+      branch: "json_import"
+    ABNSCRIPTS:
+      enabled: true
+      name: abnScripts
+      source: "{{ playbook_dir }}/../abnScripts"
+  PRELOAD_PACKAGES:
+    - abn
+    - abnScripts
+```
+
 To install additional R packages in the OpenCPU container, add entries to the `RUN_R` list:
 
 ```yaml

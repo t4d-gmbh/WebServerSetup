@@ -29,6 +29,48 @@
     group: "{{ docker_user }}"
     mode: '0755'
 
+- name: Copy local OpenCPU package sources into build context
+  become: true
+  ansible.builtin.copy:
+    src: "{{ package.source }}"
+    dest: "/data/docker/opencpu/opencpu/{{ package_name }}"
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0755'
+  loop: "{{ opencpu.R_PACKAGES | default({}) | dict2items }}"
+  loop_control:
+    loop_var: package_item
+    label: "{{ package_item.key }}"
+  vars:
+    package_name: "{{ package_item.key }}"
+    package: "{{ package_item.value }}"
+  when:
+    - package.source is defined
+    - package.enabled | default(true) | bool
+  notify:
+    - Run OpenCPU docker compose
+
+- name: Present OpenCPU preload profile
+  become: true
+  ansible.builtin.template:
+    src: Rprofile.j2
+    dest: /data/docker/opencpu/opencpu/Rprofile
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: '0644'
+  when: opencpu.PRELOAD_PACKAGES | default([]) | length > 0
+  notify:
+    - Run OpenCPU docker compose
+
+- name: Remove OpenCPU preload profile when unused
+  become: true
+  ansible.builtin.file:
+    path: /data/docker/opencpu/opencpu/Rprofile
+    state: absent
+  when: opencpu.PRELOAD_PACKAGES | default([]) | length == 0
+  notify:
+    - Run OpenCPU docker compose
+
 - name: Present Opencpu container build file
   become: true
   template:
@@ -37,6 +79,8 @@
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
     mode: '0644'
+  notify:
+    - Run OpenCPU docker compose
 
 - name: Log into DockerHub
   community.docker.docker_login:
