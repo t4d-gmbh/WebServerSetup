@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
 {% endif %}
 
-ENV R_LIBS_USER=""
+ENV R_LIBS_USER=" "
 
 {% if opencpu.PRELOAD_PACKAGES | default([]) | length > 0 %}
 COPY Rprofile /etc/opencpu/Rprofile
@@ -35,7 +35,7 @@ COPY {{ package_item.key }} /tmp/{{ package_item.key }}
 RUN R -e "remotes::install_local('/tmp/{{ package_item.key }}', dependencies=TRUE, upgrade='never', lib=.Library)"
 {% endif %}
 {% endfor %}
-RUN R -e "packages <- c({% set ns = namespace(first=true) %}{% for package_item in opencpu.R_PACKAGES | default({}) | dict2items %}{% if package_item.value.enabled | default(true) | bool %}{% if not ns.first %}, {% endif %}'{{ package_item.value.name | default(package_item.key) }}'{% set ns.first = false %}{% endif %}{% endfor %}); stopifnot(all(vapply(packages, requireNamespace, logical(1), quietly=TRUE)))"
+RUN R -e "packages <- c({% set ns = namespace(first=true) %}{% for package_item in opencpu.R_PACKAGES | default({}) | dict2items %}{% if package_item.value.enabled | default(true) | bool %}{% if not ns.first %}, {% endif %}'{{ package_item.value.name | default(package_item.key) }}'{% set ns.first = false %}{% endif %}{% endfor %}); stopifnot(all(vapply(packages, function(package) nzchar(find.package(package, lib.loc=.Library, quiet=TRUE)), logical(1))))"
 {% endif %}
 
 # Install custom packages
