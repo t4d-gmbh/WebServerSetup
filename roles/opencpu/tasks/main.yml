@@ -32,8 +32,8 @@
 - name: Copy local OpenCPU package sources into build context
   become: true
   ansible.builtin.copy:
-    src: "{{ package.source }}"
-    dest: "/data/docker/opencpu/opencpu/{{ package_name }}"
+    src: "{{ package.source }}/"
+    dest: "/data/docker/opencpu/opencpu/{{ package_name }}/"
     owner: "{{ docker_user }}"
     group: "{{ docker_user }}"
     mode: '0755'
