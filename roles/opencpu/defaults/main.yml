@@ -12,3 +12,10 @@ opencpu:
     - "install.packages('pak', repos=c(CRAN='https://cran.r-project.org'))"
     - "pak::repo_add(INLA = 'https://inla.r-inla-download.org/R/stable/')"
     # - "pak::pkg_install('furrer-lab/abn@3.1.2', dependencies=TRUE)"
+
+  # Optional packages to install while building the image. Each entry may
+  # contain repository/branch for a GitHub source or source for a local
+  # package copied from the Ansible controller.
+  R_PACKAGES: {}
+  PRELOAD_PACKAGES: []
+  CRAN_REPOSITORY: "https://cloud.r-project.org"

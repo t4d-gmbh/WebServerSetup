@@ -47,3 +47,101 @@
         that:
           - opencpu_compose.stat.exists
         fail_msg: "OpenCPU docker-compose.yml does not exist"
+
+    - name: Read rendered OpenCPU Dockerfile
+      ansible.builtin.slurp:
+        src: /data/docker/opencpu/opencpu/Dockerfile
+      register: opencpu_dockerfile_content
+
+    - name: Read rendered OpenCPU preload profile
+      ansible.builtin.slurp:
+        src: /data/docker/opencpu/opencpu/Rprofile
+      register: opencpu_rprofile_content
+
+    - name: Assert optional package build configuration is rendered
+      ansible.builtin.assert:
+        that:
+          - "'COPY ABNSCRIPTS /tmp/ABNSCRIPTS' in (opencpu_dockerfile_content.content | b64decode)"
+          - '"install_local" in (opencpu_dockerfile_content.content | b64decode)'
+          - "'ENV R_LIBS_USER=\" \"' in (opencpu_dockerfile_content.content | b64decode)"
+          - "'ENV OCPU_LIBRARY=\"/usr/lib/opencpu/library\"' in (opencpu_dockerfile_content.content | b64decode)"
+          - "'COPY Rprofile /etc/opencpu/Rprofile' in (opencpu_dockerfile_content.content | b64decode)"
+          - "'abnScripts' in (opencpu_rprofile_content.content | b64decode)"
+          - "'library(package, character.only = TRUE)' in (opencpu_rprofile_content.content | b64decode)"
+
+    - name: Check copied local package source
+      ansible.builtin.stat:
+        path: /data/docker/opencpu/opencpu/ABNSCRIPTS/DESCRIPTION
+      register: abnscripts_description
+
+    - name: Assert local package source was copied
+      ansible.builtin.assert:
+        that:
+          - abnscripts_description.stat.exists
+
+    - name: Check OpenCPU container is running
+      ansible.builtin.command:
+        cmd: docker inspect --format '{{ '{{' }}.State.Running{{ '}}' }}' opencpu
+      register: opencpu_running
+      changed_when: false
+
+    - name: Assert OpenCPU container is running
+      ansible.builtin.assert:
+        that:
+          - opencpu_running.stdout == 'true'
+        fail_msg: "The customized OpenCPU container is not running"
+
+    - name: Verify package installation and OpenCPU library path
+      ansible.builtin.command:
+        cmd: >-
+          docker exec opencpu R --vanilla -e
+          "stopifnot(Sys.getenv('OCPU_LIBRARY') == '/usr/lib/opencpu/library');
+          .libPaths(c('/usr/lib/opencpu/library', .libPaths()));
+          stopifnot(requireNamespace('abnScripts', quietly=TRUE,
+          lib.loc='/usr/lib/opencpu/library'));
+          stopifnot(nzchar(find.package('abnScripts',
+          lib.loc='/usr/lib/opencpu/library', quiet=TRUE)));
+          stopifnot(file.exists('/etc/opencpu/Rprofile'))"
+      register: package_installation
+      changed_when: false
+
+    - name: Assert package installation succeeded
+      ansible.builtin.assert:
+        that:
+          - package_installation.rc == 0
+        fail_msg: "abnScripts was not installed into the OpenCPU image"
+
+    - name: Verify OpenCPU preload profile loads the package
+      ansible.builtin.command:
+        cmd: >-
+          docker exec opencpu R --vanilla -e
+          ".libPaths(c('/usr/lib/opencpu/library', .libPaths()));
+          source('/etc/opencpu/Rprofile');
+          stopifnot('package:abnScripts' %in% search())"
+      register: preload_profile
+      changed_when: false
+
+    - name: Assert OpenCPU preload profile works
+      ansible.builtin.assert:
+        that:
+          - preload_profile.rc == 0
+        fail_msg: "The OpenCPU preload profile did not load abnScripts"
+
+    - name: Verify OpenCPU preloaded package API
+      ansible.builtin.command:
+        cmd: >-
+          docker exec opencpu sh -c
+          "curl --fail --silent --show-error
+          http://127.0.0.1/ocpu/library/abnScripts/R/hello/json"
+      register: opencpu_api
+      changed_when: false
+      retries: 12
+      delay: 5
+      until: opencpu_api.rc == 0
+
+    - name: Assert OpenCPU package endpoint works
+      ansible.builtin.assert:
+        that:
+          - opencpu_api.rc == 0
+          - "'hello' in opencpu_api.stdout"
+        fail_msg: "OpenCPU could not execute abnScripts::hello"

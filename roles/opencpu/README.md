@@ -33,6 +33,16 @@ By means of container labels the instance is configured to use authentik as auth
     ```
     in the Dockerfile.
 
+  - `R_PACKAGES`: Optional mapping of packages to install during the image build. A
+    GitHub package uses `repository` and optionally `branch`; a local package uses
+    `source`, which is copied from the Ansible controller into the Docker build
+    context. Use `name` when the mapping key differs from the R package name. Set
+    `enabled: false` to skip an entry.
+  - `PRELOAD_PACKAGES`: Optional list of package names loaded by OpenCPU through
+    `/etc/opencpu/Rprofile` when an R worker starts.
+  - `CRAN_REPOSITORY`: CRAN mirror used to install the build tooling. Defaults to
+    `https://cloud.r-project.org`.
+
   - `AUTHENTIK_PROXY_CONTAINER`: _Optional_ name of the docker container running the authentik outpost used to authenticate for the opencpu service.
     If omitted the OpenCPU service is not secured and can be reached without any authentication.
 
@@ -90,6 +100,19 @@ To use this role, add it to your Ansible playbook as follows:
       RUN_R:
         - "install.packages('pak', repos=c(CRAN='https://cran.r-project.org'))"
         - "pak::repo_add(INLA = 'https://inla.r-inla-download.org/R/stable/')"
+
+      R_PACKAGES:
+        ABN:
+          enabled: true
+          repository: "https://github.com/furrer-lab/abn.git"
+          branch: "json_import"
+        ABNSCRIPTS:
+          enabled: true
+          name: abnScripts
+          source: "{{ playbook_dir }}/../abnScripts"
+      PRELOAD_PACKAGES:
+        - abn
+        - abnScripts
   roles:
     - authentik  # recommended in case you want to secure your opencpu service
     - opencpu

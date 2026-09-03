@@ -1,0 +1,8 @@
+local({
+  packages <- {{ opencpu.PRELOAD_PACKAGES | to_json }}
+  invisible(lapply(packages, function(package) {
+    if (requireNamespace(package, quietly = TRUE)) {
+      library(package, character.only = TRUE)
+    }
+  }))
+})

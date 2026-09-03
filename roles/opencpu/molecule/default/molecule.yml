@@ -18,6 +18,7 @@ provisioner:
   name: ansible
   env:
     ANSIBLE_ROLES_PATH: "../../../"
+    COMPOSE_BAKE: "false"
   inventory:
     host_vars:
       instance:
@@ -30,6 +31,13 @@ provisioner:
           DOCKER_IMAGE: "docker.io/opencpu/ubuntu-24.04"
           DOCKER_TAG: "v2.2.14-2"
           RUN_R: []
+          R_PACKAGES:
+            ABNSCRIPTS:
+              enabled: true
+              name: abnScripts
+              source: "{{ playbook_dir }}/fixtures/abnScripts"
+          PRELOAD_PACKAGES:
+            - abnScripts
 scenario:
   test_sequence:
     - dependency
