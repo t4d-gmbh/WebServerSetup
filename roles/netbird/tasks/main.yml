@@ -1,0 +1,65 @@
+---
+- name: Ensure user exists
+  user:
+    name: "{{ dancer_user }}"
+    state: present
+
+- name: Create proxy Docker network
+  become: yes
+  community.docker.docker_network:
+    name: proxy
+    state: present
+
+- name: Create NetBird configuration directory
+  become: yes
+  file:
+    path: "{{ netbird_base_path }}"
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+
+- name: Create NetBird server configuration file
+  become: yes
+  template:
+    src: config.yaml.j2
+    dest: "{{ netbird_base_path }}/config.yaml"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0600'
+  no_log: true
+
+- name: Create NetBird dashboard environment file
+  become: yes
+  template:
+    src: dashboard.env.j2
+    dest: "{{ netbird_base_path }}/dashboard.env"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0600'
+
+- name: Create NetBird docker-compose file
+  become: yes
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ netbird_base_path }}/docker-compose.yml"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+
+- name: Ensure ACL package is installed
+  package:
+    name: acl
+    state: present
+  become: yes
+
+- name: Start NetBird containers
+  community.docker.docker_compose_v2:
+    project_src: "{{ netbird_base_path }}"
+    state: present
+  become: yes
+  become_user: "{{ dancer_user }}"
+  register: netbird_compose_result
+  retries: 3
+  delay: 10
+  until: netbird_compose_result is not failed
