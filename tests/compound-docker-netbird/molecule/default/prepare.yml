@@ -8,11 +8,9 @@
         name: testuser
         state: present
 
-    - name: Install GPG (needed for docker role's apt_key)
+    - name: Install Docker SDK for Python (needed by community.docker modules)
       ansible.builtin.apt:
         name:
-          - gpg
-          - gpg-agent
           - python3-docker
         state: present
         update_cache: true
