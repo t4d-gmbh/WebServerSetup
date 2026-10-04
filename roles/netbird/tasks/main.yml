@@ -139,7 +139,16 @@
 
 - name: Set proxy access token fact from generated token
   ansible.builtin.set_fact:
-    netbird_proxy_token: "{{ netbird_proxy_token_created.stdout | regex_search('^Token:\\s+(\\S+)', '\\1') | first }}"
+    netbird_proxy_token: "{{ netbird_proxy_token_created.stdout | regex_search('(?m)^Token:\\s+(\\S+)', '\\1') | first }}"
+  when: netbird_proxy_token_created is not skipped
+  no_log: true
+
+- name: Assert proxy access token was extracted
+  ansible.builtin.assert:
+    that:
+      - netbird_proxy_token is match('^nbx_')
+    fail_msg: "token extraction failed - 'admin token create' output format changed"
+    success_msg: "proxy access token extracted"
   when: netbird_proxy_token_created is not skipped
   no_log: true
 
