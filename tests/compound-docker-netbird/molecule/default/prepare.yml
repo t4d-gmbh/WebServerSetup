@@ -14,3 +14,21 @@
           - python3-docker
         state: present
         update_cache: true
+
+    - name: Create Docker daemon configuration directory
+      ansible.builtin.file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+
+    # Docker CE 28 defaults to the containerd image store, whose RAM footprint
+    # during pull/build exceeds the CI tmpfs mounts for /var/lib/{docker,containerd}.
+    # Written in prepare, before the docker role starts the service in converge.
+    - name: Use overlay2 storage driver in CI
+      ansible.builtin.copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "features": { "containerd-snapshotter": false }
+          }
+        mode: '0644'
