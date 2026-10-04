@@ -23,7 +23,7 @@ provisioner:
       instance:
         dancer_user: testuser
         traefik:
-          version: "3.5.4"
+          version: "3.7.13"
         dns_provider: infomaniak
         email: "test@example.com"
         HTPASSWD_USERS:

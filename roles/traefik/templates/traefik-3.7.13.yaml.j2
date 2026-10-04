@@ -1,0 +1,67 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: ERROR
+
+api:
+  dashboard: true
+  debug: false
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+    http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
+    transport:
+      respondingTimeouts:
+        readTimeout: 0  # required for long-lived gRPC/WebSocket streams (e.g. NetBird)
+
+certificatesResolvers:
+  {{ dns_provider }}:
+    acme:
+      email: "{{ email }}"
+      storage: /etc/traefik/certs/{{ dns_provider }}-acme.json
+      dnsChallenge:
+        provider: "{{ dns_provider }}"
+        resolvers:
+          - "1.1.1.1:53"
+          - "9.9.9.9:53"
+
+{% if tls_default_domains is defined %}
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: "{{ dns_provider }}" 
+        domain:
+          main: "{{ tls_default_domains.main }}"
+{% if tls_default_domains.sans %}
+          sans: "{{ tls_default_domains.sans | join(',') }}"
+{% endif %}
+{% endif %}
+
+accessLog:
+  addInternals: true
+  filePath: "/var/log/access.log"
+
+serversTransport:
+  insecureSkipVerify: true
+
+providers:
+  docker:
+    exposedByDefault: false
+    endpoint: 'unix:///var/run/docker.sock'
+    watch: true
+  file:
+    directory: /etc/traefik/conf/
+    watch: true
