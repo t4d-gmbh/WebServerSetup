@@ -25,10 +25,8 @@ provisioner:
         server_url: "https://nb.test.example.com"
         dns_provider: infomaniak
         email: "test@example.com"
-        netbird_admin_email: "admin@test.example.com"
         vault_netbird_auth_secret: "test-relay-auth-secret"
         vault_netbird_store_encryption_key: "dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdDEyMzQ="
-        vault_netbird_admin_password: "TestPassword123!"
         netbird_proxy_enabled: true
         netbird_proxy_sni_excludes:
           - "auth.test.example.com"

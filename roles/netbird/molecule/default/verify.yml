@@ -46,7 +46,6 @@
           - "'https://nb.test.example.com:443' in (nb_config.content | b64decode)"
           - "'issuer' in (nb_config.content | b64decode)"
           - "'https://nb.test.example.com/oauth2' in (nb_config.content | b64decode)"
-          - "'admin@test.example.com' in (nb_config.content | b64decode)"
           - "'stunPorts:' in (nb_config.content | b64decode)"
 
     - name: Read rendered dashboard.env

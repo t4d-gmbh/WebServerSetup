@@ -22,7 +22,6 @@ This Ansible role installs and configures a self-hosted [NetBird](https://netbir
 - `netbird_stun_port`: UDP port of the embedded STUN server (default: 3478).
 - `netbird_log_level`: Log level of the NetBird server (default: "info").
 - `netbird_store_engine`: Management store engine, `sqlite` or `postgres` (default: "sqlite").
-- `netbird_admin_email`: Optional email for the initial admin user. When set, an `owner` block is rendered into `config.yaml` and the account is created on first startup. **Known issue (netbird-server 0.80.0): the `owner` block stores the password unhashed, so logins fail with "Login error" / `hashedSecret too short`. Recommended: leave this empty and create the first admin via the `/setup` wizard — see [First admin user](#first-admin-user).**
 - `netbird_proxy_enabled`: Deploy the NetBird reverse proxy (`netbirdio/reverse-proxy`) to expose internal services publicly (default: false). See [Reverse proxy feature](#reverse-proxy-feature).
 - `netbird_proxy_domain`: Base domain of the proxy cluster; services land on `<name>.<domain>`. Defaults to the management host (official quickstart behaviour); set a dedicated domain (with an A record) to keep it separate from `server_url`.
 - `netbird_proxy_name`: Name of the generated proxy access token (default: "netbird-proxy").
@@ -38,7 +37,6 @@ Vault variables (required, define them in your `vault.yml`):
 
 - `vault_netbird_auth_secret`: Shared secret for relay authentication. Generate with `openssl rand -base64 32`.
 - `vault_netbird_store_encryption_key`: base64-encoded 32-byte key encrypting setup keys and tokens at rest. Generate with `openssl rand -base64 32`. **Back this key up** — losing it means losing access to encrypted data.
-- `vault_netbird_admin_password`: Password for `netbird_admin_email` (only used with the `owner` block, see the caveat above). NetBird requires at least 8 characters including one digit, one uppercase letter, and one special character.
 - `vault_netbird_session_cookie_key`: Optional AES key for embedded IdP session cookies. Generate with `openssl rand -base64 32`.
 - `vault_netbird_proxy_token`: Optional pre-created proxy access token (`nbx_...`). When unset and `netbird_proxy_enabled` is true, the role generates one via the management CLI and persists it as `.proxy_token` in the base path.
 
@@ -76,11 +74,11 @@ To use this role, add it to your Ansible playbook as follows:
 
 ## First admin user
 
-The admin account is created **only on the very first startup** (while the store is empty). Changing `config.yaml` afterwards never updates the account.
+The role intentionally does not bootstrap the admin account — matching the official quickstart, the first owner is created through the setup flow, which stores the password correctly (bcrypt via the embedded IdP).
 
-**Recommended (works reliably):** leave `netbird_admin_email` empty, open `https://<server_url>/setup` after the first run, and create the admin via the wizard (password: at least 8 characters incl. digit, uppercase, special character). The wizard hashes the password correctly.
+After the first playbook run, open `https://<server_url>/setup` and create the admin account there (password: at least 8 characters including one digit, one uppercase letter, and one special character). The `/setup` page is only available while no user exists; once an account exists it redirects to the login page.
 
-Alternatively, complete setup via the API:
+For automated deployments, complete setup via the API instead:
 
 ```bash
 curl -X POST "https://<server_url>/api/setup" \
@@ -88,7 +86,7 @@ curl -X POST "https://<server_url>/api/setup" \
   -d '{"email": "admin@example.com", "password": "NewPass1!", "name": "Admin"}'
 ```
 
-**Known issue with the `owner` config block (netbird-server 0.80.0):** setting `netbird_admin_email` renders an `owner` block into `config.yaml`, but the password is stored **without bcrypt hashing**, and logins fail with "Login error" plus `parsing bcrypt hash: hashedSecret too short` in the server log. If you hit this, repair the account with the admin CLI (hashes correctly, no data loss):
+If a local user locks themselves out, an administrator can reset the password on the server with the admin CLI (no data loss):
 
 ```bash
 printf '%s\n' 'NewPass1!' | docker exec -i netbird-server \
@@ -111,7 +109,7 @@ Setting `netbird_proxy_enabled: true` adds a third container (`netbird-proxy`, i
 
 1. DNS: an A record for `netbird_proxy_domain` pointing at the server, plus a wildcard CNAME `*.<netbird_proxy_domain> → <netbird_proxy_domain>` if you want services on the cluster domain itself.
 2. Playbook: `netbird_proxy_enabled: true` (and `netbird_proxy_sni_excludes` with your other service hostnames), then run.
-3. The role generates the proxy access token once (`admin token create --name <netbird_proxy_name>`) and persists it in `.proxy_token` — like the owner block, the token is **never rotated** on later runs; revoke/recreate via `admin token list|revoke` and delete `.proxy_token` to force regeneration.
+3. The role generates the proxy access token once (`admin token create --name <netbird_proxy_name>`) and persists it in `.proxy_token` — the token is **never rotated** on later runs; revoke/recreate via `admin token list|revoke` and delete `.proxy_token` to force regeneration.
 4. Verify: dashboard → **Reverse Proxy → Services** — the domain appears with a *Cluster* badge.
 
 **Custom domains:** added purely in the dashboard (*Reverse Proxy → Custom Domains*), verified via a wildcard CNAME pointing at `netbird_proxy_domain`. They need **no role or Traefik change** — the catch-all passes their TLS through automatically (check CAA records allow `letsencrypt.org` if your zone publishes any).
@@ -136,7 +134,6 @@ Setting `netbird_proxy_enabled: true` adds a third container (`netbird-proxy`, i
     server_url: https://netbird.example.com
     dns_provider: infomaniak
     email: some@e.mail
-    # netbird_admin_email: admin@example.com  # see "First admin user" — prefer the /setup wizard
   roles:
     - t4d.WebServerSetup.docker
     - t4d.WebServerSetup.traefik

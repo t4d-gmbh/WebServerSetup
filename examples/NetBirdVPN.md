@@ -144,9 +144,7 @@ ansible-vault edit vault.yml
 
 ## First Login
 
-Once the playbook has run, open `https://netbird.myserver.net/setup` and create the first admin account there (the setup page is only available while no user exists; the password needs at least 8 characters including one digit, one uppercase letter, and one special character).
-
-> **Note:** the role also supports bootstrapping the admin via `netbird_admin_email` / `vault_netbird_admin_password`, but with netbird-server 0.80.0 that `owner` block stores the password unhashed and login then fails. Prefer the `/setup` wizard; see the [role README](../roles/netbird/README.md#first-admin-user) for the admin-CLI repair command if you are affected.
+Once the playbook has run, open `https://netbird.myserver.net/setup` and create the first admin account there (the setup page is only available while no user exists; the password needs at least 8 characters including one digit, one uppercase letter, and one special character). For automated deployments the same can be done via `POST /api/setup` — see the [role README](../roles/netbird/README.md#first-admin-user).
 
 You can then create setup keys in the dashboard and enroll clients with `netbird up --setup-key <key>`.
 

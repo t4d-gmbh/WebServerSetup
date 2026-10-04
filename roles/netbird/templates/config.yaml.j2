@@ -24,11 +24,6 @@ server:
       - "{{ netbird_public_url }}/nb-silent-auth"
     cliRedirectURIs:
       - "http://localhost:53000/"
-{% if netbird_admin_email | length > 0 %}
-    owner:
-      email: "{{ netbird_admin_email }}"
-      password: "{{ vault_netbird_admin_password }}"
-{% endif %}
 
 {% if netbird_trusted_http_proxies | length > 0 %}
   reverseProxy:
