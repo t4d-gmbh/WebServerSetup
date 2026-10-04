@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 - name: Install python deps
   apt:
     name:
@@ -74,28 +77,11 @@
   tags:
     - molecule-notest
 
-# Not sure if this is needed anymore
 - name: Set up a cron job for Certbot renewal
   become: yes
   cron:
     name: "Certbot auto-renewal"
     minute: "0"
     hour: "2"  # Runs daily at 2 AM
-    job: "/usr/bin/certbot renew --quiet && /bin/systemctl reload nginx"
+    job: "/usr/bin/certbot renew --quiet --deploy-hook \"{{ certbot_renew_hook }}\""
     user: root
-
-      # - name: Obtain SSL certificate
-      #   command: >
-      #     certbot --nginx -d {{ domain_name }} --non-interactive --agree-tos
-      #     --email {{ email }} --cert-path {{ cert_path }} --key-path {{ key_path }}
-      #   become: yes
-      #   register: certbot_result
-      #   changed_when: "'Congratulations' in certbot_result.stdout"
-      #
-      # - name: Set up auto-renewal for Certbot
-      #   cron:
-      #     name: "Certbot auto-renewal"
-      #     minute: "0"
-      #     hour: "0"
-      #     job: "certbot renew --quiet"
-      #   become: yes

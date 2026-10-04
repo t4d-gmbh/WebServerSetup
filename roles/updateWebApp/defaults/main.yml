@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Subdirectory within /opt/{{ app_name }} that contains manage.py.
 # Use "." for repositories where manage.py is at the repository root.
 # Use "{{ app_name | lower }}" for the legacy layout where manage.py lives

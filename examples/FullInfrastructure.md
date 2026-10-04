@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Full Infrastructure Stack
 
 This example deploys a complete container infrastructure on an Ubuntu server: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.

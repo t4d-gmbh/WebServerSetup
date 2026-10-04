@@ -1,0 +1,42 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+gitlab:
+  version: "19.3.1-ce.0"
+
+# GitLab publishes omnibus apt repos only for Ubuntu LTS releases.
+# Set jammy for 22.04 hosts, noble for 24.04. Anything else is unsupported.
+gitlab_repo_codename: "noble"
+
+# host extracted from server_url (e.g. https://gitlab.example.com -> gitlab.example.com)
+gitlab_host: "{{ server_url | regex_replace('^https?://', '') }}"
+gitlab_external_url: "https://{{ gitlab_host }}"
+
+# TLS material issued by the certbot role via DNS-01 (the host itself is not
+# publicly reachable, so omnibus' built-in HTTP-01 validation cannot work).
+gitlab_ssl_certificate: "/etc/letsencrypt/live/{{ gitlab_host }}/fullchain.pem"
+gitlab_ssl_certificate_key: "/etc/letsencrypt/live/{{ gitlab_host }}/privkey.pem"
+
+# Optional: sender address for GitLab notifications (SMTP itself stays
+# configured through the standard gitlab_rails['smtp_*'] settings in
+# gitlab.rb.j2 overrides or a post-role template extension).
+gitlab_email_from: ""
+
+# /etc/gitlab/skip-auto-reconfigure only suppresses the reconfigure that runs
+# on package UPGRADES; a first install always reconfigures from the postinst.
+# That is why gitlab.rb is templated BEFORE the package install: the
+# unavoidable first run already uses the right configuration. The handler then
+# covers later changes and upgrades.
+gitlab_skip_auto_reconfigure: true
+
+# Whether the handler actually runs `gitlab-ctl reconfigure`. CI keeps this
+# false: the first-install postinst reconfigure already ran (with a stand-in
+# certificate from prepare.yml), and a second full chef pass would only burn
+# 10+ minutes.
+gitlab_reconfigure: true
+
+# vault-provided (optional):
+#   vault_gitlab_initial_root_password  root password applied on first
+#                                       reconfigure only; when unset, GitLab
+#                                       writes /etc/gitlab/initial_root_password

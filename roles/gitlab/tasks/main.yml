@@ -1,0 +1,127 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+- name: Assert supported distribution and release
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+      - gitlab_repo_codename in ['jammy', 'noble']
+    fail_msg: >-
+      GitLab omnibus publishes apt repositories only for Ubuntu 22.04 (jammy)
+      and 24.04 (noble). Got {{ ansible_distribution }}
+      {{ ansible_distribution_version }}. Use a supported LTS host or the
+      official gitlab/gitlab-ce Docker image instead.
+
+- name: Install GitLab prerequisites
+  become: true
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - perl
+      - openssh-server
+    state: present
+    update_cache: true
+
+- name: Create apt keyring directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download GitLab GPG key
+  become: true
+  ansible.builtin.get_url:
+    url: https://packages.gitlab.com/gpg.key
+    dest: /etc/apt/keyrings/gitlab.asc
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Add GitLab apt repository
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/gitlab-ce.sources
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu
+      Suites: {{ gitlab_repo_codename }}
+      Components: main
+      Signed-By: /etc/apt/keyrings/gitlab.asc
+
+- name: Create GitLab configuration directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/gitlab
+    state: directory
+  # No owner/group/mode here: the package's chef run re-attributes /etc/gitlab
+  # itself, and asserting 0755 would fail the idempotence check after install.
+
+- name: Keep package postinst from running reconfigure
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/gitlab/skip-auto-reconfigure
+    content: ""
+    mode: '0600'
+  when: gitlab_skip_auto_reconfigure
+
+- name: Allow package postinst to run reconfigure
+  become: true
+  ansible.builtin.file:
+    path: /etc/gitlab/skip-auto-reconfigure
+    state: absent
+  when: not gitlab_skip_auto_reconfigure
+
+- name: Deploy GitLab configuration
+  become: true
+  ansible.builtin.template:
+    src: gitlab.rb.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Reconfigure GitLab
+
+- name: Check certificate files exist
+  become: true
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ gitlab_ssl_certificate }}"
+    - "{{ gitlab_ssl_certificate_key }}"
+  register: gitlab_cert_stat
+
+- name: Assert certbot certificates are in place
+  ansible.builtin.assert:
+    that:
+      - gitlab_cert_stat.results | map(attribute='stat.exists') | select | list | count == 2
+    fail_msg: >-
+      {{ gitlab_ssl_certificate }} not found. Run the certbot role for
+      domain_name={{ gitlab_host }} before this role; GitLab's nginx will not
+      start without the DNS-01 certificate.
+  tags:
+    - molecule-notest
+
+- name: Install GitLab CE
+  become: true
+  ansible.builtin.apt:
+    name:
+      - "gitlab-ce={{ gitlab.version }}"
+    state: present
+    update_cache: true
+  notify: Reconfigure GitLab
+
+- name: Ensure GitLab runit service is enabled and running
+  become: true
+  ansible.builtin.systemd:
+    name: gitlab-runsvdir
+    enabled: true
+    state: started
+  when: gitlab_reconfigure

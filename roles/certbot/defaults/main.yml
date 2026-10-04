@@ -1,0 +1,8 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Command executed by `certbot renew` only after a certificate was renewed.
+# For a shared nginx box the default works; for GitLab omnibus set
+# "gitlab-ctl restart nginx" (nginx is run by runit there, not systemd).
+certbot_renew_hook: "systemctl reload nginx"
