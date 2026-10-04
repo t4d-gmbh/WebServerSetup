@@ -15,7 +15,7 @@
           - "'Docker version' in docker_version.stdout"
         fail_msg: "Docker is not installed"
 
-    - name: Check Docker Compose v2 plugin is installed
+    - name: Check Docker Compose plugin is installed
       ansible.builtin.command: docker compose version
       register: compose_version
       changed_when: false
@@ -24,13 +24,14 @@
       ansible.builtin.debug:
         msg: "stdout={{ compose_version.stdout | default('') }} stderr={{ compose_version.stderr | default('') }}"
 
-    - name: Assert Docker Compose v2 is available
+    - name: Assert Docker Compose V2+ is available
       ansible.builtin.assert:
         that:
           - compose_version.rc == 0
           - "'Docker Compose version' in (compose_version.stdout ~ compose_version.stderr)"
-          - (compose_version.stdout ~ compose_version.stderr) is search('version v?2[.0-9]')
-        fail_msg: "docker compose v2 not usable (stdout={{ compose_version.stdout }}, stderr={{ compose_version.stderr }})"
+          # major version >= 2; docker_compose_v2 requires V2+ semantics (current builds are v5.x)
+          - (compose_version.stdout ~ compose_version.stderr) is search('version v?(?:[2-9]|[1-9][0-9]+)[.0-9]')
+        fail_msg: "docker compose V2+ not usable (stdout={{ compose_version.stdout }}, stderr={{ compose_version.stderr }})"
 
     - name: Check apt keyring and sources files exist
       ansible.builtin.stat:

@@ -2,7 +2,7 @@
 
 [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-docker.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-docker.yml)
 
-This Ansible role installs and configures Docker Engine and Docker Compose (v2 plugin) on an Ubuntu server. It ensures that the necessary system packages are installed, the Docker GPG key is placed in `/etc/apt/keyrings` and the repository is added as a deb822 source pinned to the host's release codename, and the Docker service is started and enabled. Additionally, it adds a specified user to the Docker group for managing containers without sudo.
+This Ansible role installs and configures Docker Engine and the Docker Compose plugin (V2+) on an Ubuntu server. It ensures that the necessary system packages are installed, the Docker GPG key is placed in `/etc/apt/keyrings` and the repository is added as a deb822 source pinned to the host's release codename, and the Docker service is started and enabled. Additionally, it adds a specified user to the Docker group for managing containers without sudo.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ To use this role, add it to your Ansible playbook as follows:
 2. **Remove Legacy Repository Artifacts**: Removes the old `docker.list` source and `trusted.gpg.d/docker.gpg` key written by previous versions of this role (which relied on the deprecated `apt-key`).
 3. **Add Docker GPG Key**: Downloads the official Docker GPG key to `/etc/apt/keyrings/docker.asc`.
 4. **Add Docker Repository**: Writes a deb822 source (`/etc/apt/sources.list.d/docker.sources`) signed with the keyring and pinned to the host's release codename (e.g. `resolute` on Ubuntu 26.04).
-5. **Update APT and Install Docker Packages**: Installs Docker Engine, Docker CLI, containerd, and the Docker Compose v2 plugin.
+5. **Update APT and Install Docker Packages**: Installs Docker Engine, Docker CLI, containerd, and the Docker Compose plugin (V2+).
 6. **Add User to Docker Group**: Adds the specified user to the Docker group to allow non-sudo access to Docker commands.
 7. **Start and Enable Docker Service**: Ensures that the Docker service is started and enabled to run on boot.
 8. **Loggin in to Docker Hub**: If credentails are provided they are used to login to Docker Hub.
