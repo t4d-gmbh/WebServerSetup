@@ -58,9 +58,8 @@
   ansible.builtin.file:
     path: /etc/gitlab
     state: directory
-    owner: root
-    group: root
-    mode: '0755'
+  # No owner/group/mode here: the package's chef run re-attributes /etc/gitlab
+  # itself, and asserting 0755 would fail the idempotence check after install.
 
 - name: Keep package postinst from running reconfigure
   become: true
