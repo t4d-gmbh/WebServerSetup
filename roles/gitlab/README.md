@@ -24,7 +24,7 @@ Apart from the certificate wiring the deployment follows the official installati
 | `gitlab_ssl_certificate` | `/etc/letsencrypt/live/{{ gitlab_host }}/fullchain.pem` | Certificate used by omnibus nginx. |
 | `gitlab_ssl_certificate_key` | `/etc/letsencrypt/live/{{ gitlab_host }}/privkey.pem` | Matching private key. |
 | `gitlab_email_from` | `""` | Optional `gitlab_rails['gitlab_email_from']`. |
-| `gitlab_skip_auto_reconfigure` | `true` | Keep `/etc/gitlab/skip-auto-reconfigure` so the package postinst does not run reconfigure; the role's handler does it instead (official config-management pattern). |
+| `gitlab_skip_auto_reconfigure` | `true` | Keep `/etc/gitlab/skip-auto-reconfigure`, which suppresses the reconfigure on package **upgrades** (a first install always reconfigures from the postinst — the role templates `gitlab.rb` beforehand so that run uses the right config). |
 | `gitlab_reconfigure` | `true` | Whether the handler actually runs `gitlab-ctl reconfigure`. CI sets this to `false`. |
 | `vault_gitlab_initial_root_password` | — | Optional vault variable; applied on the **first** reconfigure only. When unset, GitLab writes `/etc/gitlab/initial_root_password` (valid for 24 h). |
 
@@ -55,7 +55,7 @@ See [examples/GitLab.md](../../examples/GitLab.md) for a complete NetBird + cert
 
 ## CI Notes
 
-The molecule suite installs the real package (proving repo, pin and keyring) but sets `gitlab_reconfigure: false`, so the 10–20 minute chef run and the service start are skipped; the certificate assertion is tagged `molecule-notest`.
+The molecule suite installs the real package (proving repo, pin and keyring). A first install always reconfigures from the package postinst and cannot be skipped, so `prepare.yml` generates a self-signed stand-in certificate at the certbot live paths — letting the real chef converge run inside the container. The handler-driven second reconfigure is gated off (`gitlab_reconfigure: false`), and the certificate assertion is tagged `molecule-notest`.
 
 ## License
 

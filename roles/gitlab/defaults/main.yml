@@ -20,12 +20,17 @@ gitlab_ssl_certificate_key: "/etc/letsencrypt/live/{{ gitlab_host }}/privkey.pem
 # gitlab.rb.j2 overrides or a post-role template extension).
 gitlab_email_from: ""
 
-# Official config-management pattern: /etc/gitlab/skip-auto-reconfigure keeps
-# the package postinst from running the (slow) chef reconfigure; the role's
-# handler runs it under control instead. Keep the default.
+# /etc/gitlab/skip-auto-reconfigure only suppresses the reconfigure that runs
+# on package UPGRADES; a first install always reconfigures from the postinst.
+# That is why gitlab.rb is templated BEFORE the package install: the
+# unavoidable first run already uses the right configuration. The handler then
+# covers later changes and upgrades.
 gitlab_skip_auto_reconfigure: true
 
-# Set to false only to keep CI from executing the 10+ minute reconfigure.
+# Whether the handler actually runs `gitlab-ctl reconfigure`. CI keeps this
+# false: the first-install postinst reconfigure already ran (with a stand-in
+# certificate from prepare.yml), and a second full chef pass would only burn
+# 10+ minutes.
 gitlab_reconfigure: true
 
 # vault-provided (optional):
