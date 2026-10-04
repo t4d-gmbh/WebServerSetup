@@ -20,12 +20,17 @@
       register: compose_version
       changed_when: false
 
+    - name: Show Docker Compose version output
+      ansible.builtin.debug:
+        msg: "stdout={{ compose_version.stdout | default('') }} stderr={{ compose_version.stderr | default('') }}"
+
     - name: Assert Docker Compose v2 is available
       ansible.builtin.assert:
         that:
           - compose_version.rc == 0
-          - "'Docker Compose version v2' in compose_version.stdout"
-        fail_msg: "docker compose v2 plugin is not installed"
+          - "'Docker Compose version' in (compose_version.stdout ~ compose_version.stderr)"
+          - (compose_version.stdout ~ compose_version.stderr) is search('version v?2[.0-9]')
+        fail_msg: "docker compose v2 not usable (stdout={{ compose_version.stdout }}, stderr={{ compose_version.stderr }})"
 
     - name: Check apt keyring and sources files exist
       ansible.builtin.stat:
