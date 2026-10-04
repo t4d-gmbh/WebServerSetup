@@ -53,6 +53,22 @@
     state: present
   become: yes
 
+# Docker Compose (v5+) validates env_file for ALL services at project load
+# time, even when the operation is restricted to other services. Seed an
+# empty proxy.env before the first compose run (official quickstart uses a
+# placeholder token the same way); the real file is templated after the
+# management server is up and the access token has been minted.
+- name: Ensure proxy environment file exists for compose project loading
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ netbird_base_path }}/proxy.env"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0600'
+    force: false
+  become: yes
+  when: netbird_proxy_enabled
+
 - name: Start NetBird containers
   community.docker.docker_compose_v2:
     project_src: "{{ netbird_base_path }}"
