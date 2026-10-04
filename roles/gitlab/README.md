@@ -17,7 +17,7 @@ Apart from the certificate wiring the deployment follows the official installati
 
 | Variable | Default | Description |
 |---|---|---|
-| `gitlab.version` | `19.4.1-ce.0` | Exact omnibus package version to pin. |
+| `gitlab.version` | `19.3.1-ce.0` | Exact omnibus package version to pin. |
 | `gitlab_repo_codename` | `noble` | Repository suite (`jammy` or `noble`). |
 | `gitlab_host` | from `server_url` | Hostname used for `external_url` and certificate lookup. |
 | `gitlab_external_url` | `https://{{ gitlab_host }}` | Omnibus `external_url`. |

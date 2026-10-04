@@ -59,7 +59,7 @@
 - name: Check NetBird enrollment status
   become: true
   ansible.builtin.command:
-    command: netbird status
+    cmd: netbird status
   register: netbird_client_status
   changed_when: false
   failed_when: false
@@ -70,7 +70,7 @@
 - name: Enroll peer with a setup key
   become: true
   ansible.builtin.command:
-    command: >-
+    cmd: >-
       netbird up --management-url {{ netbird_client_management_url | quote }}
       --setup-key {{ vault_netbird_setup_key | quote }}
       --hostname {{ netbird_client_name | quote }}

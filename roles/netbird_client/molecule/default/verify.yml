@@ -5,7 +5,7 @@
   tasks:
     - name: Check netbird binary is installed
       ansible.builtin.command:
-        command: netbird version
+        cmd: netbird version
       register: netbird_version
       changed_when: false
 

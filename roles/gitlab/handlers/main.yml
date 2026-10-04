@@ -2,6 +2,6 @@
 - name: Reconfigure GitLab
   become: true
   ansible.builtin.command:
-    command: gitlab-ctl reconfigure
+    cmd: gitlab-ctl reconfigure
   changed_when: false
   when: gitlab_reconfigure

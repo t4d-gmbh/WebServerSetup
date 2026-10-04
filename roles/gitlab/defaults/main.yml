@@ -1,6 +1,6 @@
 ---
 gitlab:
-  version: "19.4.1-ce.0"
+  version: "19.3.1-ce.0"
 
 # GitLab publishes omnibus apt repos only for Ubuntu LTS releases.
 # Set jammy for 22.04 hosts, noble for 24.04. Anything else is unsupported.

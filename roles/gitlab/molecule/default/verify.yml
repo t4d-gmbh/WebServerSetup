@@ -5,14 +5,14 @@
   tasks:
     - name: Check GitLab CE package is installed
       ansible.builtin.command:
-        command: gitlab-ctl --version
+        cmd: gitlab-ctl --version
       register: gitlab_ctl
       changed_when: false
 
     - name: Assert gitlab-ctl reports the pinned version
       ansible.builtin.assert:
         that:
-          - "'19.4.1' in gitlab_ctl.stdout"
+          - "'19.3.1' in gitlab_ctl.stdout"
         fail_msg: "gitlab-ctl missing or wrong version: {{ gitlab_ctl.stdout }}"
 
     - name: Read rendered gitlab.rb

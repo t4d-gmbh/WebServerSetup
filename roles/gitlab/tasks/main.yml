@@ -64,9 +64,9 @@
 
 - name: Keep package postinst from running reconfigure
   become: true
-  ansible.builtin.file:
-    path: /etc/gitlab/skip-auto-reconfigure
-    state: file
+  ansible.builtin.copy:
+    dest: /etc/gitlab/skip-auto-reconfigure
+    content: ""
     mode: '0600'
   when: gitlab_skip_auto_reconfigure
 
