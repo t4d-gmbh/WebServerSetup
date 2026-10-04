@@ -1,0 +1,85 @@
+---
+- name: Assert management URL and setup key are set
+  ansible.builtin.assert:
+    that:
+      - netbird_client_management_url | length > 0
+      - vault_netbird_setup_key is defined
+    fail_msg: >-
+      netbird_client_management_url and vault_netbird_setup_key are required.
+
+- name: Create apt keyring directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download NetBird GPG key
+  become: true
+  ansible.builtin.get_url:
+    url: https://pkgs.netbird.io/debian/public.key
+    dest: /etc/apt/keyrings/netbird.asc
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Add NetBird apt repository
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/netbird.sources
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://pkgs.netbird.io/debian
+      Suites: stable
+      Components: main
+      Signed-By: /etc/apt/keyrings/netbird.asc
+
+- name: Install NetBird client
+  become: true
+  ansible.builtin.apt:
+    name:
+      - >-
+        netbird{{ '=' ~ netbird_client_version if netbird_client_version else '' }}
+    state: present
+    update_cache: true
+
+- name: Ensure NetBird service is enabled and running
+  become: true
+  ansible.builtin.systemd:
+    name: netbird
+    enabled: true
+    state: started
+  when: netbird_client_start_service
+
+- name: Check NetBird enrollment status
+  become: true
+  ansible.builtin.command:
+    command: netbird status
+  register: netbird_client_status
+  changed_when: false
+  failed_when: false
+  when: netbird_client_start_service
+  tags:
+    - molecule-notest
+
+- name: Enroll peer with a setup key
+  become: true
+  ansible.builtin.command:
+    command: >-
+      netbird up --management-url {{ netbird_client_management_url | quote }}
+      --setup-key {{ vault_netbird_setup_key | quote }}
+      --hostname {{ netbird_client_name | quote }}
+      {{ '--pre-shared-key ' ~ vault_netbird_pre_shared_key | quote
+         if vault_netbird_pre_shared_key is defined else '' }}
+  no_log: true
+  changed_when: true
+  when:
+    - netbird_client_start_service
+    - netbird_client_status.rc != 0 or 'NeedsLogin' in netbird_client_status.stdout | default('')
+  tags:
+    - molecule-notest

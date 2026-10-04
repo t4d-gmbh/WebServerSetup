@@ -1,0 +1,16 @@
+---
+external_url {{ gitlab_external_url | to_json }}
+
+# TLS is provided by certbot DNS-01 certificates (this host is only reachable
+# from inside the NetBird network, so omnibus' own ACME HTTP-01 validation can
+# never work). Disabling letsencrypt also stops reconfigure from touching it.
+letsencrypt['enable'] = false
+nginx['ssl_certificate'] = {{ gitlab_ssl_certificate | to_json }}
+nginx['ssl_certificate_key'] = {{ gitlab_ssl_certificate_key | to_json }}
+
+{% if gitlab_email_from %}
+gitlab_rails['gitlab_email_from'] = {{ gitlab_email_from | to_json }}
+{% endif %}
+{% if vault_gitlab_initial_root_password is defined %}
+gitlab_rails['initial_root_password'] = {{ vault_gitlab_initial_root_password | to_json }}
+{% endif %}

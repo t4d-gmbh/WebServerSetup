@@ -1,0 +1,30 @@
+---
+- name: Verify netbird_client
+  hosts: all
+  become: true
+  tasks:
+    - name: Check netbird binary is installed
+      ansible.builtin.command:
+        command: netbird version
+      register: netbird_version
+      changed_when: false
+
+    - name: Assert netbird CLI works
+      ansible.builtin.assert:
+        that:
+          - netbird_version.rc == 0
+        fail_msg: "netbird binary not usable: {{ netbird_version.stdout }}"
+
+    - name: Check apt artifacts
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /etc/apt/keyrings/netbird.asc
+        - /etc/apt/sources.list.d/netbird.sources
+      register: netbird_files
+
+    - name: Assert repository and keyring exist
+      ansible.builtin.assert:
+        that:
+          - netbird_files.results | map(attribute='stat.exists') | select | list | count == 2
+        fail_msg: "NetBird apt repo or keyring missing"

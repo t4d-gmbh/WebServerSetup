@@ -1,0 +1,20 @@
+---
+# Public URL of the NetBird management/dashboard endpoint, e.g.
+# https://nb.example.com (the netbird server role's netbird_public_url).
+# Must be reachable from this host over the regular network for enrollment.
+netbird_client_management_url: ""
+
+# Optional: pin the client package version ("" keeps the repo's latest).
+netbird_client_version: ""
+
+# Peer name shown in the dashboard.
+netbird_client_name: "{{ ansible_hostname }}"
+
+# Set to false to only install the package without touching the service
+# (used by CI, where the daemon has no TUN device).
+netbird_client_start_service: true
+
+# vault-provided (required):
+#   vault_netbird_setup_key        setup key created in the dashboard
+# vault-provided (optional):
+#   vault_netbird_pre_shared_key   PSK additionally required by the server

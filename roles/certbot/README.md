@@ -17,6 +17,8 @@ This Ansible role installs and configures Certbot for obtaining and managing SSL
 - `domain_name`: The domain for which the SSL certificate is requested.
 - `cert_path`: The path where the SSL certificate will be stored.
 - `key_path`: The path where the private key will be stored.
+- `certbot_email`: Email address used for the Let's Encrypt account.
+- `certbot_renew_hook`: Command run by the renewal cron **only after a certificate was actually renewed** (deploy hook). Default `systemctl reload nginx`; for GitLab omnibus use `gitlab-ctl restart nginx` (nginx is managed by runit there).
 
 ## Dependencies
 
@@ -43,6 +45,7 @@ To use this role, add it to your Ansible playbook as follows:
 7. **Check SSL Certificate Validity**: Verifies if the existing SSL certificate is valid.
 8. **Obtain SSL Certificate**: Requests a new SSL certificate if the existing one is invalid or does not exist.
 9. **Debug Output**: Displays the output of the Certbot command for troubleshooting.
+10. **Set up Renewal Cron**: Runs `certbot renew` daily at 2 AM; after an actual renewal it executes `certbot_renew_hook` (default `systemctl reload nginx`) as a deploy hook.
 10. **Set Up Cron Job for Renewal**: Configures a cron job to automatically renew the SSL certificate daily at 2 AM.
 
 ## Usage

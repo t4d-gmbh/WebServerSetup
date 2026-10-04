@@ -1,0 +1,34 @@
+---
+gitlab:
+  version: "19.4.1-ce.0"
+
+# GitLab publishes omnibus apt repos only for Ubuntu LTS releases.
+# Set jammy for 22.04 hosts, noble for 24.04. Anything else is unsupported.
+gitlab_repo_codename: "noble"
+
+# host extracted from server_url (e.g. https://gitlab.example.com -> gitlab.example.com)
+gitlab_host: "{{ server_url | regex_replace('^https?://', '') }}"
+gitlab_external_url: "https://{{ gitlab_host }}"
+
+# TLS material issued by the certbot role via DNS-01 (the host itself is not
+# publicly reachable, so omnibus' built-in HTTP-01 validation cannot work).
+gitlab_ssl_certificate: "/etc/letsencrypt/live/{{ gitlab_host }}/fullchain.pem"
+gitlab_ssl_certificate_key: "/etc/letsencrypt/live/{{ gitlab_host }}/privkey.pem"
+
+# Optional: sender address for GitLab notifications (SMTP itself stays
+# configured through the standard gitlab_rails['smtp_*'] settings in
+# gitlab.rb.j2 overrides or a post-role template extension).
+gitlab_email_from: ""
+
+# Official config-management pattern: /etc/gitlab/skip-auto-reconfigure keeps
+# the package postinst from running the (slow) chef reconfigure; the role's
+# handler runs it under control instead. Keep the default.
+gitlab_skip_auto_reconfigure: true
+
+# Set to false only to keep CI from executing the 10+ minute reconfigure.
+gitlab_reconfigure: true
+
+# vault-provided (optional):
+#   vault_gitlab_initial_root_password  root password applied on first
+#                                       reconfigure only; when unset, GitLab
+#                                       writes /etc/gitlab/initial_root_password

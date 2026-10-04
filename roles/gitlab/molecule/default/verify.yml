@@ -1,0 +1,59 @@
+---
+- name: Verify gitlab
+  hosts: all
+  become: true
+  tasks:
+    - name: Check GitLab CE package is installed
+      ansible.builtin.command:
+        command: gitlab-ctl --version
+      register: gitlab_ctl
+      changed_when: false
+
+    - name: Assert gitlab-ctl reports the pinned version
+      ansible.builtin.assert:
+        that:
+          - "'19.4.1' in gitlab_ctl.stdout"
+        fail_msg: "gitlab-ctl missing or wrong version: {{ gitlab_ctl.stdout }}"
+
+    - name: Read rendered gitlab.rb
+      ansible.builtin.slurp:
+        src: /etc/gitlab/gitlab.rb
+      register: gitlab_rb_raw
+
+    - name: Assert gitlab.rb carries the DNS-01 TLS wiring
+      ansible.builtin.assert:
+        that:
+          - "'external_url \"https://gitlab.example.com\"' in gitlab_rb"
+          - "'letsencrypt[''enable''] = false' in gitlab_rb"
+          - "gitlab_rb is search('/etc/letsencrypt/live/gitlab.example.com/fullchain.pem')"
+          - "'TestPassword123' in gitlab_rb"
+        fail_msg: "gitlab.rb does not contain the expected directives"
+      vars:
+        gitlab_rb: "{{ gitlab_rb_raw.content | b64decode }}"
+
+    - name: Check gitlab.rb permissions
+      ansible.builtin.stat:
+        path: /etc/gitlab/gitlab.rb
+      register: gitlab_rb_stat
+
+    - name: Assert gitlab.rb is root-only readable
+      ansible.builtin.assert:
+        that:
+          - gitlab_rb_stat.stat.exists
+          - gitlab_rb_stat.stat.mode == '0600'
+        fail_msg: "gitlab.rb must exist with mode 0600"
+
+    - name: Check apt artifacts
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /etc/apt/keyrings/gitlab.asc
+        - /etc/apt/sources.list.d/gitlab-ce.sources
+        - /etc/gitlab/skip-auto-reconfigure
+      register: gitlab_files
+
+    - name: Assert repository, keyring and skip file exist
+      ansible.builtin.assert:
+        that:
+          - gitlab_files.results | map(attribute='stat.exists') | select | list | count == 3
+        fail_msg: "GitLab apt repo, keyring or skip-auto-reconfigure missing"
