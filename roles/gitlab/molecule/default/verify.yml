@@ -26,13 +26,18 @@
     - name: Assert gitlab.rb carries the DNS-01 TLS wiring
       ansible.builtin.assert:
         that:
-          - "'external_url \"https://gitlab.example.com\"' in gitlab_rb"
-          - "'letsencrypt[''enable''] = false' in gitlab_rb"
-          - "gitlab_rb is search('/etc/letsencrypt/live/gitlab.example.com/fullchain.pem')"
+          - external_url_line in gitlab_rb
+          - le_disable_line in gitlab_rb
+          - cert_line in gitlab_rb
+          - key_line in gitlab_rb
           - "'TestPassword123' in gitlab_rb"
         fail_msg: "gitlab.rb does not contain the expected directives"
       vars:
         gitlab_rb: "{{ gitlab_rb_raw.content | b64decode }}"
+        external_url_line: 'external_url "https://gitlab.example.com"'
+        le_disable_line: "letsencrypt['enable'] = false"
+        cert_line: "nginx['ssl_certificate'] = \"/etc/letsencrypt/live/gitlab.example.com/fullchain.pem\""
+        key_line: "nginx['ssl_certificate_key'] = \"/etc/letsencrypt/live/gitlab.example.com/privkey.pem\""
 
     - name: Check gitlab.rb permissions
       ansible.builtin.stat:
