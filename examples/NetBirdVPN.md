@@ -33,6 +33,7 @@ The simplest way to add it is by creating a `requirements.yml` file in your proj
 collections:
   - name: t4d.WebServerSetup
     type: git
+    source: https://github.com/t4d-gmbh/WebServerSetup.git
     version: main
 ```
 
