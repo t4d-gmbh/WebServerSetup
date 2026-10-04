@@ -1,0 +1,93 @@
+---
+- name: Verify netbird proxy scenario
+  hosts: all
+  become: true
+  tasks:
+    - name: Check proxy files exist
+      ansible.builtin.stat:
+        path: "/data/docker/netbird/{{ item }}"
+      register: nb_proxy_files
+      loop:
+        - proxy.env
+        - .proxy_token
+        - docker-compose.yml
+
+    - name: Assert proxy files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "NetBird {{ item.item }} does not exist"
+      loop: "{{ nb_proxy_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Check Traefik dynamic config exists
+      ansible.builtin.stat:
+        path: /data/docker/traefik/conf/netbird-proxy.yaml
+      register: nb_traefik_dyn
+
+    - name: Assert Traefik dynamic config exists
+      ansible.builtin.assert:
+        that:
+          - nb_traefik_dyn.stat.exists
+        fail_msg: "/data/docker/traefik/conf/netbird-proxy.yaml does not exist"
+
+    - name: Read rendered proxy.env
+      ansible.builtin.slurp:
+        path: /data/docker/netbird/proxy.env
+      register: nb_proxy_env
+      no_log: true
+
+    - name: Assert proxy.env content
+      ansible.builtin.assert:
+        that:
+          - "'NB_PROXY_DOMAIN=nb.test.example.com' in (nb_proxy_env.content | b64decode)"
+          - "'NB_PROXY_MANAGEMENT_ADDRESS=http://netbird-server:80' in (nb_proxy_env.content | b64decode)"
+          - "'NB_PROXY_ALLOW_INSECURE=true' in (nb_proxy_env.content | b64decode)"
+          - "'NB_PROXY_ACME_CHALLENGE_TYPE=tls-alpn-01' in (nb_proxy_env.content | b64decode)"
+          - "'NB_PROXY_PROXY_PROTOCOL=true' in (nb_proxy_env.content | b64decode)"
+          - "'NB_PROXY_TOKEN=nbx_' in (nb_proxy_env.content | b64decode)"
+
+    - name: Read rendered docker-compose.yml
+      ansible.builtin.slurp:
+        path: /data/docker/netbird/docker-compose.yml
+      register: nb_compose
+
+    - name: Assert proxy service and passthrough rule
+      ansible.builtin.assert:
+        that:
+          - "'netbirdio/reverse-proxy:' in (nb_compose.content | b64decode)"
+          - "'HostSNI(`*`)' in (nb_compose.content | b64decode)"
+          - "'!HostSNI(`nb.test.example.com`)' in (nb_compose.content | b64decode)"
+          - "'!HostSNI(`auth.test.example.com`)' in (nb_compose.content | b64decode)"
+          - "'tls.passthrough=true' in (nb_compose.content | b64decode)"
+          - "'serverstransport=pp-v2@file' in (nb_compose.content | b64decode)"
+
+    - name: Validate docker-compose file
+      ansible.builtin.command: docker compose config --quiet
+      args:
+        chdir: /data/docker/netbird
+      changed_when: false
+
+    - name: List proxy access tokens on the management server
+      community.docker.docker_container_exec:
+        container: netbird-server
+        command: /go/bin/netbird-server --config /etc/netbird/config.yaml admin token list
+      register: nb_token_list
+
+    - name: Assert the generated token is registered
+      ansible.builtin.assert:
+        that:
+          - "'netbird-proxy' in nb_token_list.stdout"
+        fail_msg: "Proxy access token not found in management server token list"
+
+    - name: Gather netbird-proxy container info
+      community.docker.docker_container_info:
+        name: netbird-proxy
+      register: nb_proxy_container
+
+    - name: Assert netbird-proxy is running
+      ansible.builtin.assert:
+        that:
+          - nb_proxy_container.container.State.Running
+        fail_msg: "netbird-proxy container is not running"

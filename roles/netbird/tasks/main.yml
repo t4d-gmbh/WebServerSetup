@@ -57,9 +57,120 @@
   community.docker.docker_compose_v2:
     project_src: "{{ netbird_base_path }}"
     state: present
+    services: "{{ netbird_proxy_enabled | ternary(['dashboard', 'netbird-server'], omit) }}"
   become: yes
   become_user: "{{ dancer_user }}"
   register: netbird_compose_result
   retries: 3
   delay: 10
   until: netbird_compose_result is not failed
+
+- name: Gather proxy network info
+  community.docker.docker_network_info:
+    name: proxy
+  register: netbird_proxy_network
+  when: netbird_proxy_enabled
+
+- name: Ensure Traefik dynamic configuration directory exists
+  become: yes
+  file:
+    path: /data/docker/traefik/conf
+    state: directory
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0755'
+  when: netbird_proxy_enabled
+
+- name: Create Traefik PROXY protocol servers transport
+  become: yes
+  template:
+    src: netbird-proxy.yaml.j2
+    dest: /data/docker/traefik/conf/netbird-proxy.yaml
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0644'
+  when: netbird_proxy_enabled
+
+- name: Check for persisted proxy access token
+  ansible.builtin.stat:
+    path: "{{ netbird_base_path }}/.proxy_token"
+  register: netbird_proxy_token_file
+  when: netbird_proxy_enabled
+
+- name: Read persisted proxy access token
+  ansible.builtin.slurp:
+    path: "{{ netbird_base_path }}/.proxy_token"
+  register: netbird_proxy_token_existing
+  when: netbird_proxy_enabled and netbird_proxy_token_file.stat.exists
+  no_log: true
+
+- name: Create NetBird proxy access token
+  community.docker.docker_container_exec:
+    container: netbird-server
+    command: /go/bin/netbird-server --config /etc/netbird/config.yaml admin token create --name {{ netbird_proxy_name }}
+  register: netbird_proxy_token_created
+  when: >-
+    netbird_proxy_enabled and
+    vault_netbird_proxy_token is not defined and
+    not netbird_proxy_token_file.stat.exists
+  no_log: true
+
+- name: Set proxy access token fact from persisted token
+  ansible.builtin.set_fact:
+    netbird_proxy_token: "{{ netbird_proxy_token_existing.content | b64decode | trim }}"
+  when: netbird_proxy_enabled and netbird_proxy_token_file.stat.exists
+  no_log: true
+
+- name: Set proxy access token fact from generated token
+  ansible.builtin.set_fact:
+    netbird_proxy_token: "{{ netbird_proxy_token_created.stdout | regex_search('^Token:\\s+(\\S+)', '\\1') | first }}"
+  when: netbird_proxy_token_created is not skipped
+  no_log: true
+
+- name: Persist generated proxy access token
+  ansible.builtin.copy:
+    content: "{{ netbird_proxy_token }}"
+    dest: "{{ netbird_base_path }}/.proxy_token"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0600'
+    force: false
+  become: yes
+  when: netbird_proxy_token_created is not skipped
+  no_log: true
+
+- name: Set proxy access token fact from vault
+  ansible.builtin.set_fact:
+    netbird_proxy_token: "{{ vault_netbird_proxy_token }}"
+  when: netbird_proxy_enabled and vault_netbird_proxy_token is defined
+  no_log: true
+
+- name: Set proxy trusted proxies fact
+  ansible.builtin.set_fact:
+    netbird_proxy_trusted: "{{ netbird_proxy_trusted_proxies if netbird_proxy_trusted_proxies | length > 0 else [netbird_proxy_network.network.IPAM.Config[0].Subnet] }}"
+  when: netbird_proxy_enabled
+
+- name: Create NetBird proxy environment file
+  become: yes
+  template:
+    src: proxy.env.j2
+    dest: "{{ netbird_base_path }}/proxy.env"
+    owner: "{{ dancer_user }}"
+    group: "{{ dancer_user }}"
+    mode: '0600'
+  when: netbird_proxy_enabled
+  no_log: true
+
+- name: Start NetBird proxy container
+  community.docker.docker_compose_v2:
+    project_src: "{{ netbird_base_path }}"
+    state: present
+    services:
+      - proxy
+  become: yes
+  become_user: "{{ dancer_user }}"
+  register: netbird_proxy_compose_result
+  retries: 3
+  delay: 10
+  until: netbird_proxy_compose_result is not failed
+  when: netbird_proxy_enabled

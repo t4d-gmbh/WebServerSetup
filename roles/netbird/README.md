@@ -23,6 +23,13 @@ This Ansible role installs and configures a self-hosted [NetBird](https://netbir
 - `netbird_log_level`: Log level of the NetBird server (default: "info").
 - `netbird_store_engine`: Management store engine, `sqlite` or `postgres` (default: "sqlite").
 - `netbird_admin_email`: Optional email for the initial admin user. When set, an `owner` block is rendered into `config.yaml` and the account is created on first startup. **Known issue (netbird-server 0.80.0): the `owner` block stores the password unhashed, so logins fail with "Login error" / `hashedSecret too short`. Recommended: leave this empty and create the first admin via the `/setup` wizard — see [First admin user](#first-admin-user).**
+- `netbird_proxy_enabled`: Deploy the NetBird reverse proxy (`netbirdio/reverse-proxy`) to expose internal services publicly (default: false). See [Reverse proxy feature](#reverse-proxy-feature).
+- `netbird_proxy_domain`: Base domain of the proxy cluster; services land on `<name>.<domain>`. Defaults to the management host (official quickstart behaviour); set a dedicated domain (with an A record) to keep it separate from `server_url`.
+- `netbird_proxy_name`: Name of the generated proxy access token (default: "netbird-proxy").
+- `netbird_proxy_port`: Proxy listener port inside the container (default: 8443; reached via Traefik TLS passthrough on 443).
+- `netbird_proxy_wg_port`: UDP port published for the proxy's embedded WireGuard client (default: 51820).
+- `netbird_proxy_sni_excludes`: Hostnames Traefik must keep for its own HTTP routers. The passthrough rule is a catch-all (`HostSNI(*)`); `netbird_host` is always excluded automatically — add **every other service hostname** served by the shared Traefik (authentik, headscale, opencpu, ...), or their TLS will be passed to the proxy.
+- `netbird_proxy_trusted_proxies`: CIDRs whose PROXY protocol headers the proxy trusts. Auto-detected from the `proxy` docker network when empty.
 - `netbird_trusted_http_proxies`: Optional list of trusted reverse-proxy CIDRs for client-IP forwarding (default: `[]`).
 - `server_url`: Public URL of the NetBird instance, e.g. `https://netbird.example.com` (from the Traefik/Headscale convention of this collection).
 - `dns_provider`: Traefik certificate resolver name used for TLS (e.g. `infomaniak`).
@@ -33,6 +40,7 @@ Vault variables (required, define them in your `vault.yml`):
 - `vault_netbird_store_encryption_key`: base64-encoded 32-byte key encrypting setup keys and tokens at rest. Generate with `openssl rand -base64 32`. **Back this key up** — losing it means losing access to encrypted data.
 - `vault_netbird_admin_password`: Password for `netbird_admin_email` (only used with the `owner` block, see the caveat above). NetBird requires at least 8 characters including one digit, one uppercase letter, and one special character.
 - `vault_netbird_session_cookie_key`: Optional AES key for embedded IdP session cookies. Generate with `openssl rand -base64 32`.
+- `vault_netbird_proxy_token`: Optional pre-created proxy access token (`nbx_...`). When unset and `netbird_proxy_enabled` is true, the role generates one via the management CLI and persists it as `.proxy_token` in the base path.
 
 ## Dependencies
 
@@ -89,6 +97,31 @@ printf '%s\n' 'NewPass1!' | docker exec -i netbird-server \
 ```
 
 Using `--password-file -` reads the password from stdin so it never appears in the process arguments.
+
+## Reverse proxy feature
+
+Setting `netbird_proxy_enabled: true` adds a third container (`netbird-proxy`, image `netbirdio/reverse-proxy`) that exposes internal services to the public internet. The configuration mirrors NetBird's official quickstart:
+
+- The proxy manages its **own TLS certificates** (Let's Encrypt, `tls-alpn-01`), so Traefik forwards matching connections as **raw TLS passthrough** — no termination.
+- The passthrough router is a catch-all (`HostSNI(*)`, lowest priority) minus explicit exclusions: `netbird_host` is always excluded, and **every other hostname on the shared Traefik must be added to `netbird_proxy_sni_excludes`** — otherwise its TLS is handed to the proxy.
+- The proxy connects to management over the docker network (`http://netbird-server:80`), so no `/management.ProxyService/` route through Traefik is needed.
+- The traefik role's `websecure` entrypoint needs `allowACMEByPass: true` (set in the `traefik-3.7.13.yaml.j2` template) so the proxy can solve its own TLS-ALPN challenges.
+
+**Enabling steps:**
+
+1. DNS: an A record for `netbird_proxy_domain` pointing at the server, plus a wildcard CNAME `*.<netbird_proxy_domain> → <netbird_proxy_domain>` if you want services on the cluster domain itself.
+2. Playbook: `netbird_proxy_enabled: true` (and `netbird_proxy_sni_excludes` with your other service hostnames), then run.
+3. The role generates the proxy access token once (`admin token create --name <netbird_proxy_name>`) and persists it in `.proxy_token` — like the owner block, the token is **never rotated** on later runs; revoke/recreate via `admin token list|revoke` and delete `.proxy_token` to force regeneration.
+4. Verify: dashboard → **Reverse Proxy → Services** — the domain appears with a *Cluster* badge.
+
+**Custom domains:** added purely in the dashboard (*Reverse Proxy → Custom Domains*), verified via a wildcard CNAME pointing at `netbird_proxy_domain`. They need **no role or Traefik change** — the catch-all passes their TLS through automatically (check CAA records allow `letsencrypt.org` if your zone publishes any).
+
+**Requirements & caveats:**
+
+- Port 443 must be reachable (passthrough) and UDP 51820 published for the proxy's WireGuard client.
+- The proxy's embedded client dials the **public URL** of the management server; if your network does not hairpin the server's own public IP, proxied services return 504 (`failed connecting to Signal Service`). Workaround: split DNS for the management domain inside the proxy container (`extra_hosts`).
+- TCP/UDP (L4) proxy services need per-port mappings on the proxy container — not managed by this role; add them via your own compose overrides.
+- CrowdSec integration is not managed by this role.
 
 ## Example Playbook
 

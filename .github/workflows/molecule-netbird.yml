@@ -37,3 +37,10 @@ jobs:
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
+
+      - name: Run Molecule proxy scenario
+        run: molecule test -s proxy
+        working-directory: roles/netbird
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"

@@ -1,0 +1,8 @@
+---
+- name: Converge (proxy scenario)
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include netbird"
+      ansible.builtin.include_role:
+        name: netbird

@@ -57,9 +57,45 @@ services:
       options:
         max-size: "500m"
         max-file: "2"
+{% if netbird_proxy_enabled %}
+
+  # NetBird Proxy - exposes internal resources to the internet
+  # TCP passthrough for any unmatched domain (proxy handles its own TLS)
+  proxy:
+    image: netbirdio/reverse-proxy:{{ netbird.proxy_tag }}
+    container_name: netbird-proxy
+    restart: unless-stopped
+    depends_on:
+      - netbird-server
+    networks:
+      - proxy
+    ports:
+      - '{{ netbird_proxy_wg_port }}:{{ netbird_proxy_wg_port }}/udp'
+    env_file:
+      - ./proxy.env
+    volumes:
+      - netbird_proxy_certs:/certs
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.netbird-proxy.entrypoints=websecure
+      - traefik.tcp.routers.netbird-proxy.rule=HostSNI(`*`){% for hostname in [netbird_host] + netbird_proxy_sni_excludes %} && !HostSNI(`{{ hostname }}`){% endfor %}
+      - traefik.tcp.routers.netbird-proxy.tls.passthrough=true
+      - traefik.tcp.routers.netbird-proxy.service=netbird-proxy-tls
+      - traefik.tcp.routers.netbird-proxy.priority=1
+      - traefik.tcp.services.netbird-proxy-tls.loadbalancer.server.port={{ netbird_proxy_port }}
+      - traefik.tcp.services.netbird-proxy-tls.loadbalancer.serverstransport=pp-v2@file
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"
+{% endif %}
 
 volumes:
   netbird_data:
+{% if netbird_proxy_enabled %}
+  netbird_proxy_certs:
+{% endif %}
 
 networks:
   proxy:

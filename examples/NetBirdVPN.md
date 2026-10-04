@@ -150,6 +150,25 @@ Once the playbook has run, open `https://netbird.myserver.net/setup` and create 
 
 You can then create setup keys in the dashboard and enroll clients with `netbird up --setup-key <key>`.
 
+## Reverse Proxy (optional)
+
+NetBird can also expose internal services to the public internet through a dedicated proxy container. To enable it, add the proxy variables to the playbook `vars` and rerun:
+
+```yaml
+    netbird_proxy_enabled: true
+    netbird_proxy_domain: "proxy.myserver.net"   # or omit to reuse the NetBird host
+    netbird_proxy_sni_excludes:                   # every other hostname on this Traefik!
+      - "auth.myserver.net"
+```
+
+Then:
+
+1. Create DNS records: A `proxy.myserver.net` → server IP, and (to host services on the cluster domain) CNAME `*.proxy.myserver.net` → `proxy.myserver.net`.
+2. Rerun the playbook — the role generates the proxy access token once and starts `netbird-proxy` behind Traefik TLS passthrough.
+3. Verify in the dashboard under **Reverse Proxy → Services**: the domain shows with a *Cluster* badge.
+
+Custom domains for services are added entirely in the dashboard (*Reverse Proxy → Custom Domains*, verified via a wildcard CNAME pointing at the proxy domain) — no playbook change needed. See the [role README](../roles/netbird/README.md#reverse-proxy-feature) for details and caveats (UDP 51820, hairpin NAT, token lifecycle).
+
 ## Used Roles
 
 Here can find detailed information about the roles used in this examples:
