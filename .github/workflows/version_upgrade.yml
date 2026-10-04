@@ -58,6 +58,7 @@ jobs:
           - celerySetup
           - postgresqlSetup
           - headscale
+          - netbird
           - traefik
           - opencpu
           - updateWebApp
@@ -94,6 +95,7 @@ jobs:
         scenario:
           - compound-docker-auth-headscale
           - compound-docker-auth-opencpu
+          - compound-docker-netbird
           - compound-full-stack
           - compound-django-stack
     steps:

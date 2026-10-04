@@ -1,0 +1,16 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+
+    - name: Install Docker SDK for Python (needed by community.docker modules)
+      ansible.builtin.apt:
+        name:
+          - python3-docker
+        state: present
+        update_cache: true

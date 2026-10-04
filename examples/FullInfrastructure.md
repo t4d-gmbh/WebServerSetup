@@ -79,7 +79,7 @@ ansible-playbook playbook.yml -i inventory.ini --ask-vault-pass
 
     # traefik - reverse proxy
     traefik:
-      version: "3.5.4"
+      version: "3.7.13"
 
     # authentik - identity provider
     AUTHENTIK_TAG: "2025.6.3"

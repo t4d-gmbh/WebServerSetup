@@ -13,12 +13,15 @@ entryPoints:
   web:
     address: :80
     http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
       redirections:
         entryPoint:
           to: websecure
           scheme: https
   websecure:
     address: :443
+    http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
     transport:
       respondingTimeouts:
         readTimeout: 0  # required for long-lived gRPC/WebSocket streams (e.g. NetBird)
@@ -42,7 +45,7 @@ tls:
         resolver: "{{ dns_provider }}" 
         domain:
           main: "{{ tls_default_domains.main }}"
-{% if tls_default_domains.sans is defined and tls_default_domains.sans %}
+{% if tls_default_domains.sans %}
           sans: "{{ tls_default_domains.sans | join(',') }}"
 {% endif %}
 {% endif %}

@@ -19,7 +19,9 @@ entryPoints:
           scheme: https
   websecure:
     address: :443
-
+    transport:
+      respondingTimeouts:
+        readTimeout: 0  # required for long-lived gRPC/WebSocket streams (e.g. NetBird)
 
 certificatesResolvers:
   {{ dns_provider }}:

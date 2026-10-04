@@ -22,18 +22,13 @@ provisioner:
     host_vars:
       instance:
         dancer_user: testuser
-        traefik:
-          version: "3.7.13"
+        server_url: "https://nb.test.example.com"
         dns_provider: infomaniak
         email: "test@example.com"
-        HTPASSWD_USERS:
-          - name: admin
-            pw_hash: "$apr1$test$testhash"
-        CERTRESOLVER:
-          infomaniak:
-            INFOMANIAK_ACCESS_TOKEN: "test-token"
-        TRAEFIK_ENV:
-          INFOMANIAK_ACCESS_TOKEN: "test-token"
+        netbird_admin_email: "admin@test.example.com"
+        vault_netbird_auth_secret: "test-relay-auth-secret"
+        vault_netbird_store_encryption_key: "dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdDEyMzQ="
+        vault_netbird_admin_password: "TestPassword123!"
 scenario:
   test_sequence:
     - dependency

@@ -1,0 +1,31 @@
+---
+dancer_user: 'dancer'
+netbird_base_path: /data/docker/netbird
+
+netbird:
+  server_tag: "0.80.0"
+  dashboard_tag: "v2.94.0"
+
+netbird_stun_port: 3478
+netbird_log_level: info
+netbird_store_engine: sqlite
+
+# host extracted from server_url (e.g. https://nb.example.com -> nb.example.com)
+netbird_host: "{{ server_url | regex_replace('^https?://', '') }}"
+netbird_public_url: "https://{{ netbird_host }}"
+
+# Optional: initial admin user. When set, the owner block is rendered into
+# config.yaml and no manual /setup step is required.
+netbird_admin_email: ""
+
+# Optional: CIDRs of trusted reverse proxies for client-IP forwarding
+# (server.reverseProxy.trustedHTTPProxies), e.g. ["172.16.0.0/12"].
+netbird_trusted_http_proxies: []
+
+# vault-provided (required):
+#   vault_netbird_auth_secret           relay auth secret, e.g. `openssl rand -base64 32`
+#   vault_netbird_store_encryption_key  base64 of 32 raw bytes, e.g. `openssl rand -base64 32`
+#   vault_netbird_admin_password        password for netbird_admin_email
+# vault-provided (optional):
+#   vault_netbird_session_cookie_key    AES key for embedded IdP session cookies,
+#                                       e.g. `openssl rand -base64 32`

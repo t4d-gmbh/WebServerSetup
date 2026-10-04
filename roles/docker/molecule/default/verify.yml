@@ -15,6 +15,70 @@
           - "'Docker version' in docker_version.stdout"
         fail_msg: "Docker is not installed"
 
+    - name: Check Docker Compose v2 plugin is installed
+      ansible.builtin.command: docker compose version
+      register: compose_version
+      changed_when: false
+
+    - name: Assert Docker Compose v2 is available
+      ansible.builtin.assert:
+        that:
+          - compose_version.rc == 0
+          - "'Docker Compose version v2' in compose_version.stdout"
+        fail_msg: "docker compose v2 plugin is not installed"
+
+    - name: Check apt keyring and sources files exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: apt_files
+      loop:
+        - /etc/apt/keyrings/docker.asc
+        - /etc/apt/sources.list.d/docker.sources
+
+    - name: Assert apt keyring and sources files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "{{ item.item }} does not exist"
+      loop: "{{ apt_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Assert legacy docker.list is removed
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/docker.list
+      register: legacy_list
+
+    - name: Fail if legacy docker.list still exists
+      ansible.builtin.assert:
+        that:
+          - not legacy_list.stat.exists
+        fail_msg: "Legacy /etc/apt/sources.list.d/docker.list was not removed"
+
+    - name: Read Docker apt sources file
+      ansible.builtin.slurp:
+        path: /etc/apt/sources.list.d/docker.sources
+      register: docker_sources
+
+    - name: Assert sources file matches the host release
+      ansible.builtin.assert:
+        that:
+          - "'Suites: ' + ansible_distribution_release in (docker_sources.content | b64decode)"
+          - "'Signed-By: /etc/apt/keyrings/docker.asc' in (docker_sources.content | b64decode)"
+        fail_msg: "docker.sources does not use the host release codename"
+
+    - name: Check docker-ce comes from download.docker.com
+      ansible.builtin.command: apt-cache policy docker-ce
+      register: docker_policy
+      changed_when: false
+
+    - name: Assert docker-ce is installed from the Docker repository
+      ansible.builtin.assert:
+        that:
+          - "'download.docker.com' in docker_policy.stdout"
+          - "'Installed: (none)' not in docker_policy.stdout"
+        fail_msg: "docker-ce is not installed from download.docker.com"
+
     - name: Check user is in docker group
       ansible.builtin.command: id testuser
       register: user_groups

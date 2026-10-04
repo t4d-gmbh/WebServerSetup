@@ -1,0 +1,61 @@
+---
+- name: Verify compound - Docker + NetBird
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Assert Docker is installed
+      ansible.builtin.assert:
+        that:
+          - docker_version.rc == 0
+        fail_msg: "Docker is not installed"
+
+    - name: Check proxy network exists
+      ansible.builtin.command: docker network inspect proxy
+      register: proxy_net
+      changed_when: false
+
+    - name: Assert proxy network exists
+      ansible.builtin.assert:
+        that:
+          - proxy_net.rc == 0
+        fail_msg: "Docker proxy network does not exist"
+
+    - name: Check netbird files exist
+      ansible.builtin.stat:
+        path: "/data/docker/netbird/{{ item }}"
+      register: nb_files
+      loop:
+        - config.yaml
+        - dashboard.env
+        - docker-compose.yml
+
+    - name: Assert netbird files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "NetBird {{ item.item }} does not exist"
+      loop: "{{ nb_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Check netbird containers are running
+      ansible.builtin.command: docker ps --format '{% raw %}{{.Names}}{% endraw %}'
+      register: running_containers
+      changed_when: false
+
+    - name: Assert netbird-server is running
+      ansible.builtin.assert:
+        that:
+          - "'netbird-server' in running_containers.stdout"
+        fail_msg: "netbird-server container is not running"
+
+    - name: Assert netbird-dashboard is running
+      ansible.builtin.assert:
+        that:
+          - "'netbird-dashboard' in running_containers.stdout"
+        fail_msg: "netbird-dashboard container is not running"
