@@ -73,7 +73,6 @@ Here’s an example of the playbook file (`playbook.yml`):
     server_url: "https://netbird.myserver.net"
     email: "admin@example.com"  # Email for ACME
     dns_provider: "infomaniak"  # DNS provider
-    netbird_admin_email: "admin@example.com"  # initial admin user, omit to use the /setup page
 
   tasks:
     - name: Ensure Docker is set up and running
@@ -125,7 +124,6 @@ CERTRESOLVER:
   INFOMANIAK_ENDPOINT: "https://api.infomaniak.com"
 vault_netbird_auth_secret: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX="
 vault_netbird_store_encryption_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX="
-vault_netbird_admin_password: "use-a-long-random-password"
 ```
 
 Under `CERTRESOLVER`, you can place all the necessary variables so that Traefik can request and renew the certificate from your specific provider. A list of providers and required variables can be found in [Traefik's official documentation](https://doc.traefik.io/traefik/https/acme/#providers).
@@ -146,10 +144,9 @@ ansible-vault edit vault.yml
 
 ## First Login
 
-Once the playbook has run:
+Once the playbook has run, open `https://netbird.myserver.net/setup` and create the first admin account there (the setup page is only available while no user exists; the password needs at least 8 characters including one digit, one uppercase letter, and one special character).
 
-- If you set `netbird_admin_email`, log in at `https://netbird.myserver.net` with that email and the vault password.
-- Otherwise, open `https://netbird.myserver.net/setup` and create the first admin account there (the setup page is only available while no user exists).
+> **Note:** the role also supports bootstrapping the admin via `netbird_admin_email` / `vault_netbird_admin_password`, but with netbird-server 0.80.0 that `owner` block stores the password unhashed and login then fails. Prefer the `/setup` wizard; see the [role README](../roles/netbird/README.md#first-admin-user) for the admin-CLI repair command if you are affected.
 
 You can then create setup keys in the dashboard and enroll clients with `netbird up --setup-key <key>`.
 

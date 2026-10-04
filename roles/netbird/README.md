@@ -22,7 +22,7 @@ This Ansible role installs and configures a self-hosted [NetBird](https://netbir
 - `netbird_stun_port`: UDP port of the embedded STUN server (default: 3478).
 - `netbird_log_level`: Log level of the NetBird server (default: "info").
 - `netbird_store_engine`: Management store engine, `sqlite` or `postgres` (default: "sqlite").
-- `netbird_admin_email`: Optional email for the initial admin user. When set, an `owner` block is rendered into `config.yaml` and the account is created on first startup. When empty, create the first user manually via the `/setup` page.
+- `netbird_admin_email`: Optional email for the initial admin user. When set, an `owner` block is rendered into `config.yaml` and the account is created on first startup. **Known issue (netbird-server 0.80.0): the `owner` block stores the password unhashed, so logins fail with "Login error" / `hashedSecret too short`. Recommended: leave this empty and create the first admin via the `/setup` wizard — see [First admin user](#first-admin-user).**
 - `netbird_trusted_http_proxies`: Optional list of trusted reverse-proxy CIDRs for client-IP forwarding (default: `[]`).
 - `server_url`: Public URL of the NetBird instance, e.g. `https://netbird.example.com` (from the Traefik/Headscale convention of this collection).
 - `dns_provider`: Traefik certificate resolver name used for TLS (e.g. `infomaniak`).
@@ -31,7 +31,7 @@ Vault variables (required, define them in your `vault.yml`):
 
 - `vault_netbird_auth_secret`: Shared secret for relay authentication. Generate with `openssl rand -base64 32`.
 - `vault_netbird_store_encryption_key`: base64-encoded 32-byte key encrypting setup keys and tokens at rest. Generate with `openssl rand -base64 32`. **Back this key up** — losing it means losing access to encrypted data.
-- `vault_netbird_admin_password`: Password for `netbird_admin_email`.
+- `vault_netbird_admin_password`: Password for `netbird_admin_email` (only used with the `owner` block, see the caveat above). NetBird requires at least 8 characters including one digit, one uppercase letter, and one special character.
 - `vault_netbird_session_cookie_key`: Optional AES key for embedded IdP session cookies. Generate with `openssl rand -base64 32`.
 
 ## Dependencies
@@ -64,7 +64,31 @@ To use this role, add it to your Ansible playbook as follows:
 1. Point your domain (A record) at the server.
 2. Define the required variables in your playbook or inventory, and the vault variables in `vault.yml`.
 3. Run the playbook.
-4. Log in at `https://netbird.example.com` — with the dashboard URL, create peers, setup keys, and policies. Clients connect with `netbird setup --key <setup-key>`.
+4. Create the first admin user (see [First admin user](#first-admin-user)), then log in at `https://netbird.example.com` — with the dashboard URL, create peers, setup keys, and policies. Clients connect with `netbird setup --key <setup-key>`.
+
+## First admin user
+
+The admin account is created **only on the very first startup** (while the store is empty). Changing `config.yaml` afterwards never updates the account.
+
+**Recommended (works reliably):** leave `netbird_admin_email` empty, open `https://<server_url>/setup` after the first run, and create the admin via the wizard (password: at least 8 characters incl. digit, uppercase, special character). The wizard hashes the password correctly.
+
+Alternatively, complete setup via the API:
+
+```bash
+curl -X POST "https://<server_url>/api/setup" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "NewPass1!", "name": "Admin"}'
+```
+
+**Known issue with the `owner` config block (netbird-server 0.80.0):** setting `netbird_admin_email` renders an `owner` block into `config.yaml`, but the password is stored **without bcrypt hashing**, and logins fail with "Login error" plus `parsing bcrypt hash: hashedSecret too short` in the server log. If you hit this, repair the account with the admin CLI (hashes correctly, no data loss):
+
+```bash
+printf '%s\n' 'NewPass1!' | docker exec -i netbird-server \
+  /go/bin/netbird-server --config /etc/netbird/config.yaml admin user change-password \
+  --email admin@example.com --password-file -
+```
+
+Using `--password-file -` reads the password from stdin so it never appears in the process arguments.
 
 ## Example Playbook
 
@@ -79,7 +103,7 @@ To use this role, add it to your Ansible playbook as follows:
     server_url: https://netbird.example.com
     dns_provider: infomaniak
     email: some@e.mail
-    netbird_admin_email: admin@example.com
+    # netbird_admin_email: admin@example.com  # see "First admin user" — prefer the /setup wizard
   roles:
     - t4d.WebServerSetup.docker
     - t4d.WebServerSetup.traefik
