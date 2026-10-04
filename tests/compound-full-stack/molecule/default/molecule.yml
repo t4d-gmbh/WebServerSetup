@@ -33,7 +33,7 @@ provisioner:
         email: "test@example.com"
         # traefik
         traefik:
-          version: "3.5.4"
+          version: "3.7.13"
         HTPASSWD_USERS:
           - name: admin
             pw_hash: "$apr1$test$testhash"

@@ -14,10 +14,10 @@ This Ansible role installs and configures Traefik, a modern reverse proxy and lo
 ## Role Variables
 
 - `dancer_user`: The username of the user who will own the Traefik files and directories.
-- `traefik.version`: The version of Traefik to install (default: "3.4.3").
+- `traefik.version`: The version of Traefik to install (default: "3.7.13").
 - `dns_provider`: The DNS provider for Let's Encrypt certificate resolution.
 - `email`: The email address for Let's Encrypt notifications.
-- `HTPASSWD_USERS`: A list of users for basic authentication, each containing `name` and `password`.
+- `HTPASSWD_USERS`: A list of users for basic authentication, each containing `name` and `password`. Note: since Traefik 3.6.19, BasicAuth middlewares with an empty users file are rejected and the routers referencing them are unmounted (404) — ensure at least one user when a basicauth middleware is in use.
 - `tls_default_domains`: An optional dict with the keys `main` and `sans` to set domains for a default certificate.
   - `main` the main domain to fetch a certificate for
   - `sans` are a list of sub-domains.

@@ -1,0 +1,49 @@
+---
+dancer_user: 'dancer'
+netbird_base_path: /data/docker/netbird
+
+netbird:
+  server_tag: "0.80.0"
+  dashboard_tag: "v2.94.0"
+  proxy_tag: "0.80.0"
+
+netbird_stun_port: 3478
+netbird_log_level: info
+netbird_store_engine: sqlite
+
+# host extracted from server_url (e.g. https://nb.example.com -> nb.example.com)
+netbird_host: "{{ server_url | regex_replace('^https?://', '') }}"
+netbird_public_url: "https://{{ netbird_host }}"
+
+# Optional: CIDRs of trusted reverse proxies for client-IP forwarding
+# (server.reverseProxy.trustedHTTPProxies), e.g. ["172.16.0.0/12"].
+netbird_trusted_http_proxies: []
+
+# NetBird reverse proxy feature (netbirdio/reverse-proxy container).
+# When enabled, services are exposed under netbird_proxy_domain (and any
+# GUI-registered custom domains) through Traefik TLS passthrough.
+netbird_proxy_enabled: false
+# Base domain of this proxy cluster; services land on <name>.<domain>.
+# Defaults to the management host (official quickstart behaviour); set a
+# dedicated domain (plus A record) to keep it separate from server_url.
+netbird_proxy_domain: "{{ netbird_host }}"
+netbird_proxy_name: "netbird-proxy"
+netbird_proxy_port: 8443
+netbird_proxy_wg_port: 51820
+# Hostnames Traefik must keep for its own HTTP routers (the passthrough rule
+# is a catch-all). netbird_host is always excluded automatically; add every
+# other service hostname served by the shared Traefik (authentik, headscale...).
+netbird_proxy_sni_excludes: []
+# CIDRs whose PROXY protocol headers the proxy trusts; auto-detected from the
+# proxy docker network when empty.
+netbird_proxy_trusted_proxies: []
+# vault-provided (optional): pre-created proxy access token (nbx_...).
+# When unset, the role generates one on first enable and persists it in
+# the base path as .proxy_token.
+
+# vault-provided (required):
+#   vault_netbird_auth_secret           relay auth secret, e.g. `openssl rand -base64 32`
+#   vault_netbird_store_encryption_key  base64 of 32 raw bytes, e.g. `openssl rand -base64 32`
+# vault-provided (optional):
+#   vault_netbird_session_cookie_key    AES key for embedded IdP session cookies,
+#                                       e.g. `openssl rand -base64 32`

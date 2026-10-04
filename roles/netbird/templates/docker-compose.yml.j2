@@ -1,0 +1,102 @@
+---
+services:
+  dashboard:
+    image: netbirdio/dashboard:{{ netbird.dashboard_tag }}
+    container_name: netbird-dashboard
+    restart: unless-stopped
+    networks:
+      - proxy
+    env_file:
+      - ./dashboard.env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.netbird-dashboard.rule=Host(`{{ netbird_host }}`)
+      - traefik.http.routers.netbird-dashboard.entrypoints=websecure
+      - traefik.http.routers.netbird-dashboard.tls=true
+      - traefik.http.routers.netbird-dashboard.tls.certresolver={{ dns_provider }}
+      - traefik.http.routers.netbird-dashboard.priority=1
+      - traefik.http.services.netbird-dashboard.loadbalancer.server.port=80
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"
+
+  netbird-server:
+    image: netbirdio/netbird-server:{{ netbird.server_tag }}
+    container_name: netbird-server
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - '{{ netbird_stun_port }}:{{ netbird_stun_port }}/udp'
+    volumes:
+      - netbird_data:/var/lib/netbird
+      - ./config.yaml:/etc/netbird/config.yaml
+    command: ["--config", "/etc/netbird/config.yaml"]
+    labels:
+      - traefik.enable=true
+      # gRPC router (needs h2c backend for HTTP/2 cleartext)
+      - traefik.http.routers.netbird-grpc.rule=Host(`{{ netbird_host }}`) && (PathPrefix(`/signalexchange.SignalExchange/`) || PathPrefix(`/management.ManagementService/`))
+      - traefik.http.routers.netbird-grpc.entrypoints=websecure
+      - traefik.http.routers.netbird-grpc.tls=true
+      - traefik.http.routers.netbird-grpc.tls.certresolver={{ dns_provider }}
+      - traefik.http.routers.netbird-grpc.service=netbird-server-h2c
+      # Backend router (relay, WebSocket, API, OAuth2)
+      - traefik.http.routers.netbird-backend.rule=Host(`{{ netbird_host }}`) && (PathPrefix(`/relay`) || PathPrefix(`/ws-proxy/`) || PathPrefix(`/api`) || PathPrefix(`/oauth2`))
+      - traefik.http.routers.netbird-backend.entrypoints=websecure
+      - traefik.http.routers.netbird-backend.tls=true
+      - traefik.http.routers.netbird-backend.tls.certresolver={{ dns_provider }}
+      - traefik.http.routers.netbird-backend.service=netbird-server
+      # Services
+      - traefik.http.services.netbird-server.loadbalancer.server.port=80
+      - traefik.http.services.netbird-server-h2c.loadbalancer.server.port=80
+      - traefik.http.services.netbird-server-h2c.loadbalancer.server.scheme=h2c
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"
+{% if netbird_proxy_enabled %}
+
+  # NetBird Proxy - exposes internal resources to the internet
+  # TCP passthrough for any unmatched domain (proxy handles its own TLS)
+  proxy:
+    image: netbirdio/reverse-proxy:{{ netbird.proxy_tag }}
+    container_name: netbird-proxy
+    restart: unless-stopped
+    depends_on:
+      - netbird-server
+    networks:
+      - proxy
+    ports:
+      - '{{ netbird_proxy_wg_port }}:{{ netbird_proxy_wg_port }}/udp'
+    env_file:
+      - ./proxy.env
+    volumes:
+      - netbird_proxy_certs:/certs
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.netbird-proxy.entrypoints=websecure
+      - traefik.tcp.routers.netbird-proxy.rule=HostSNI(`*`){% for hostname in [netbird_host] + netbird_proxy_sni_excludes %} && !HostSNI(`{{ hostname }}`){% endfor %}
+      - traefik.tcp.routers.netbird-proxy.tls.passthrough=true
+      - traefik.tcp.routers.netbird-proxy.service=netbird-proxy-tls
+      - traefik.tcp.routers.netbird-proxy.priority=1
+      - traefik.tcp.services.netbird-proxy-tls.loadbalancer.server.port={{ netbird_proxy_port }}
+      - traefik.tcp.services.netbird-proxy-tls.loadbalancer.serverstransport=pp-v2@file
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"
+{% endif %}
+
+volumes:
+  netbird_data:
+{% if netbird_proxy_enabled %}
+  netbird_proxy_certs:
+{% endif %}
+
+networks:
+  proxy:
+    external: true

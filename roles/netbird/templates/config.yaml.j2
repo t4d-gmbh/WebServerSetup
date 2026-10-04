@@ -1,0 +1,38 @@
+# NetBird combined server configuration — managed by Ansible (t4d.WebServerSetup.netbird)
+server:
+  listenAddress: ":80"
+  exposedAddress: "{{ netbird_public_url }}:443"
+  stunPorts:
+    - {{ netbird_stun_port }}
+  metricsPort: 9090
+  healthcheckAddress: ":9000"
+  logLevel: "{{ netbird_log_level }}"
+  logFile: "console"
+
+  authSecret: "{{ vault_netbird_auth_secret }}"
+  dataDir: "/var/lib/netbird"
+
+  auth:
+    issuer: "{{ netbird_public_url }}/oauth2"
+    localAuthDisabled: false
+    signKeyRefreshEnabled: true
+{% if vault_netbird_session_cookie_key is defined %}
+    sessionCookieEncryptionKey: "{{ vault_netbird_session_cookie_key }}"
+{% endif %}
+    dashboardRedirectURIs:
+      - "{{ netbird_public_url }}/nb-auth"
+      - "{{ netbird_public_url }}/nb-silent-auth"
+    cliRedirectURIs:
+      - "http://localhost:53000/"
+
+{% if netbird_trusted_http_proxies | length > 0 %}
+  reverseProxy:
+    trustedHTTPProxies:
+{% for cidr in netbird_trusted_http_proxies %}
+      - "{{ cidr }}"
+{% endfor %}
+{% endif %}
+
+  store:
+    engine: "{{ netbird_store_engine }}"
+    encryptionKey: "{{ vault_netbird_store_encryption_key }}"

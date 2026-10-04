@@ -3,7 +3,6 @@
   become: yes
   ansible.builtin.apt:
     name:
-      - apt-transport-https
       - ca-certificates
       - curl
       - software-properties-common
@@ -11,17 +10,49 @@
     state: latest
     update_cache: true
 
-- name: Add Docker GPG apt Key
+- name: Remove legacy Docker trusted keyring from apt_key
   become: yes
-  apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    state: present
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/docker.gpg
+    state: absent
 
-- name: Add Docker Repository
+- name: Remove legacy Docker apt source list
   become: yes
-  apt_repository:
-    repo: deb https://download.docker.com/linux/ubuntu focal stable
-    state: present
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/docker.list
+    state: absent
+
+- name: Create apt keyring directory
+  become: yes
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download Docker GPG key
+  become: yes
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Add Docker apt repository
+  become: yes
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/ubuntu
+      Suites: {{ ansible_distribution_release }}
+      Components: stable
+      Signed-By: /etc/apt/keyrings/docker.asc
 
 - name: Update apt and install Docker packages
   become: yes
@@ -30,7 +61,7 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
-      - docker-compose
+      - docker-compose-plugin
     state: latest
     update_cache: true
 

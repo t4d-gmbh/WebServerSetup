@@ -13,15 +13,21 @@ entryPoints:
   web:
     address: :80
     http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
       redirections:
         entryPoint:
           to: websecure
           scheme: https
   websecure:
     address: :443
+    allowACMEByPass: true  # let user routers (e.g. NetBird proxy) handle TLS-ALPN challenges
+    http:
+      aliasHeadersStrategy: keep  # explicit since Traefik 3.7.12; silence startup warning
     transport:
       respondingTimeouts:
         readTimeout: 0  # required for long-lived gRPC/WebSocket streams (e.g. NetBird)
+        writeTimeout: 0
+        idleTimeout: 0
 
 certificatesResolvers:
   {{ dns_provider }}:
@@ -42,7 +48,7 @@ tls:
         resolver: "{{ dns_provider }}" 
         domain:
           main: "{{ tls_default_domains.main }}"
-{% if tls_default_domains.sans is defined and tls_default_domains.sans %}
+{% if tls_default_domains.sans %}
           sans: "{{ tls_default_domains.sans | join(',') }}"
 {% endif %}
 {% endif %}
@@ -53,6 +59,9 @@ accessLog:
 
 serversTransport:
   insecureSkipVerify: true
+  forwardingTimeouts:
+    responseHeaderTimeout: 0s  # no timeout for long-lived gRPC streams (NetBird)
+    idleConnTimeout: 0s
 
 providers:
   docker:

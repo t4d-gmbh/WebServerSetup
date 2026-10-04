@@ -1,0 +1,89 @@
+---
+- name: Verify netbird
+  hosts: all
+  become: true
+  tasks:
+    - name: Check NetBird config directory exists
+      ansible.builtin.stat:
+        path: /data/docker/netbird
+      register: nb_dir
+
+    - name: Assert config directory exists
+      ansible.builtin.assert:
+        that:
+          - nb_dir.stat.exists
+          - nb_dir.stat.isdir
+        fail_msg: "NetBird config directory does not exist"
+
+    - name: Check generated files exist
+      ansible.builtin.stat:
+        path: "/data/docker/netbird/{{ item }}"
+      register: nb_file
+      loop:
+        - config.yaml
+        - dashboard.env
+        - docker-compose.yml
+
+    - name: Assert generated files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "NetBird {{ item.item }} does not exist"
+      loop: "{{ nb_file.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Read rendered config.yaml
+      ansible.builtin.slurp:
+        path: /data/docker/netbird/config.yaml
+      register: nb_config
+      no_log: true
+
+    - name: Assert config.yaml content
+      ansible.builtin.assert:
+        that:
+          - "'exposedAddress' in (nb_config.content | b64decode)"
+          - "'https://nb.test.example.com:443' in (nb_config.content | b64decode)"
+          - "'issuer' in (nb_config.content | b64decode)"
+          - "'https://nb.test.example.com/oauth2' in (nb_config.content | b64decode)"
+          - "'stunPorts:' in (nb_config.content | b64decode)"
+
+    - name: Read rendered dashboard.env
+      ansible.builtin.slurp:
+        path: /data/docker/netbird/dashboard.env
+      register: nb_dashboard_env
+
+    - name: Assert dashboard.env content
+      ansible.builtin.assert:
+        that:
+          - "'AUTH_CLIENT_ID=netbird-dashboard' in (nb_dashboard_env.content | b64decode)"
+          - "'NETBIRD_MGMT_API_ENDPOINT=https://nb.test.example.com' in (nb_dashboard_env.content | b64decode)"
+          - "'LETSENCRYPT_DOMAIN=none' in (nb_dashboard_env.content | b64decode)"
+
+    - name: Validate docker-compose file
+      ansible.builtin.command: docker compose config --quiet
+      args:
+        chdir: /data/docker/netbird
+      changed_when: false
+
+    - name: Gather netbird-server container info
+      community.docker.docker_container_info:
+        name: netbird-server
+      register: nb_server
+
+    - name: Assert netbird-server is running
+      ansible.builtin.assert:
+        that:
+          - nb_server.container.State.Running
+        fail_msg: "netbird-server container is not running"
+
+    - name: Gather netbird-dashboard container info
+      community.docker.docker_container_info:
+        name: netbird-dashboard
+      register: nb_dashboard
+
+    - name: Assert netbird-dashboard is running
+      ansible.builtin.assert:
+        that:
+          - nb_dashboard.container.State.Running
+        fail_msg: "netbird-dashboard container is not running"
