@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Ensure we can act as unpriviledged user
 - name: Ensure ACL package is installed
   package:

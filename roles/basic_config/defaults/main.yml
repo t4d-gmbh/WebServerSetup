@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # swapfile_size: Set to a valid size (e.g., "1G", "2G") to create a swap file.
 # If left as null (or commented out), no swap file will be created.
 swapfile_size: null

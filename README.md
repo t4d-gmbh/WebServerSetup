@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 <div align="center">
 
 <img src="https://raw.githubusercontent.com/t4d-gmbh/WebServerSetup/main/_static/logo.svg" alt="WebServerSetup Logo" width="400">

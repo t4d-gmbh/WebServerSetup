@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # GitLab CE behind NetBird (VPN-only server) 🦊
 
 This example deploys a self-hosted **GitLab CE** server that is reachable **only from inside a NetBird network** — there is no public HTTP/HTTPS port. Because Let's Encrypt can never reach the machine, TLS certificates are obtained with **certbot's DNS-01 challenge** (Infomaniak), and the host joins the VPN with the **netbird client** role.

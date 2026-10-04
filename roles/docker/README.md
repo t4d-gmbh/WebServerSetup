@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Ansible Role: Docker
 
 [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-docker.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-docker.yml)

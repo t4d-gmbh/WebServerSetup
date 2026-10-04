@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # R Analytics Stack
 
 This example deploys an authenticated R computing environment: Docker engine, Authentik identity provider for user management, and OpenCPU for running R scripts via a REST API. All services are connected through a shared Docker network and can be fronted by an existing Traefik reverse proxy.

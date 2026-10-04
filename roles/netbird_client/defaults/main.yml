@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Public URL of the NetBird management/dashboard endpoint, e.g.
 # https://nb.example.com (the netbird server role's netbird_public_url).
 # Must be reachable from this host over the regular network for enrollment.

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # NetBird VPN Setup 🕸️
 
 This README provides instructions on how to use three Ansible roles: **Docker**, **Traefik**, and **NetBird**. These roles are designed to set up a Docker environment with Traefik as a reverse proxy and a self-hosted [NetBird](https://netbird.io) zero-trust VPN platform (combined management, signal, relay, and STUN server plus the web dashboard).

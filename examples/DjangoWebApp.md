@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Django Web Application Stack
 
 This example provides two playbooks for deploying and maintaining a Django web application:

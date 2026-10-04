@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Ansible Role: GitLab
 
 [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gitlab.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gitlab.yml)
@@ -59,7 +65,7 @@ The molecule suite installs the real package (proving repo, pin and keyring). A 
 
 ## License
 
-Apache-2.0 (see repository root)
+This role is licensed under the GNU GPLv3 License.
 
 ## Author
 
