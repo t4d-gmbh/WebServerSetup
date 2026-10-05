@@ -118,6 +118,8 @@ The certbot role's cron renews daily and runs `gitlab-ctl restart nginx` via `ce
 
 ## Caveats
 
+- **Ubuntu 26.04 hosts**: as of 2026-10-05 GitLab's resolute apt publication is broken upstream (pool URLs serve noble's artifacts while resolute's index lists different hashes → `File has unexpected size` on every version). Keep the 26.04 VM and pin the working suite in the gitlab play's `vars:` until GitLab republishes: `gitlab_repo_codename: "noble"` — see [role README](../roles/gitlab/README.md#known-upstream-issues).
+
 - **Git LFS / large uploads**: omnibus nginx defaults are generous; if you put anything in front later, revisit proxy body limits.
 - **Container registry**: not enabled by this role; add `registry_external_url` wiring to `gitlab.rb.j2` via a `gitlab_rails`/`registry` extension if needed.
 - **Upgrades**: bump `gitlab.version` stepwise per GitLab's upgrade-path notes (never skip minors across major boundaries) — the handler reconfigures automatically after the package changes.
