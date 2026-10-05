@@ -11,19 +11,19 @@ This example deploys a self-hosted **GitLab CE** server that is reachable **only
 ## Architecture
 
 ```
- laptop (netbird client) ──▶ 100.64.x.y (netbird overlay) ──▶ GitLab VM (Ubuntu 24.04)
+ laptop (netbird client) ──▶ 100.64.x.y (netbird overlay) ──▶ GitLab VM (Ubuntu 24.04/26.04)
                                      ▲
  bird.t42d.ch (public) ──────────────┘  management plane only
 ```
 
 - The **netbird server** (`t4d.WebServerSetup.netbird` + traefik + docker) runs on the public host — see [NetBirdVPN.md](NetBirdVPN.md).
-- The **GitLab VM** runs Ubuntu 22.04/24.04 (omnibus repos exist only for LTS), installs the netbird client, gets a `100.64.x.y` address, and serves HTTPS itself.
+- The **GitLab VM** runs Ubuntu 22.04, 24.04 or 26.04 (the releases GitLab publishes omnibus repos for), installs the netbird client, gets a `100.64.x.y` address, and serves HTTPS itself.
 - DNS: an `A` record `gitlab.myserver.net → <netbird IP>` (the overlay address). It does not have to be reachable from the public internet — DNS-01 validates through the Infomaniak API, not through the host.
 
 ## Prerequisites
 
 - A running NetBird deployment with a **setup key** (dashboard → Peers → Access Keys).
-- A second Ubuntu 24.04 VM reachable once via normal SSH (it may live behind the VPN later; SSH should stay available to you).
+- A second Ubuntu 24.04 or 26.04 VM reachable once via normal SSH (it may live behind the VPN later; SSH should stay available to you).
 - Infomaniak DNS API token (same one the traefik role uses).
 - ≥ 4 GB RAM (8 GB recommended) on the GitLab VM.
 
@@ -71,6 +71,8 @@ project/
 ```
 
 Order matters: **certbot before gitlab** — the gitlab role asserts that the certificate files exist before reconfigure, because omnibus nginx will not start without them.
+
+The role defaults to `gitlab.version: 19.3.1-ce.0`; pick any other published release by overriding it in `vars` (e.g. `gitlab: {version: "19.4.1-ce.0"}`) — mind the upgrade-path note in Caveats below.
 
 ## Inventory
 

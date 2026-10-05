@@ -5,9 +5,11 @@
 gitlab:
   version: "19.3.1-ce.0"
 
-# GitLab publishes omnibus apt repos only for Ubuntu LTS releases.
-# Set jammy for 22.04 hosts, noble for 24.04. Anything else is unsupported.
-gitlab_repo_codename: "noble"
+# GitLab publishes omnibus apt repositories for Ubuntu 22.04 (jammy),
+# 24.04 (noble) and 26.04 (resolute); interim releases (oracular, questing...)
+# are not published. Defaults to the host's own release; override only to pin
+# a suite deliberately.
+gitlab_repo_codename: "{{ ansible_distribution_release }}"
 
 # host extracted from server_url (e.g. https://gitlab.example.com -> gitlab.example.com)
 gitlab_host: "{{ server_url | regex_replace('^https?://', '') }}"

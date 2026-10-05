@@ -14,7 +14,7 @@ Apart from the certificate wiring the deployment follows the official installati
 
 ## Requirements
 
-- **Ubuntu 22.04 (jammy) or 24.04 (noble)** — GitLab publishes omnibus repositories only for LTS releases. The role asserts this and fails early.
+- **Ubuntu 22.04 (jammy), 24.04 (noble), or 26.04 (resolute)** — GitLab publishes omnibus repositories for these releases only (no interim releases). The role asserts this and fails early.
 - At least **4 GB RAM** (8 GB recommended), 10+ GB free disk under `/var/opt/gitlab`.
 - A DNS A record for `gitlab_host` (may point at a private/VPN IP — DNS-01 does not require the host to be reachable).
 - The [certbot](../certbot/README.md) role must have issued the certificate for `gitlab_host` **before** this role runs (see [examples/GitLab.md](../../examples/GitLab.md)).
@@ -23,8 +23,8 @@ Apart from the certificate wiring the deployment follows the official installati
 
 | Variable | Default | Description |
 |---|---|---|
-| `gitlab.version` | `19.3.1-ce.0` | Exact omnibus package version to pin. |
-| `gitlab_repo_codename` | `noble` | Repository suite (`jammy` or `noble`). |
+| `gitlab.version` | `19.3.1-ce.0` | Exact omnibus package version to pin — default, override per deployment. |
+| `gitlab_repo_codename` | `{{ ansible_distribution_release }}` | Repository suite; auto-matches the host (jammy/noble/resolute). |
 | `gitlab_host` | from `server_url` | Hostname used for `external_url` and certificate lookup. |
 | `gitlab_external_url` | `https://{{ gitlab_host }}` | Omnibus `external_url`. |
 | `gitlab_ssl_certificate` | `/etc/letsencrypt/live/{{ gitlab_host }}/fullchain.pem` | Certificate used by omnibus nginx. |

@@ -6,11 +6,11 @@
   ansible.builtin.assert:
     that:
       - ansible_distribution == 'Ubuntu'
-      - gitlab_repo_codename in ['jammy', 'noble']
+      - gitlab_repo_codename in ['jammy', 'noble', 'resolute']
     fail_msg: >-
-      GitLab omnibus publishes apt repositories only for Ubuntu 22.04 (jammy)
-      and 24.04 (noble). Got {{ ansible_distribution }}
-      {{ ansible_distribution_version }}. Use a supported LTS host or the
+      GitLab omnibus publishes apt repositories only for Ubuntu 22.04 (jammy),
+      24.04 (noble) and 26.04 (resolute). Got {{ ansible_distribution }}
+      {{ ansible_distribution_version }}. Use a supported release or the
       official gitlab/gitlab-ce Docker image instead.
 
 - name: Install GitLab prerequisites
