@@ -15,7 +15,7 @@
     append: yes  # Append to the group list
 
 - name: Allow ansible user to run sudo without a password
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sudoers
     line: '{{ new_ansible_user }} ALL=(ALL) NOPASSWD: ALL'
     state: present
@@ -43,7 +43,7 @@
     mode: '0600'
 
 - name: Disable password authentication in SSH config
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#?PasswordAuthentication'
     line: 'PasswordAuthentication no'

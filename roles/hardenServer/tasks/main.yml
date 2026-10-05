@@ -17,7 +17,7 @@
 
 - name: Set UFW default deny incoming
   become: true
-  ufw:
+  community.general.ufw:
     direction: incoming
     policy: deny
   tags:
@@ -25,7 +25,7 @@
 
 - name: Set UFW default allow outgoing
   become: true
-  ufw:
+  community.general.ufw:
     direction: outgoing
     policy: allow
   tags:
@@ -33,14 +33,14 @@
 
 - name: Enable UFW
   become: true
-  ufw:
+  community.general.ufw:
     state: enabled
   tags:
     - molecule-notest
 
 - name: Enable UFW logging
   become: true
-  ufw:
+  community.general.ufw:
     logging: on
   tags:
     - molecule-notest
@@ -62,7 +62,7 @@
         name: openssh-server
         state: present
     - name: Allow SSH
-      ufw:
+      community.general.ufw:
         rule: allow
         name: OpenSSH
       notify: Restart UFW
@@ -78,7 +78,7 @@
         name: nginx
         state: present
     - name: Allow Nginx Full traffic
-      ufw:
+      community.general.ufw:
         rule: allow
         name: 'Nginx Full'
       notify: Restart UFW
@@ -94,7 +94,7 @@
         name: samba
         state: present
     - name: Allow Samba
-      ufw:
+      community.general.ufw:
         rule: allow
         name: 'Samba'
       notify: Restart UFW
@@ -110,7 +110,7 @@
         name: nfs-common
         state: present
     - name: Allow NFS TCP
-      ufw:
+      community.general.ufw:
         rule: allow
         port: "2049"
         proto: tcp
@@ -118,7 +118,7 @@
       tags:
         - molecule-notest
     - name: Allow NFS UDP
-      ufw:
+      community.general.ufw:
         rule: allow
         port: "2049"
         proto: udp
@@ -135,7 +135,7 @@
         url: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.noarmor.gpg"
         state: present
     - name: Add Tailscale repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: "deb https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
         state: present
     - name: Install Tailscale
@@ -144,7 +144,7 @@
         state: present
         update_cache: yes
     - name: Allow Tailscale UDP
-      ufw:
+      community.general.ufw:
         rule: allow
         port: "41641"
         proto: udp
@@ -152,7 +152,7 @@
       tags:
         - molecule-notest
     - name: Allow Tailscale TCP
-      ufw:
+      community.general.ufw:
         rule: allow
         port: "443"
         proto: tcp
@@ -163,7 +163,7 @@
 
 - name: Harden SSH configuration
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#?{{ item.key }}'
     line: '{{ item.key }} {{ item.value }}'
