@@ -59,6 +59,13 @@ None at role level, but a correct deployment needs the **certbot role beforehand
 
 See [examples/GitLab.md](../../examples/GitLab.md) for a complete NetBird + certbot + GitLab deployment.
 
+## Known upstream issues
+
+- **Ubuntu 26.04 (resolute) installs are currently impossible via the resolute suite** (observed 2026-10-05): GitLab's resolute `Packages` index lists its own per-distro artifacts, but the shared pool URLs (`/ubuntu/pool/main/g/gitlab-ce/gitlab-ce_<version>_amd64.deb`) resolve to **noble's** files for every published version (19.3.1–19.4.1 verified). apt therefore always aborts with `File has unexpected size … Mirror sync in progress?`. Re-check with:
+  `curl -s https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/dists/resolute/main/binary-amd64/Packages | grep -E "Version|SHA256|Size"` vs the artifact id in the redirect of `curl -sIL https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/pool/main/g/gitlab-ce/gitlab-ce_19.4.1-ce.0_amd64.deb`.
+
+  **Workaround on 26.04 hosts:** set `gitlab_repo_codename: "noble"`. The noble deb's only dependencies (`openssh-server`, `perl`) are satisfied on 26.04, omnibus is self-contained, and GitLab 19.3.x officially supports 26.04 — so chef's platform check passes and the noble artifact (which is what the pool serves anyway) installs cleanly. The molecule `instance2604` platform validates exactly this path; drop the override once GitLab republishes resolute.
+
 ## CI Notes
 
 The molecule suite installs the real package (proving repo, pin and keyring). A first install always reconfigures from the package postinst and cannot be skipped, so `prepare.yml` generates a self-signed stand-in certificate at the certbot live paths — letting the real chef converge run inside the container. The handler-driven second reconfigure is gated off (`gitlab_reconfigure: false`), and the certificate assertion is tagged `molecule-notest`.

@@ -14,6 +14,12 @@ platforms:
     cgroupns_mode: host
     privileged: true
     pre_build_image: true
+  # WORKAROUND (upstream breakage 2026-10-05): GitLab's resolute publication
+  # serves noble's artifacts while its index lists different SHA256/Size, so
+  # apt fails on every version. This platform pins the noble suite instead,
+  # validating that path end-to-end (noble deb on a real 26.04 host + full
+  # postinst chef reconfigure). Remove the override when GitLab republishes
+  # resolute.
   - name: instance2604
     image: geerlingguy/docker-ubuntu2604-ansible:latest
     command: ""
@@ -34,6 +40,7 @@ provisioner:
         vault_gitlab_initial_root_password: "TestPassword123!"
       instance2604:
         server_url: "https://gitlab.example.com"
+        gitlab_repo_codename: "noble"
         gitlab_reconfigure: false
         vault_gitlab_initial_root_password: "TestPassword123!"
 scenario:
