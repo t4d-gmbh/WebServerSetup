@@ -25,6 +25,23 @@ gitlab_ssl_certificate_key: "/etc/letsencrypt/live/{{ gitlab_host }}/privkey.pem
 # gitlab.rb.j2 overrides or a post-role template extension).
 gitlab_email_from: ""
 
+# GitLab boots the full Rails environment to clear its cache at the end of
+# every reconfigure. On memory-constrained hosts (<=4 GB without ample swap)
+# this can thrash until chef's 3600s timeout kills the postinst. Set false to
+# emit gitlab_rails['rake_cache_clear'] = false (GitLab's documented
+# memory-constrained-environments knob).
+gitlab_rake_cache_clear: true
+
+# Set false to emit prometheus_monitoring['enable'] = false (disables the
+# bundled prometheus/grafana/alertmanager/exporter stack; frees ~0.5-1 GB).
+gitlab_prometheus_monitoring: true
+
+# Low-memory tuning. Only emitted when set; empty = keep GitLab omnibus
+# defaults. See roles/gitlab/README.md "Low-memory tuning".
+gitlab_puma_worker_processes: ""
+gitlab_sidekiq_max_concurrency: ""
+gitlab_postgresql_shared_buffers: ""   # e.g. "256MB"
+
 # /etc/gitlab/skip-auto-reconfigure only suppresses the reconfigure that runs
 # on package UPGRADES; a first install always reconfigures from the postinst.
 # That is why gitlab.rb is templated BEFORE the package install: the

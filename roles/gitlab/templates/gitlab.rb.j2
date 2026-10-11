@@ -5,9 +5,32 @@ external_url {{ gitlab_external_url | to_json }}
 # TLS is provided by certbot DNS-01 certificates (this host is only reachable
 # from inside the NetBird network, so omnibus' own ACME HTTP-01 validation can
 # never work). Disabling letsencrypt also stops reconfigure from touching it.
+# Rails-specific nginx settings live under gitlab_rails['nginx'] since 19.2;
+# the legacy nginx['ssl_certificate*'] keys are deprecated translation shims.
 letsencrypt['enable'] = false
-nginx['ssl_certificate'] = {{ gitlab_ssl_certificate | to_json }}
-nginx['ssl_certificate_key'] = {{ gitlab_ssl_certificate_key | to_json }}
+gitlab_rails['nginx']['ssl_certificate'] = {{ gitlab_ssl_certificate | to_json }}
+gitlab_rails['nginx']['ssl_certificate_key'] = {{ gitlab_ssl_certificate_key | to_json }}
+{% if not gitlab_rake_cache_clear %}
+
+# Skip the Rails cache clear at the end of reconfigure (GitLab's documented
+# memory-constrained knob; a fresh install has no cache to clear anyway).
+gitlab_rails['rake_cache_clear'] = false
+{% endif %}
+{% if not gitlab_prometheus_monitoring %}
+
+# Disable the bundled prometheus/grafana/alertmanager/exporter stack
+# (documented GitLab knob for memory-constrained instances).
+prometheus_monitoring['enable'] = false
+{% endif %}
+{% if gitlab_puma_worker_processes != "" %}
+puma['worker_processes'] = {{ gitlab_puma_worker_processes }}
+{% endif %}
+{% if gitlab_sidekiq_max_concurrency != "" %}
+sidekiq['max_concurrency'] = {{ gitlab_sidekiq_max_concurrency }}
+{% endif %}
+{% if gitlab_postgresql_shared_buffers != "" %}
+postgresql['shared_buffers'] = {{ gitlab_postgresql_shared_buffers | to_json }}
+{% endif %}
 
 {% if gitlab_email_from %}
 gitlab_rails['gitlab_email_from'] = {{ gitlab_email_from | to_json }}

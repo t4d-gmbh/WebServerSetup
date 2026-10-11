@@ -110,13 +110,43 @@
     - molecule-notest
 
 - name: Install GitLab CE
-  become: true
-  ansible.builtin.apt:
-    name:
-      - "gitlab-ce={{ gitlab.version }}"
-    state: present
-    update_cache: true
-  notify: Reconfigure GitLab
+  block:
+    - name: Install gitlab-ce package (runs first reconfigure in postinst)
+      become: true
+      ansible.builtin.apt:
+        name:
+          - "gitlab-ce={{ gitlab.version }}"
+        state: present
+        update_cache: true
+      notify: Reconfigure GitLab
+  rescue:
+    # The package postinst swallows chef's output; surface the real error.
+    - name: Locate latest reconfigure log
+      become: true
+      ansible.builtin.shell:
+        cmd: ls -t /var/log/gitlab/reconfigure/ 2>/dev/null | head -1
+      register: gitlab_reconf_log_name
+      changed_when: false
+      failed_when: false
+
+    - name: Read reconfigure log tail
+      become: true
+      ansible.builtin.command:
+        cmd: "tail -n 80 /var/log/gitlab/reconfigure/{{ gitlab_reconf_log_name.stdout }}"
+      register: gitlab_reconf_log
+      changed_when: false
+      failed_when: false
+      when: gitlab_reconf_log_name.stdout | length > 0
+
+    - name: Fail with reconfigure log excerpt
+      ansible.builtin.fail:
+        msg: |-
+          gitlab-ce postinst reconfigure failed.
+          Latest log: /var/log/gitlab/reconfigure/{{ gitlab_reconf_log_name.stdout | default('(none)') }}
+          {{ gitlab_reconf_log.stdout | default('no reconfigure log found - inspect /var/log/gitlab/ manually') }}
+          Recovery: fix the root cause, then run
+            sudo gitlab-ctl reconfigure && sudo dpkg --configure gitlab-ce
+          and rerun the playbook.
 
 - name: Ensure GitLab runit service is enabled and running
   become: true
