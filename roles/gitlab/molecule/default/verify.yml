@@ -36,8 +36,44 @@
         gitlab_rb: "{{ gitlab_rb_raw.content | b64decode }}"
         external_url_line: 'external_url "https://gitlab.example.com"'
         le_disable_line: "letsencrypt['enable'] = false"
-        cert_line: "nginx['ssl_certificate'] = \"/etc/letsencrypt/live/gitlab.example.com/fullchain.pem\""
-        key_line: "nginx['ssl_certificate_key'] = \"/etc/letsencrypt/live/gitlab.example.com/privkey.pem\""
+        cert_line: "gitlab_rails['nginx']['ssl_certificate'] = \"/etc/letsencrypt/live/gitlab.example.com/fullchain.pem\""
+        key_line: "gitlab_rails['nginx']['ssl_certificate_key'] = \"/etc/letsencrypt/live/gitlab.example.com/privkey.pem\""
+
+    - name: Assert low-memory knobs are rendered when configured
+      ansible.builtin.assert:
+        that:
+          - prom_line in gitlab_rb
+          - puma_line in gitlab_rb
+          - sidekiq_line in gitlab_rb
+          - pg_line in gitlab_rb
+          - rake_line in gitlab_rb
+        fail_msg: "low-memory settings missing from gitlab.rb"
+      when: gitlab_prometheus_monitoring is defined and not gitlab_prometheus_monitoring
+      vars:
+        gitlab_rb: "{{ gitlab_rb_raw.content | b64decode }}"
+        prom_line: "prometheus_monitoring['enable'] = false"
+        puma_line: "puma['worker_processes'] = 2"
+        sidekiq_line: "sidekiq['max_concurrency'] = 5"
+        pg_line: "postgresql['shared_buffers'] = \"256MB\""
+        rake_line: "gitlab_rails['rake_cache_clear'] = false"
+
+    - name: Assert low-memory knobs are absent on default hosts
+      ansible.builtin.assert:
+        that:
+          - prom_needle not in gitlab_rb
+          - puma_needle not in gitlab_rb
+          - sidekiq_needle not in gitlab_rb
+          - pg_needle not in gitlab_rb
+          - rake_needle not in gitlab_rb
+        fail_msg: "default render must not contain low-memory settings"
+      when: gitlab_prometheus_monitoring is not defined or gitlab_prometheus_monitoring
+      vars:
+        gitlab_rb: "{{ gitlab_rb_raw.content | b64decode }}"
+        prom_needle: "prometheus_monitoring"
+        puma_needle: "puma['worker_processes']"
+        sidekiq_needle: "sidekiq['max_concurrency']"
+        pg_needle: "postgresql['shared_buffers']"
+        rake_needle: "gitlab_rails['rake_cache_clear']"
 
     - name: Check gitlab.rb permissions
       ansible.builtin.stat:
