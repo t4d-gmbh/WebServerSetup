@@ -43,6 +43,13 @@ provisioner:
         gitlab_repo_codename: "noble"
         gitlab_reconfigure: false
         vault_gitlab_initial_root_password: "TestPassword123!"
+        # Low-memory tuning profile: exercises the emit paths (this host's
+        # postinst reconfigure then actually runs with the tuned settings).
+        gitlab_prometheus_monitoring: false
+        gitlab_puma_worker_processes: 2
+        gitlab_sidekiq_max_concurrency: 5
+        gitlab_postgresql_shared_buffers: "256MB"
+        gitlab_rake_cache_clear: false
 scenario:
   test_sequence:
     - dependency
