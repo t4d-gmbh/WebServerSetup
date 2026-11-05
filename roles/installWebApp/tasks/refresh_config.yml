@@ -1,4 +1,8 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Refresh an existing deployment without provisioning, checkout or migrations.
 - name: Read existing application environment and effective encryption keys
   ansible.builtin.command:

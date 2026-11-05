@@ -4,7 +4,15 @@
 
 version = 1
 
-[[rule]]
+[[annotations]]
 path = "_static/logo.png"
+SPDX-FileCopyrightText = "2026 Jonas I. Liechti <j-i-l@t4d.ch>"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = [
+  "roles/opencpu/molecule/default/fixtures/abnScripts/DESCRIPTION",
+  "roles/opencpu/molecule/default/fixtures/abnScripts/NAMESPACE",
+]
 SPDX-FileCopyrightText = "2026 Jonas I. Liechti <j-i-l@t4d.ch>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
