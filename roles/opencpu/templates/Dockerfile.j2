@@ -21,6 +21,7 @@ ENV OCPU_LIBRARY="/usr/lib/opencpu/library"
 
 {% if opencpu.PRELOAD_PACKAGES | default([]) | length > 0 %}
 COPY Rprofile /etc/opencpu/Rprofile
+RUN R --vanilla -e "invisible(parse(file='/etc/opencpu/Rprofile'))"
 {% endif %}
 
 {% if package_build_enabled %}
