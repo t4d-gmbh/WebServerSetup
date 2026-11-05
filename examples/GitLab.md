@@ -25,7 +25,7 @@ This example deploys a self-hosted **GitLab CE** server that is reachable **only
 - A running NetBird deployment with a **setup key** (dashboard → Peers → Access Keys).
 - A second Ubuntu 24.04 or 26.04 VM reachable once via normal SSH (it may live behind the VPN later; SSH should stay available to you).
 - Infomaniak DNS API token (same one the traefik role uses).
-- ≥ 4 GB RAM (8 GB recommended) on the GitLab VM.
+- ≥ 4 GB RAM **plus swap** (8 GB recommended) on the GitLab VM — the first reconfigure boots the full Rails environment; the playbook below provisions a swapfile via `basic_config`.
 
 ## Directory Structure
 
@@ -59,15 +59,18 @@ project/
   vars_files:
     - vault.yml
   vars:
+    swapfile_size: "4G"                         # basic_config: swap before any reconfigure
     server_url: "https://gitlab.myserver.net"
     domain_name: "gitlab.myserver.net"          # consumed by certbot
     certbot_email: "admin@example.com"
     cert_path: "/etc/letsencrypt/live/gitlab.myserver.net/fullchain.pem"
     key_path: "/etc/letsencrypt/live/gitlab.myserver.net/privkey.pem"
     certbot_renew_hook: "gitlab-ctl restart nginx"
+    gitlab_repo_codename: "noble"               # workaround for broken resolute publication (see Caveats)
   roles:
-    - t4d.WebServerSetup.certbot   # issues the DNS-01 certificate first
-    - t4d.WebServerSetup.gitlab    # omnibus uses those certificate paths
+    - t4d.WebServerSetup.basic_config  # swap + kernel tuning first
+    - t4d.WebServerSetup.certbot       # issues the DNS-01 certificate second
+    - t4d.WebServerSetup.gitlab        # omnibus uses those certificate paths
 ```
 
 Order matters: **certbot before gitlab** — the gitlab role asserts that the certificate files exist before reconfigure, because omnibus nginx will not start without them.
@@ -120,6 +123,7 @@ The certbot role's cron renews daily and runs `gitlab-ctl restart nginx` via `ce
 
 - **Ubuntu 26.04 hosts**: as of 2026-10-05 GitLab's resolute apt publication is broken upstream (pool URLs serve noble's artifacts while resolute's index lists different hashes → `File has unexpected size` on every version). Keep the 26.04 VM and pin the working suite in the gitlab play's `vars:` until GitLab republishes: `gitlab_repo_codename: "noble"` — see [role README](../roles/gitlab/README.md#known-upstream-issues).
 
+- **Low-memory hosts**: on a 4 GB VPS the omnibus defaults (monitoring stack, sidekiq 20+) cause swap thrash and multi-second page loads. See [role README → Low-memory tuning](../roles/gitlab/README.md#low-memory-tuning) for the five knobs (`gitlab_rake_cache_clear`, `gitlab_prometheus_monitoring`, `gitlab_puma_worker_processes`, `gitlab_sidekiq_max_concurrency`, `gitlab_postgresql_shared_buffers`).
 - **Git LFS / large uploads**: omnibus nginx defaults are generous; if you put anything in front later, revisit proxy body limits.
 - **Container registry**: not enabled by this role; add `registry_external_url` wiring to `gitlab.rb.j2` via a `gitlab_rails`/`registry` extension if needed.
 - **Upgrades**: bump `gitlab.version` stepwise per GitLab's upgrade-path notes (never skip minors across major boundaries) — the handler reconfigures automatically after the package changes.
@@ -127,5 +131,6 @@ The certbot role's cron renews daily and runs `gitlab-ctl restart nginx` via `ce
 ## Used Roles
 
 - [NetBird Client](../roles/netbird_client/README.md)
+- [Basic Config](../roles/basic_config/README.md)
 - [Certbot](../roles/certbot/README.md)
 - [GitLab](../roles/gitlab/README.md)

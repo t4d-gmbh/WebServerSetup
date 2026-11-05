@@ -56,13 +56,13 @@
       Components: main
       Signed-By: /etc/apt/keyrings/gitlab.asc
 
+# noqa risky-file-permissions - existence only; chef re-attributes /etc/gitlab
+# on install, and enforcing mode here broke molecule idempotence.
 - name: Create GitLab configuration directory
   become: true
   ansible.builtin.file:
     path: /etc/gitlab
     state: directory
-  # No owner/group/mode here: the package's chef run re-attributes /etc/gitlab
-  # itself, and asserting 0755 would fail the idempotence check after install.
 
 - name: Keep package postinst from running reconfigure
   become: true
@@ -110,13 +110,49 @@
     - molecule-notest
 
 - name: Install GitLab CE
-  become: true
-  ansible.builtin.apt:
-    name:
-      - "gitlab-ce={{ gitlab.version }}"
-    state: present
-    update_cache: true
-  notify: Reconfigure GitLab
+  block:
+    - name: Install gitlab-ce package (runs first reconfigure in postinst)
+      become: true
+      ansible.builtin.apt:
+        name:
+          - "gitlab-ce={{ gitlab.version }}"
+        state: present
+        update_cache: true
+      notify: Reconfigure GitLab
+  rescue:
+    # The package postinst swallows chef's output; surface the real error.
+    - name: Find reconfigure logs
+      become: true
+      ansible.builtin.find:
+        paths: /var/log/gitlab/reconfigure
+        file_type: file
+      register: gitlab_reconf_logs
+      failed_when: false  # dir absent if chef died before logging
+
+    - name: Resolve latest reconfigure log
+      ansible.builtin.set_fact:
+        gitlab_latest_reconf_log: >-
+          {{ (gitlab_reconf_logs.files | sort(attribute='mtime'))[-1].path
+             if (gitlab_reconf_logs.files | default([]) | length) > 0 else '' }}
+
+    - name: Read reconfigure log tail
+      become: true
+      ansible.builtin.command:
+        cmd: "tail -n 80 {{ gitlab_latest_reconf_log }}"
+      register: gitlab_reconf_log
+      changed_when: false
+      failed_when: false
+      when: gitlab_latest_reconf_log | length > 0
+
+    - name: Fail with reconfigure log excerpt
+      ansible.builtin.fail:
+        msg: |-
+          gitlab-ce postinst reconfigure failed.
+          Latest log: {{ gitlab_latest_reconf_log | default('(none)') }}
+          {{ gitlab_reconf_log.stdout | default('no reconfigure log found - inspect /var/log/gitlab/ manually') }}
+          Recovery: fix the root cause, then run
+            sudo gitlab-ctl reconfigure && sudo dpkg --configure gitlab-ce
+          and rerun the playbook.
 
 - name: Ensure GitLab runit service is enabled and running
   become: true
