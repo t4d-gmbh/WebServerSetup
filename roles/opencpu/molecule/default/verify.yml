@@ -75,6 +75,25 @@
       vars:
         preload_vector_line: 'packages <- c("abnScripts")'
 
+    # Repository options must precede installation in every R process;
+    # configuring pak in a later RUN_R command does not configure remotes.
+    - name: Assert fixture exercises all three package installation commands
+      ansible.builtin.assert:
+        that:
+          - installation_lines | length == 3
+      vars:
+        installation_lines: "{{ (opencpu_dockerfile_content.content | b64decode).splitlines() | select('search', 'install[.]packages|remotes::install_local') | list }}"
+
+    - name: Assert repositories are configured before each package installation
+      ansible.builtin.assert:
+        that:
+          - repository_line in item
+          - item.index(repository_line) < item.index('install')
+        fail_msg: "Package installation must configure CRAN and INLA in the same R process: {{ item }}"
+      loop: "{{ (opencpu_dockerfile_content.content | b64decode).splitlines() | select('search', 'install[.]packages|remotes::install_local') | list }}"
+      vars:
+        repository_line: 'options(repos=c(\"CRAN\"=\"https://cloud.r-project.org\", \"INLA\"=\"https://inla.r-inla-download.org/R/stable/\"));'
+
     - name: Check copied local package source
       ansible.builtin.stat:
         path: /data/docker/opencpu/opencpu/ABNSCRIPTS/DESCRIPTION

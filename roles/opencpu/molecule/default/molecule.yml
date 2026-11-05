@@ -34,6 +34,8 @@ provisioner:
           DOCKER_IMAGE: "docker.io/opencpu/ubuntu-24.04"
           DOCKER_TAG: "v2.2.14-2"
           RUN_R: []
+          EXTRA_REPOSITORIES:
+            INLA: "https://inla.r-inla-download.org/R/stable/"
           R_PACKAGES:
             ABNSCRIPTS:
               enabled: true
