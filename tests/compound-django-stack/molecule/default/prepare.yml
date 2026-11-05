@@ -55,8 +55,9 @@
         creates: /opt/testapp/venv/bin/python
 
     - name: Install Celery in test app venv
+      # Match the standalone celerySetup fixture's pre-5.7 stable release.
       ansible.builtin.pip:
-        name: celery
+        name: "celery==5.6.2"
         virtualenv: /opt/testapp/venv
 
     - name: Create minimal test app package

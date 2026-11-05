@@ -1,0 +1,9 @@
+Package: abnScripts
+Type: Package
+Title: Molecule fixture package
+Version: 0.0.1
+Authors@R: person("Molecule", "Fixture", email = "fixture@example.com", role = c("aut", "cre"))
+Description: Small package used to test the OpenCPU build context.
+License: MIT
+Encoding: UTF-8
+RoxygenNote: 7.0.0

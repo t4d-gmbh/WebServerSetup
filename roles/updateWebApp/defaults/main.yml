@@ -12,3 +12,9 @@ django_project_subdir: "."
 log_level: "WARNING"
 log_file: ""
 app_log_levels: []
+
+# A coordinated maintenance playbook can defer restarts until all checks pass.
+update_webapp_restart_handlers:
+  - Restart Gunicorn service
+  - Restart Celery Service
+  - Restart web server

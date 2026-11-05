@@ -1,0 +1,10 @@
+{# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch> #}
+{# SPDX-License-Identifier: GPL-3.0-or-later #}
+local({
+  packages <- c({{ opencpu.PRELOAD_PACKAGES | map('to_json') | join(', ') }})
+  invisible(lapply(packages, function(package) {
+    if (requireNamespace(package, quietly = TRUE)) {
+      library(package, character.only = TRUE)
+    }
+  }))
+})

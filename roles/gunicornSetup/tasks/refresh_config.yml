@@ -1,0 +1,36 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Configuration-only entry point: do not install packages or start services.
+- name: Refresh Gunicorn service definition
+  ansible.builtin.template:
+    src: gunicorn.service.j2
+    dest: /etc/systemd/system/gunicorn.service
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  become: true
+
+- name: Ensure Gunicorn service override directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/gunicorn.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Configure explicit Celery execution mode for web processes
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/gunicorn.service.d/bnvis-environment.conf
+    content: |
+      [Service]
+      Environment="CELERY_TASK_ALWAYS_EAGER={{ celery_task_always_eager }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  become: true

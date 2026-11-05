@@ -27,7 +27,9 @@ By means of container labels the instance is configured to use authentik as auth
   - `CONTAINER_NAME`: Name the container; defaults to "opencpu".
   - `DOCKER_IMAGE`: Which OpenCPU container image to use as basis. By default `docker.io/opencpu/ubuntu-24.04` is used.
   - `DOCKER_TAG`: The specific tag to use. By default `v2.2.14-2` is used.
-  - `RUN_R`: A list of valid R statements to execute in order when building the docker image.
+  - `RUN_R`: A list of valid R statements executed after `R_PACKAGES` installation
+    when building the Docker image. Use `EXTRA_REPOSITORIES`, not `RUN_R`, to
+    configure repositories needed by package dependencies.
      
     The entry:
     ```yml
@@ -38,6 +40,23 @@ By means of container labels the instance is configured to use authentik as auth
     RUN R -e "install.packages('pak', repos=c(CRAN='https://cran.r-project.org'))"
     ```
     in the Dockerfile.
+
+  - `R_PACKAGES`: Optional mapping of packages to install during the image build. A
+    GitHub package uses `repository` and optionally `branch`; a local package uses
+    `source`, which is copied from the Ansible controller into the Docker build
+    context. Use `name` when the mapping key differs from the R package name. Set
+    `enabled: false` to skip an entry.
+  - `PRELOAD_PACKAGES`: Optional list of package names loaded by OpenCPU through
+    `/etc/opencpu/Rprofile` when an R worker starts.
+  - `CRAN_REPOSITORY`: CRAN mirror used to install build tooling and package dependencies. Defaults to
+    `https://cloud.r-project.org`.
+  - `EXTRA_REPOSITORIES`: Optional mapping of repository names to URLs (default
+    `{}`). For example, `INLA: "https://inla.r-inla-download.org/R/stable/"`.
+    CRAN and these repositories are set via `options(repos=...)` in each R
+    process before dependency resolution and `remotes::install_local`.
+    `pak::repo_add()` in a later `RUN_R` command cannot configure those earlier
+    remotes installations. Actual INLA installation still requires compatible
+    R/system dependencies; configuring its repository alone does not prove that.
 
   - `AUTHENTIK_PROXY_CONTAINER`: _Optional_ name of the docker container running the authentik outpost used to authenticate for the opencpu service.
     If omitted the OpenCPU service is not secured and can be reached without any authentication.
@@ -95,7 +114,22 @@ To use this role, add it to your Ansible playbook as follows:
     
       RUN_R:
         - "install.packages('pak', repos=c(CRAN='https://cran.r-project.org'))"
-        - "pak::repo_add(INLA = 'https://inla.r-inla-download.org/R/stable/')"
+
+      EXTRA_REPOSITORIES:
+        INLA: "https://inla.r-inla-download.org/R/stable/"
+
+      R_PACKAGES:
+        ABN:
+          enabled: true
+          repository: "https://github.com/furrer-lab/abn.git"
+          branch: "json_import"
+        ABNSCRIPTS:
+          enabled: true
+          name: abnScripts
+          source: "{{ playbook_dir }}/../abnScripts"
+      PRELOAD_PACKAGES:
+        - abn
+        - abnScripts
   roles:
     - authentik  # recommended in case you want to secure your opencpu service
     - opencpu

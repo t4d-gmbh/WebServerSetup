@@ -22,3 +22,8 @@ django_project_subdir: "."
 
 # Whether to run collectstatic after the frontend build
 frontend_run_collectstatic: true
+
+# A coordinated maintenance playbook can start services after all checks pass.
+frontend_restart_handlers:
+  - Restart Gunicorn service
+  - Restart web server

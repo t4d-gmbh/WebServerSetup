@@ -41,8 +41,10 @@
         creates: /opt/testapp/venv/bin/python
 
     - name: Install Celery in test app venv
+      # Keep the fixture on the pre-5.7 stable release while investigating
+      # the service-start failure; do not silently upgrade on PyPI releases.
       ansible.builtin.pip:
-        name: celery
+        name: "celery==5.6.2"
         virtualenv: /opt/testapp/venv
 
     - name: Create minimal test app package
