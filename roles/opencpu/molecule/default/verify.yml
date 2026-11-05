@@ -152,21 +152,34 @@
           - preload_profile.rc == 0
         fail_msg: "The OpenCPU preload profile did not load abnScripts"
 
+    - name: Read OpenCPU container network configuration
+      community.docker.docker_container_info:
+        name: opencpu
+      register: opencpu_container
+
+    - name: Resolve OpenCPU container IP
+      ansible.builtin.set_fact:
+        opencpu_container_ip: >-
+          {{ (opencpu_container.container.NetworkSettings.Networks
+              | dict2items | first).value.IPAddress }}
+
     - name: Verify OpenCPU preloaded package API
-      ansible.builtin.command:
-        cmd: >-
-          docker exec opencpu sh -c
-          "curl --fail --silent --show-error
-          http://127.0.0.1/ocpu/library/abnScripts/R/hello/json"
+      ansible.builtin.uri:
+        url: "http://{{ opencpu_container_ip }}/ocpu/library/abnScripts/R/hello/json"
+        method: GET
+        return_content: true
+        status_code: 200
+        use_proxy: false
+        timeout: 10
       register: opencpu_api
       changed_when: false
       retries: 12
       delay: 5
-      until: opencpu_api.rc == 0
+      until: opencpu_api.status is defined and opencpu_api.status == 200
 
     - name: Assert OpenCPU package endpoint works
       ansible.builtin.assert:
         that:
-          - opencpu_api.rc == 0
-          - "'hello' in opencpu_api.stdout"
+          - opencpu_api.status == 200
+          - "'hello' in opencpu_api.content"
         fail_msg: "OpenCPU could not execute abnScripts::hello"
