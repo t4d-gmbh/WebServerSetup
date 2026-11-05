@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # List of services to enable
 # NOTE: as long as you want to keep using ansible, ssh should
 #       always be part of this list!

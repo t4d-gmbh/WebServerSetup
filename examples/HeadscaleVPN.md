@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Headscale VPN Setup 🌐
 
 This README provides instructions on how to use three Ansible roles: **Docker**, **Traefik**, and **Headscale**. These roles are designed to set up a Docker environment with Traefik as a reverse proxy and Headscale for managing Tailscale nodes.
@@ -33,6 +39,7 @@ The simplest way to add it is by creating a `requirements.yml` file in your proj
 collections:
   - name: t4d.WebServerSetup
     type: git
+    source: https://github.com/t4d-gmbh/WebServerSetup.git
     version: main
 ```
 

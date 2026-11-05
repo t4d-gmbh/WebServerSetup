@@ -1,3 +1,5 @@
+{# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch> #}
+{# SPDX-License-Identifier: GPL-3.0-or-later #}
 ---
 {% set version_parts = AUTHENTIK_TAG.split('.') %}
 {% set skip_redis = (version_parts[0]|int > 2025) or (version_parts[0]|int == 2025 and version_parts[1]|int >= 10) %}

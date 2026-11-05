@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 name: Test Ansible Roles
 
 on:
@@ -58,6 +61,7 @@ jobs:
           - celerySetup
           - postgresqlSetup
           - headscale
+          - netbird
           - traefik
           - opencpu
           - updateWebApp
@@ -94,6 +98,7 @@ jobs:
         scenario:
           - compound-docker-auth-headscale
           - compound-docker-auth-opencpu
+          - compound-docker-netbird
           - compound-full-stack
           - compound-django-stack
     steps:

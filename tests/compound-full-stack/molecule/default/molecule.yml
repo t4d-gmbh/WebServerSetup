@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 role_name_check: 1
 driver:
   name: docker
@@ -33,7 +36,7 @@ provisioner:
         email: "test@example.com"
         # traefik
         traefik:
-          version: "3.5.4"
+          version: "3.7.13"
         HTPASSWD_USERS:
           - name: admin
             pw_hash: "$apr1$test$testhash"

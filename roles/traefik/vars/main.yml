@@ -1,2 +1,5 @@
 ---
+# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Define any default variables for the Traefik role here if needed

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 <div align="center">
 
 <img src="https://raw.githubusercontent.com/t4d-gmbh/WebServerSetup/main/_static/logo.svg" alt="WebServerSetup Logo" width="400">
@@ -11,6 +17,9 @@
   </a>
   <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-vpn-stack.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-vpn-stack.yml?label=VPN%20Stack" alt="VPN Stack">
+  </a>
+  <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-netbird-stack.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-netbird-stack.yml?label=NetBird%20Stack" alt="NetBird Stack">
   </a>
   <a href="https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/compound-analytics-stack.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/compound-analytics-stack.yml?label=R%20Analytics%20Stack" alt="R Analytics Stack">
@@ -41,6 +50,10 @@ These compound tests verify that roles work together correctly as full deploymen
     Complete container infrastructure: system tuning, Docker engine, Traefik reverse proxy with automatic TLS, Authentik identity provider, and OpenCPU analytics server -- all connected through a shared proxy network.
 *   **VPN Stack** ([example playbook](examples/HeadscaleVPN.md))
     Docker-based VPN infrastructure: Authentik for user authentication paired with Headscale (self-hosted Tailscale) for secure mesh networking, fronted by Traefik.
+*   **NetBird Stack** ([example playbook](examples/NetBirdVPN.md))
+    Self-hosted NetBird zero-trust VPN: combined management/signal/relay/STUN server plus web dashboard, fronted by Traefik with automatic TLS.
+*   **GitLab CE VPN-only Stack** ([example playbook](examples/GitLab.md))
+    GitLab CE reachable only through the NetBird overlay: netbird client enrollment, TLS via certbot DNS-01 (host never publicly reachable), omnibus package install.
 *   **R Analytics Stack** ([example playbook](examples/RAnalytics.md))
     Authenticated R computing environment: OpenCPU server for running R scripts via a REST API, secured behind Authentik and accessible through Traefik.
 
@@ -72,6 +85,12 @@ These compound tests verify that roles work together correctly as full deploymen
     Installs Docker and Docker Compose, configures the Docker service, and adds the specified user to the Docker group for container management.
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-headscale.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-headscale.yml) **[Headscale](roles/headscale/README.md)** 🛠️  
     Installs and configures Headscale, a self-hosted implementation of Tailscale, including setting up necessary directories, configuration files, and starting the Headscale container.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-netbird.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-netbird.yml) **[NetBird](roles/netbird/README.md)** 🕸️  
+    Installs and configures a self-hosted NetBird platform: the combined management, signal, relay, and STUN server plus the web dashboard as Docker containers, integrated with Traefik for TLS and routing, with optional reverse-proxy support for exposing internal services.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-netbird_client.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-netbird_client.yml) **[NetBird Client](roles/netbird_client/README.md)** 🕷️  
+    Installs the NetBird client from the official apt repository and enrolls the host into a self-hosted (or cloud) NetBird network using a setup key.
+*   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-gitlab.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-gitlab.yml) **[GitLab](roles/gitlab/README.md)** 🦊  
+    Installs GitLab CE from the official omnibus apt repository with a fully managed gitlab.rb, using certbot DNS-01 certificates for TLS so the server can run VPN-only (unreachable from the public internet).
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-traefik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-traefik.yml) **[Traefik](roles/traefik/README.md)** 🚦  
     Installs and configures Traefik as a reverse proxy and load balancer, managing routing for services and providing SSL termination with Let's Encrypt.
 *   [![build](https://img.shields.io/github/actions/workflow/status/t4d-gmbh/WebServerSetup/molecule-authentik.yml?label=build)](https://github.com/t4d-gmbh/WebServerSetup/actions/workflows/molecule-authentik.yml) **[Authentik](roles/authentik/README.md)** 🛂  

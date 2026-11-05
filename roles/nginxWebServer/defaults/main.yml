@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 # When true (default), all HTTP requests are permanently redirected to HTTPS.
 # When false, the app is served on both port 80 and port 443 without a redirect.
 nginx_https_only: true

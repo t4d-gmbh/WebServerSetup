@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 postgresql_version: "latest"
 postgresql_container_name: "postgresql"
   # postgresql_db: "mydatabase"

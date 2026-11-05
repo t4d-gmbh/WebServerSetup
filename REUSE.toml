@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+version = 1
+
+[[rule]]
+path = "_static/logo.png"
+SPDX-FileCopyrightText = "2026 Jonas I. Liechti <j-i-l@t4d.ch>"
+SPDX-License-Identifier = "GPL-3.0-or-later"

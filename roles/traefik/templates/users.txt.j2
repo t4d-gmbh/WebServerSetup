@@ -1,3 +1,5 @@
+{# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch> #}
+{# SPDX-License-Identifier: GPL-3.0-or-later #}
 {% for user in HTPASSWD_USERS | default([]) -%}
 {{ user.name }}:{{ user.pw_hash }}
 {% endfor -%}

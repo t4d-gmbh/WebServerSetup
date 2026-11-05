@@ -1,3 +1,5 @@
+{# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch> #}
+{# SPDX-License-Identifier: GPL-3.0-or-later #}
 # start from the base OpenCPU image
 FROM {{ opencpu.DOCKER_IMAGE | default("docker.io/opencpu/ubuntu-24.04") }}:{{ opencpu.DOCKER_TAG | default("v2.2.14-2") }}
 

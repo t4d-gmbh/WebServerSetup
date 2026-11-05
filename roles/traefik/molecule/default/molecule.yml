@@ -1,4 +1,7 @@
 ---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 role_name_check: 1
 driver:
   name: docker
@@ -23,7 +26,7 @@ provisioner:
       instance:
         dancer_user: testuser
         traefik:
-          version: "3.5.4"
+          version: "3.7.13"
         dns_provider: infomaniak
         email: "test@example.com"
         HTPASSWD_USERS:

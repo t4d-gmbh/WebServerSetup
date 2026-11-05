@@ -1,6 +1,9 @@
+# SPDX-FileCopyrightText: 2024-2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 namespace: t4d
 name: WebServerSetup
-version: 2026.7.1
+version: 2026.11.1
 description: Ansible collection for automating the setup and management of web servers, specifically tailored for deploying Django applications.
 readme: README.md
 license_file: LICENSE
@@ -13,3 +16,5 @@ tags:
   - ansible
   - security
   - database
+  - vpn
+  - netbird

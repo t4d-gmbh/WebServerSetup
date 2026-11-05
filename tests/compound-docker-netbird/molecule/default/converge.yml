@@ -1,0 +1,20 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+- name: Converge - Docker + NetBird
+  hosts: all
+  become: true
+  tasks:
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: docker
+
+    - name: Create external proxy network
+      community.docker.docker_network:
+        name: proxy
+        state: present
+
+    - name: Include netbird role
+      ansible.builtin.include_role:
+        name: netbird

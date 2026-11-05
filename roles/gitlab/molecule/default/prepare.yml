@@ -1,0 +1,40 @@
+---
+# SPDX-FileCopyrightText: 2026 Jonas I. Liechti <j-i-l@t4d.ch>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    # First installs always run `gitlab-ctl reconfigure` from the package
+    # postinst (skip-auto-reconfigure only gates upgrades), and the nginx
+    # recipe aborts when the ssl_certificate files are missing. Provide a
+    # self-signed stand-in at the certbot live paths so that unavoidable
+    # first converge succeeds in CI.
+    - name: Create certificate stand-in directory
+      ansible.builtin.file:
+        path: /etc/letsencrypt/live/gitlab.example.com
+        state: directory
+        owner: root
+        group: root
+        mode: '0750'
+
+    - name: Generate self-signed certificate stand-in
+      ansible.builtin.command:
+        cmd: >-
+          openssl req -x509 -newkey rsa:2048 -nodes
+          -keyout /etc/letsencrypt/live/gitlab.example.com/privkey.pem
+          -out /etc/letsencrypt/live/gitlab.example.com/fullchain.pem
+          -days 7 -subj "/CN=gitlab.example.com"
+        creates: /etc/letsencrypt/live/gitlab.example.com/fullchain.pem
+
+    - name: Set key permissions
+      ansible.builtin.file:
+        path: /etc/letsencrypt/live/gitlab.example.com/privkey.pem
+        owner: root
+        group: root
+        mode: '0600'

@@ -1,3 +1,5 @@
+{# SPDX-FileCopyrightText: 2025-2026 Jonas I. Liechti <j-i-l@t4d.ch> #}
+{# SPDX-License-Identifier: GPL-3.0-or-later #}
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
@@ -19,6 +21,9 @@ entryPoints:
           scheme: https
   websecure:
     address: :443
+    transport:
+      respondingTimeouts:
+        readTimeout: 0  # required for long-lived gRPC/WebSocket streams (e.g. NetBird)
 
 certificatesResolvers:
   {{ dns_provider }}:
