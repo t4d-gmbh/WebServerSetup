@@ -1,0 +1,42 @@
+---
+# Configuration-only entry point: deliberately leaves RabbitMQ untouched.
+- name: Refresh Celery service definition
+  ansible.builtin.template:
+    src: celery.service.j2
+    dest: /etc/systemd/system/celery.service
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  become: true
+
+- name: Refresh Celery worker configuration
+  ansible.builtin.template:
+    src: celery.j2
+    dest: /etc/conf.d/celery
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  become: true
+
+- name: Ensure Celery service override directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/celery.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Configure explicit Celery execution mode for worker processes
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/celery.service.d/bnvis-environment.conf
+    content: |
+      [Service]
+      Environment="CELERY_TASK_ALWAYS_EAGER={{ celery_task_always_eager }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  become: true

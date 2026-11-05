@@ -68,9 +68,7 @@
     chdir: "{{ frontend_app_path }}"
   become: yes
   become_user: django
-  notify:
-    - Restart Gunicorn service
-    - Restart web server
+  notify: "{{ frontend_restart_handlers }}"
   tags:
     - molecule-notest
 

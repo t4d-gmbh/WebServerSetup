@@ -100,10 +100,7 @@
     chdir: /opt/{{ app_name }}
   become: yes
   become_user: django  # Run this task as the django user
-  notify:
-    - Restart Gunicorn service  # Notify the handler
-    - Restart Celery Service
-    - Restart web server
+  notify: "{{ update_webapp_restart_handlers }}"
   tags:
     - molecule-notest
 

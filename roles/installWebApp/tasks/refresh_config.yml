@@ -1,0 +1,109 @@
+---
+# Refresh an existing deployment without provisioning, checkout or migrations.
+- name: Read existing application environment and effective encryption keys
+  ansible.builtin.command:
+    argv:
+      - "/opt/{{ app_name }}/venv/bin/python"
+      - -c
+      - |
+        import json, os, sys
+        from decouple import RepositoryEnv
+        sys.path.insert(0, os.getcwd())
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', '{{ app_name | lower }}.settings')
+        from django.conf import settings
+        values = RepositoryEnv('.env').data
+        values.update(SECRET_KEY=settings.SECRET_KEY, SALT_KEY=settings.SALT_KEY,
+                      SALT_KEY_FALLBACKS=','.join(settings.SALT_KEY_FALLBACKS))
+        print(json.dumps(values))
+    chdir: "/opt/{{ app_name }}/{{ django_project_subdir }}"
+  become: true
+  become_user: django
+  changed_when: false
+  register: _refresh_existing_env
+  no_log: true
+  check_mode: false
+
+- name: Read the persisted Django secret without generating a replacement
+  ansible.builtin.slurp:
+    src: "/etc/{{ app_name }}/secret_key.txt"
+  become: true
+  register: _refresh_secret_file
+  no_log: true
+
+- name: Verify that existing and configured encryption keys agree
+  ansible.builtin.assert:
+    that:
+      - (_refresh_existing_env.stdout | from_json).SECRET_KEY | length > 0
+      - (_refresh_existing_env.stdout | from_json).SALT_KEY | length > 0
+      - (_refresh_existing_env.stdout | from_json).SECRET_KEY == (_refresh_secret_file.content | b64decode | trim)
+      - "'SECRET_KEY' not in (env_extra_vars | combine(vault_env_extra_vars)) or (env_extra_vars | combine(vault_env_extra_vars)).SECRET_KEY == (_refresh_existing_env.stdout | from_json).SECRET_KEY"
+      - "'SALT_KEY' not in (env_extra_vars | combine(vault_env_extra_vars)) or (env_extra_vars | combine(vault_env_extra_vars)).SALT_KEY == (_refresh_existing_env.stdout | from_json).SALT_KEY"
+      - "'SALT_KEY_FALLBACKS' not in (env_extra_vars | combine(vault_env_extra_vars)) or (env_extra_vars | combine(vault_env_extra_vars)).SALT_KEY_FALLBACKS == (_refresh_existing_env.stdout | from_json).SALT_KEY_FALLBACKS"
+    fail_msg: Existing secrets are missing or disagree; resolve this before refreshing configuration.
+  no_log: true
+
+- name: Preserve unmanaged settings and merge explicitly configured extras
+  ansible.builtin.set_fact:
+    _refresh_env_extras: >-
+      {{ (_refresh_existing_env.stdout | from_json | dict2items
+          | rejectattr('key', 'in', _refresh_managed_keys)
+          | rejectattr('key', 'match', '^LOG_LEVEL_') | items2dict)
+         | combine(env_extra_vars, vault_env_extra_vars) }}
+  vars:
+    _refresh_managed_keys:
+      - DATABASE_NAME
+      - DATABASE_USER
+      - DATABASE_PASSWORD
+      - DATABASE_HOST
+      - DATABASE_PORT
+      - DATABASE_ENGINE
+      - SECRET_KEY
+      - ALLOWED_HOSTS
+      - CSRF_TRUSTED_ORIGINS
+      - STATIC_ROOT
+      - MEDIA_ROOT
+      - EMAIL_HOST
+      - EMAIL_PORT
+      - EMAIL_USE_TLS
+      - EMAIL_HOST_USER
+      - EMAIL_HOST_PASSWORD
+      - DEFAULT_FROM_EMAIL
+      - VITE_DEV_MODE
+      - LOG_LEVEL
+      - LOG_FILE
+      - CACHE_BACKEND
+      - CACHE_LOCATION
+      - CELERY_TASK_ALWAYS_EAGER
+  no_log: true
+
+- name: Validate extra values before rendering the collection template
+  ansible.builtin.assert:
+    that:
+      - "\"'\" not in (item.value | string)"
+      - "'\n' not in (item.value | string)"
+      - "'\r' not in (item.value | string)"
+    fail_msg: Extra environment values must be single-line and contain no single quotes.
+  loop: "{{ _refresh_env_extras | dict2items }}"
+  no_log: true
+
+- name: Refresh application environment while preserving existing extra settings
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "/opt/{{ app_name }}/{{ django_project_subdir }}/.env"
+    owner: django
+    group: django
+    mode: '0600'
+    backup: true
+  vars:
+    secret_key: "{{ (_refresh_existing_env.stdout | from_json).SECRET_KEY }}"
+    vault_env_extra_vars: "{{ _refresh_env_extras }}"
+  become: true
+  no_log: true
+  diff: false
+
+- name: Clear captured secret values
+  ansible.builtin.set_fact:
+    _refresh_existing_env: {}
+    _refresh_secret_file: {}
+    _refresh_env_extras: {}
+  no_log: true
